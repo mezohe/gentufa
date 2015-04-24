@@ -1458,17 +1458,20 @@ jbocme = (&zifcme (any_syllable / digit)* &pause)
 
 cmavo = expr:(!cmevla !CVCy_lujvo cmavo_form &post_word) { return _join(expr); }
 
-CVCy_lujvo = expr:(CVC_rafsi y h? initial_rafsi* brivla_core / stressed_CVC_rafsi y short_final_rafsi) { return _join(expr); }
+//// EXP-MODIF: logbanu lujvo
+CVCy_lujvo = expr:(CVC_rafsi y h? (initial_rafsi / logbanu_rafsi)* brivla_core / stressed_CVC_rafsi y short_final_rafsi) { return _join(expr); }
 
 cmavo_form = expr:(!h !cluster onset (nucleus h)* (!stressed nucleus / nucleus !cluster) / y+ / digit) { return _join(expr); }
 
 //___________________________________________________________________
 
-brivla = expr:(!cmavo initial_rafsi* brivla_core) { return _join(expr); }
+//// EXP-MODIF: logbanu lujvo
+brivla = expr:(!cmavo (initial_rafsi (initial_rafsi / logbanu_rafsi)*)? brivla_core) { return _join(expr); }
 
 brivla_core = expr:(fuhivla / gismu / CVV_final_rafsi / stressed_initial_rafsi short_final_rafsi) { return _join(expr); }
 
-stressed_initial_rafsi = expr:(stressed_extended_rafsi / stressed_y_rafsi / stressed_y_less_rafsi) { return _join(expr); }
+//// EXP-MODIF: logbanu lujvo
+stressed_initial_rafsi = expr:(stressed_extended_rafsi / stressed_y_rafsi / stressed_y_less_rafsi / stressed_logbanu_rafsi) { return _join(expr); }
 
 initial_rafsi = expr:(extended_rafsi / y_rafsi / !any_extended_rafsi y_less_rafsi !any_extended_rafsi) { return _join(expr); }
 
@@ -1490,6 +1493,10 @@ stressed_fuhivla_rafsi = expr:(fuhivla_head stressed_syllable !h onset y) { retu
 
 fuhivla_rafsi = expr:(&unstressed_syllable fuhivla_head !h onset y h?) { return _join(expr); }
 
+//// EXP-ADD: logbanu lujvo
+stressed_logbanu_rafsi = expr:(consonant stressed_vowel !CCV_rafsi !(h vowel) (h y h?)?) { return _join(expr); }
+logbanu_rafsi = expr:(!fuhivla consonant unstressed_vowel !CCV_rafsi !stressed_CCV_rafsi !(h vowel) (h y h?)?) { return _join(expr); }
+
 fuhivla_head = expr:(!rafsi_string brivla_head) { return _join(expr); }
 
 brivla_head = expr:(!cmavo !slinkuhi !h &onset unstressed_syllable*) { return _join(expr); }
@@ -1504,21 +1511,27 @@ gismu = expr:((initial_pair stressed_vowel / consonant stressed_vowel consonant)
 
 CVV_final_rafsi = expr:(consonant stressed_vowel h &final_syllable vowel &post_word) { return _join(expr); }
 
-short_final_rafsi = expr:(&final_syllable (consonant diphthong / initial_pair vowel) &post_word) { return _join(expr); }
+//// EXP-MODIF: logbanu lujvo
+short_final_rafsi = expr:(&final_syllable (consonant diphthong / consonant vowel / initial_pair vowel) &post_word) { return _join(expr); }
 
-stressed_y_rafsi = expr:((stressed_long_rafsi / stressed_CVC_rafsi) y) { return _join(expr); }
+//// EXP-MODIF: CyC syllables in fuhivla
+stressed_y_rafsi = expr:((stressed_long_rafsi / stressed_CVC_rafsi) y !coda) { return _join(expr); }
 
 stressed_y_less_rafsi = expr:(stressed_CVC_rafsi !y / stressed_CCV_rafsi / stressed_CVV_rafsi) { return _join(expr); }
 
-stressed_long_rafsi = expr:(initial_pair stressed_vowel consonant / consonant stressed_vowel consonant consonant) { return _join(expr); }
+//// EXP-MODIF: CyC syllables in fuhivla
+stressed_long_rafsi = expr:(initial_pair stressed_vowel !consonantal_syllable consonant / consonant stressed_vowel consonant !consonantal_syllable consonant) { return _join(expr); }
 
-stressed_CVC_rafsi = expr:(consonant stressed_vowel consonant) { return _join(expr); }
+//// EXP-MODIF: logbanu lujvo
+//// EXP-MODIF: CyC syllables in fuhivla
+stressed_CVC_rafsi = expr:(consonant stressed_vowel !short_final_rafsi !CVV_final_rafsi !consonantal_syllable consonant) { return _join(expr); }
 
 stressed_CCV_rafsi = expr:(initial_pair stressed_vowel) { return _join(expr); }
 
 stressed_CVV_rafsi = expr:(consonant (unstressed_vowel h stressed_vowel / stressed_diphthong) r_hyphen?) { return _join(expr); }
 
-y_rafsi = expr:((long_rafsi / CVC_rafsi) y h?) { return _join(expr); }
+//// EXP-MODIF: CyC syllables in fuhivla
+y_rafsi = expr:((long_rafsi / CVC_rafsi) y !coda h?) { return _join(expr); }
 
 y_less_rafsi = expr:(!y_rafsi !stressed_y_rafsi !hy_rafsi !stressed_hy_rafsi (CVC_rafsi / CCV_rafsi / CVV_rafsi) !h) { return _join(expr); }
 
@@ -1526,9 +1539,12 @@ hy_rafsi = expr:((long_rafsi vowel / CCV_rafsi / CVV_rafsi) h y h?)
 
 stressed_hy_rafsi = expr:((long_rafsi stressed_vowel / stressed_CCV_rafsi / stressed_CVV_rafsi) h y h?)
 
-long_rafsi = expr:(initial_pair unstressed_vowel consonant / consonant unstressed_vowel consonant consonant) { return _join(expr); }
+//// EXP-MODIF: CyC syllables in fuhivla
+long_rafsi = expr:(initial_pair unstressed_vowel !consonantal_syllable consonant / consonant unstressed_vowel consonant !consonantal_syllable consonant) { return _join(expr); }
 
-CVC_rafsi = expr:(consonant unstressed_vowel consonant) { return _join(expr); }
+//// EXP-MODIF: logbanu lujvo
+//// EXP-MODIF: CyC syllables in fuhivla
+CVC_rafsi = expr:(consonant unstressed_vowel !logbanu_rafsi !stressed_logbanu_rafsi !CVV_rafsi !stressed_CVV_rafsi !CVV_final_rafsi !consonantal_syllable consonant) { return _join(expr); }
 
 CCV_rafsi = expr:(initial_pair unstressed_vowel) { return _join(expr); }
 
@@ -1546,27 +1562,33 @@ stressed_diphthong = expr:(&stressed diphthong / diphthong &stress) {return _joi
 
 stressed_vowel = expr:(&stressed vowel / vowel &stress) {return _join(expr);}
 
-unstressed_syllable = expr:(!stressed syllable !stress / consonantal_syllable) {return _join(expr);}
+//// EXP-MODIF: CyC syllables in fuhivla
+unstressed_syllable = expr:(consonantal_syllable / !stressed syllable !stress) {return _join(expr);}
 
 unstressed_diphthong = expr:(!stressed diphthong !stress) {return _join(expr);}
 
 unstressed_vowel = expr:(!stressed vowel !stress) {return _join(expr);}
 
 //// FIX: Xorxes' fix for fu'ivla rafsi stress
-stress = expr:((consonant / glide)* h? y? syllable pause) {return _join(expr);}
+//// EXP-MODIF: CyC syllables in fuhivla
+stress = expr:((consonant y coda / consonant / glide)* h? y? syllable pause) {return _join(expr);}
 
 stressed = expr:(onset comma* [AEIOU]) {return _join(expr);}
 
-any_syllable = expr:(onset nucleus coda? / consonantal_syllable) {return _join(expr);}
+//// EXP-MODIF: CyC syllables in fuhivla
+any_syllable = expr:(consonantal_syllable / syllable / onset y !nucleus) {return _join(expr);}
 
 syllable = expr:(onset !y nucleus coda?) {return _join(expr);}
 
 //// FIX: preventing {bla'ypre} from being a valid lujvo
-consonantal_syllable = expr:(consonant syllabic &(consonantal_syllable / !nucleus onset) (consonant &spaces)?) {return _join(expr);}
+//// EXP-MODIF: CyC syllables in fuhivla
+consonantal_syllable = expr:(consonant y coda / consonant &syllabic coda) {return _join(expr);}
 
-coda = expr:(!any_syllable consonant &any_syllable / syllabic? consonant? &pause) {return _join(expr);}
+//// EXP-MODIF: CyC syllables in fuhivla
+coda = expr:(consonant &consonantal_syllable / !any_syllable consonant &any_syllable / syllabic? consonant? &pause) {return _join(expr);}
 
-onset = expr:(h / glide / initial) {return _join(expr);}
+//// EXP-MODIF: CyC syllables in fuhivla
+onset = expr:(h / glide / !consonantal_syllable initial) {return _join(expr);}
 
 nucleus = expr:(vowel / diphthong / y !nucleus) {return _join(expr);}
 
