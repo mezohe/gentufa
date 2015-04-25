@@ -1,0 +1,169 @@
+// This is a Parsing Expression Grammar for Gua\spi
+// See http://bford.info/packrat/
+// 
+// All rules have the form:
+// 
+// 	name = peg_expression
+// 
+// which means that the grammatical construct "name" is parsed using
+// "peg_expression".  
+// 
+// 1)  Names in lower case are grammatical constructs.
+// 2)  Names in UPPER CASE are selma'o (lexeme) names, and are terminals.
+// 3)  Concatenation is expressed by juxtaposition with no operator symbol.
+// 4)  / represents *ORDERED* alternation (choice).  If the first
+//     option succeeds, the others will never be checked.
+// 5)  ? indicates that the element to the left is optional.
+// 6)  * represents optional repetition of the construct to the left.
+// 7)  + represents one_or_more repetition of the construct to the left.
+// 8)  () serves to indicate the grouping of the other operators.
+//
+// Longest match wins.
+
+// ___ GRAMMAR ___
+
+{
+  function _join(arg)
+  {
+    if (typeof(arg) == "string")
+      return arg;
+    else
+    {
+      ret = "";
+      for (v in arg) { ret += _join(arg[v]); }
+      return ret;
+    }
+  }
+
+  function _node(label, arg)
+  {
+    var ret = [];
+    if (label != undefined) ret.push( label );
+    if (typeof( arg ) == "object" && typeof( arg[0] ) == "string" && arg[0] != "")
+    {
+      ret.push( arg );
+      return ret;
+    }
+    return _node_int(label, arg);
+  } 
+
+  function _node_int(label, arg)
+  {
+    if (typeof( arg ) == "string")
+      return arg;
+    var ret = [];
+    if (label != undefined) ret.push( label );
+    for (v in arg)
+    {
+      if (arg[v].length != 0)
+        ret.push( _node_int( undefined, arg[v] ) );
+    }
+    return ret;
+  }
+ 
+  function _node2(label, arg1, arg2)
+  {
+    return [label].concat(_node(arg1)).concat(_node(arg2));
+  }
+
+  function _node_nonempty(label, arg)
+  {
+    var _n = _node(label, arg);
+    return (_n.length == 1 && _n[0] == label) ? [] : _n;
+  }
+  
+  // === ZOI functions === //
+
+  function _zoi_assign_delim(word) {
+	var a = word.toString().split(",");
+	if (a.length > 0) _g_zoi_delim = a[a.length - 1];
+	else _g_zoi_delim = "";
+	return word;
+  }
+
+  function _zoi_check_quote(word) {
+	if (typeof(word) == "object") word = word.toString();
+    if (!is_string(word)) {
+	  alert("ZOI word is not a string");
+	  return false;
+	} else {
+      return (word.replace(/,/gm,"") === _g_zoi_delim);
+	}
+  }
+  
+  function _zoi_check_delim(word) {
+	if (typeof(word) == "object") word = word.toString();
+    if (!is_string(word)) {
+	  alert("ZOI word is not a string");
+	  return false;
+	} else {
+	  word = word.split(",");
+	  if (word.length > 0) word = word[word.length - 1];
+	  else word = "";
+      return (word === _g_zoi_delim);
+	}
+  }
+  
+  function is_string(v) {
+    return typeof v.valueOf() === 'string';
+  }
+}
+
+Text = Discourse
+
+C = [:bcdfgjkpqstvxz]
+Cseq = a:C+ { return a.join("") }
+V = [aeiouyrmnlw]
+Vseq = a:V+ { return a.join("") }
+space = " "
+Word = c:Cseq v:Vseq space* { return c+v }
+
+Compound = [-=]
+Sametone = "^"
+Down1 = [!\\|]
+Up1 = "/"
+
+fi = &("fi" !V space*) w:Word { return w }
+fu = &("fu" !V space*) w:Word { return w }
+i = &(":" [aeiou] !V space*) w:Word { return w }
+
+Prefix = &(( "f" [aelnory] / "qo" / "z" [aeilmoruy] / "s" [aeioru] / "fw" / "v" [aeiou] / "qu" / "v" [ylrn] / "x" [aeinoruwy] / "b" [inu] / "q" [aeilry]) !V space*) w:Word { return w }
+
+Primitive = c:Compound? !fi !fu !Prefix w:Word { return c ? c+w : w }
+
+
+Phrase = Prefix Args0 Phrase / Phrase_w
+Phrase_w = p:Primitive+ { return p.join(" ") }
+Phrase0 = Phrase Down1 Args1 / Phrase Sametone
+
+
+Args0 = Down1 Args1 / Compound
+
+Args1 = Phrase0* (Phrase Up1 / Phrase Down1 Args2)
+
+Args2 = Phrase0* (Phrase Down1 fu / Phrase Up1 / Phrase Down1 Args3)
+
+Args3 = Phrase0* (Phrase Down1 fu / Phrase Up1 / Phrase Down1 Args4)
+
+Args4 = Phrase0* (Phrase Down1 fu)
+
+
+Afterargs = (Phrase0 / Phrase Down1)* Phrase
+
+After1 = Afterargs (Down1 fi Compound After1 / Compound fi Down1 After1)*
+
+Preargs = Down1 After1 Up1 fi Preargs
+/ Down1 After1 Down1 fi Up1 Args1
+/ Args0
+
+Sentstart = s:Sametone i:i { return s+i }
+
+Sentend = Phrase (Down1 After1)?
+
+Sentence = Sentstart Preargs Sentend
+
+Nonsentence = Sentstart Down1 Sentend
+
+Unit = Sentence / Nonsentence
+
+Discourse = Unit+
