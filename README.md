@@ -31,3 +31,7 @@ Now, the grammar engine should have been created/updated, and be ready for use. 
 
 Nothing easier; after having entered the ilmentufa directory, run the command "node ircbot/camxes-bot" or "node ircbot/cipra-bot" (the latter is for the experimental grammar).
 The list of the channels joined by the bot can be found and edited within the bot script.
+
+=== Gua\spi parser ===
+
+If you can't find the Gua\spi parser in your tree, switch to the guaspi branch: "git checkout guaspi"
