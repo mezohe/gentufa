@@ -107,6 +107,8 @@
   function is_string(v) {
     return typeof v.valueOf() === 'string';
   }
+  
+  function _concat(a, b) { return a && a.concat(b) }
 }
 
 text = sentence+
@@ -115,14 +117,14 @@ sentence =
 start:start 
 terms_begin:(
 	terms_begin_repeat:terms_top*
-	{ return terms_begin_repeat.reduce(function(a, b) { return a.concat(b) }) }
+	{ return terms_begin_repeat.reduce(_concat, []) }
 )
 propo_tail:(
 	(fi0 compound)? 
 	predicate:predicate 
 	terms_end:(
 		terms_end_repeat:terms_top*
-		{ return terms_end_repeat.reduce(function(a, b) { return a.concat(b) }) }
+		{ return terms_end_repeat.reduce(_concat, []) }
 	)
 	{ return {predicate:predicate, terms_end:terms_end} }
 )?
@@ -153,7 +155,7 @@ word = magic / prefix / brivla
 
 brivla = !magic a:consonant+ b:vowel+ space* { return a.join("") + b.join("") }
 
-prefix = !magic a:( f [aeilnoruy] / qo / z [aeilmoruy] / s [aeioru] / fw / v [aeiou] / qu / v [ylrn] / x [aeinoruwy] / b [inu] / q [aeilry]) !vowel space* { return a.reduce(function(a, b) { return a.concat(b) }).join("") }
+prefix = !magic a:( "f" [aeilnoruy] / "qo" / "z" [aeilmoruy] / "s" [aeioru] / "fw" / "v" [aeiou] / "qu" / "v" [ylrn] / "x" [aeinoruwy] / "b" [inu] / "q" [aeilry]) !vowel space* { return a.reduce(_concat).join("") }
 
 magic = I / fi
 
@@ -175,24 +177,24 @@ fi1 = compound_je "fi" !vowel space* { return "-fi" }
 fi2 = down "fi" !vowel space* { return "\fi" }
 
 
-tone = a:(up / down / same / compound) !tonechar { return a }
+tone = up / down / same / compound
 
 tonechar = up / down / same / compound_be
 
-endphrase = (!word (up / same)?) / &fi
+endphrase = &start / (!word (up / same)?) / &fi
 
-up = "/"
+up = "/" !tonechar
 
 down = down_1 / subordinate
 
 compound = compound_be / compound_je
 
-same = "^"
+same = "^" !tonechar
 
-down_1 = [\\!]
+down_1 = [\\!] !tonechar
 
-subordinate = "|"
+subordinate = "|" !tonechar
 
-compound_be = "="
+compound_be = "=" !tonechar
 
-compound_je = "-"? { return "-" }
+compound_je = "-"? !tonechar { return "-" }
