@@ -778,7 +778,7 @@ var camxes = (function(){
             pos = pos1;
           }
           if (result0 === null) {
-            result0 = parse_sentence();
+            result0 = parse_statement();
           }
         }
         if (result0 !== null) {
@@ -3215,9 +3215,9 @@ var camxes = (function(){
         if (result0 !== null) {
           result0 = (function(offset, start, repeat) {
           repeat.forEach(function(r) {
-            start = _fill_jek(start, r[3], r[4]);
-            if (_empty(r[0])) start.pehe_sa = r[0];
             start.pehe = _fill_free(r[1], r[2]);
+            start = _fill_jek(start, r[3], r[4], null, null, start.pehe);
+            if (_empty(r[0])) start.pehe_sa = r[0];
           });
           return start;
         })(pos0, result0[0], result0[1]);
@@ -3344,7 +3344,7 @@ var camxes = (function(){
             term.cehe = _fill_free(r[1], r[2]);
             start.push(term);
           });
-          return {termset: "cehe", terms: start};
+          return {termset: "cehe", terms: start, structure: start.slice(1).reduce(function (a,b) { return a.concat([b.cehe, b]) }, [start[0]])};
         })(pos0, result0[0], result0[1]);
         }
         if (result0 === null) {
@@ -7048,7 +7048,13 @@ var camxes = (function(){
           pos = pos1;
         }
         if (result0 !== null) {
-          result0 = (function(offset, tag, selbri) { return _fill_free(selbri, tag, "selbri_tags") })(pos0, result0[0], result0[1]);
+          result0 = (function(offset, tag, selbri) { 
+          if (_empty(tag)) {
+            selbri.structure = [tag, selbri.structure || selbri.word]; 
+            selbri.selbri_tags = selbri.selbri_tags ? tag.concat(selbri.selbri_tags) : tag;
+          }
+          return selbri
+        })(pos0, result0[0], result0[1]);
         }
         if (result0 === null) {
           pos = pos0;
@@ -7101,7 +7107,11 @@ var camxes = (function(){
             pos = pos1;
           }
           if (result0 !== null) {
-            result0 = (function(offset, na, free, selbri) { return _fill_free(selbri, [_fill_free(na, free)], "selbri_tags") })(pos0, result0[0], result0[1], result0[2]);
+            result0 = (function(offset, na, free, selbri) { 
+            selbri.structure = [_fill_free(na, free), selbri.structure || selbri.word];
+            selbri.selbri_tags = selbri.selbri_tags ? [na].concat(selbri.selbri_tags) : [na];
+            return selbri;
+          })(pos0, result0[0], result0[1], result0[2]);
           }
           if (result0 === null) {
             pos = pos0;
@@ -58521,11 +58531,11 @@ var camxes = (function(){
           return tanru;
         }
         
-        function _fill_jek(left, jek, right, bo_tag, bo) {
+        function _fill_jek(left, jek, right, bo_tag, bo, pehe) {
           jek = _duplicate_evil(jek);
           jek.left = left;
           jek.right = right;
-          jek.structure = [left, jek.structure || jek.word];
+          jek.structure = pehe ? [left, pehe, jek.structure || jek.word] : [left, jek.structure || jek.word];
           if (bo_tag) jek.structure.push(jek.bo_tag = bo_tag);
           if (bo) jek.structure.push(jek.bo = bo);
           jek.structure.push(right);
@@ -58586,8 +58596,8 @@ var camxes = (function(){
                 return term.terms.every(count_single);
               }
               if (term.left && term.right) {
-                var left = _count_fa(term.left.terms, last, _duplicate_evil(used));
-                var right = _count_fa(term.right.terms, last, _duplicate_evil(used));
+                var left = _count_fa(term.left.terms || [term.left], last, _duplicate_evil(used));
+                var right = _count_fa(term.right.terms || [term.right], last, _duplicate_evil(used));
                 if (left.abandoned || right.abandoned || left.last != right.last || JSON.stringify(left.used) != JSON.stringify(right.used)) {
                   console.log("abandoned! " + JSON.stringify(left) + JSON.stringify(right))
                   return false;
@@ -58617,7 +58627,7 @@ var camxes = (function(){
               else
                 term.fa = [last];
               if (term.tags && term.tags[0]) {
-                var /*hoisting!*/ fa_word = "f" + _letter_fa[last];
+                var /*hoisting!*/ fa_word = "f" + (_letter_fa[last] || "axi" + last);
                 term.tags[0].word = fa_word;
               }
               while (++last in used);
