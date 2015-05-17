@@ -1,9 +1,11 @@
 var config = {
   server: 'irc.freenode.net',
-  nick: 'cipra',
+  nick: 'cipr',
   options: {
-    channels: ['#ilmen', '#lojban', '#ckule'],
-    debug: false
+    channels: ['#guaspi'],
+    debug: false,
+	floodProtection: true,
+	floodProtectionDelay: 700
   }
 };
 
@@ -16,7 +18,7 @@ client.addListener('message', function(from, to, text, message) {
 
 var camxes = require('../camxes-exp.js');
 var camxes_pre = require('../camxes_preproc.js');
-var camxes_post = require('../camxes_postproc.js');
+var camxes_post = require('../ilmentufa_postproc.js');
 
 var regexps = {
   coi:  new RegExp("(^| )coi la .?"  + config.nick + ".?"),
@@ -55,13 +57,14 @@ function extract_mode(input) {
     return [input.substr(3), 5];
   } else if (input.indexOf("-f+s ") == '0') {
     return [input.substr(5), 6];
-  } else return [input, 2];
+  } else return [input, 1];
 }
 
 function run_camxes(input, mode) {
 	var result;
 	var syntax_error = false;
-	result = camxes_pre.preprocessing(input);
+	//result = camxes_pre.preprocessing(input);
+	result = input;
 	try {
 	  result = camxes.parse(result);
 	} catch (e) {
@@ -69,8 +72,11 @@ function run_camxes(input, mode) {
 		syntax_error = true;
 	}
 	if (!syntax_error) {
-		result = JSON.stringify(result, undefined, 2);
-		result = camxes_post.postprocessing(result, mode);
+		if (mode != 3) {
+			result = result[0];
+			result = camxes_post.prettify(result);
+		} else result = JSON.stringify(camxes_post.remove_structure(result), undefined, 2);
 	}
+	console.log(result);
 	return result;
 }
