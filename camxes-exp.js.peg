@@ -247,6 +247,37 @@
     return {last: last, used: used, abandoned: abandon};
   }
   
+  function _count_fa_tail(tail, last, used) {
+    if (tail.contents) tail = tail.contents;
+    if (tail.left && tail.right) {
+      var left = _count_fa_tail(tail.left, last, _duplicate_evil(used));
+      var right = _count_fa_tail(tail.right, last, _duplicate_evil(used));
+      if (left.abandoned || right.abandoned || left.last != right.last || JSON.stringify(left.used) != JSON.stringify(right.used)) {
+        console.log("gihek abandoned! " + JSON.stringify(left) + JSON.stringify(right))
+        return false;
+      } else {
+        console.log("gihek NOT abandoned! " + JSON.stringify(left) + JSON.stringify(right))
+        last = right.last;
+        used = right.used;
+      }
+    } else {
+      var preterms = {last: last, used: used};
+      if (tail.preterms) {
+        tail.preterms.every(function (a) {
+          preterms = _count_fa(a.terms, preterms.last, preterms.used);
+          return !preterms.abandoned;
+        });
+      }
+      if (preterms.abandoned) return preterms;
+      used = preterms.used;
+      last = 1; while (++last in used);
+    }
+    if (tail.tail_terms && tail.tail_terms.terms) {
+      preterms = _count_fa(tail.tail_terms.terms.terms, last, used);
+    }
+    return preterms;
+  }
+  
   function _precedence(ke, contents, kehe) {
     return {ke: ke, contents: contents, kehe: kehe, structure: [ke, contents, kehe]};
   }
@@ -260,6 +291,11 @@
   
   function _role(thing, role) {
     thing.role = role;
+    return thing;
+  }
+  
+  function _with(thing, key, val) {
+    thing.key = val;
     return thing;
   }
 
@@ -343,6 +379,7 @@ prenex = expr:(terms? ZOhU_clause free*)
 //sentence = expr:(terms? bridi_tail_t1 (joik_ek bridi_tail / joik_ek tag? KE_clause free* bridi_tail KEhE_elidible free*)*) 
 sentence = head:terms? sa:bridi_tail_sa* tail:bridi_tail {
   var fa_after_head = head && _count_fa(head.terms);
+  _count_fa_tail(tail, fa_after_head.last || 1, fa_after_head.used || {});
   var ret = {structure: [head, tail], head: head, tail: tail, fa_after_head: fa_after_head};
   if (sa) ret.bridi_tail_sa = sa;
   return ret;
@@ -361,25 +398,54 @@ sentence_start = expr:(I_pre / NIhO_pre)
 subsentence = expr:(sentence / prenex subsentence) 
 
 //// EXP-MODIF: GI TAG BO + JACU
-bridi_tail = (first:bridi_tail_1 (gihek:(gihek tag? / GI_clause tag) ke:KE_clause kefree:free* bridi_tail KEhE_elidible free* tail_terms)?) / VAU_elidible
+bridi_tail = (start:bridi_tail_1 repeat:((gihek tag? / GI_clause tag) KE_clause free* bridi_tail KEhE_elidible free* tail_terms)? {
+  if (repeat) {
+    start = _fill_jek(start, repeat[0][0], _precedence(_fill_free(repeat[1], repeat[2]), repeat[3], _fill_free(repeat[4], repeat[5])), repeat[0][1]);
+    start.tail_terms = repeat[6];
+    start.structure = start.structure.concat(start.tail_terms);
+  }
+  return start;
+}) / VAU_elidible
 
 bridi_tail_sa = expr:(bridi_tail_start (term / !bridi_tail_start (sa_word / SA_clause !bridi_tail_start ) )* SA_clause &bridi_tail) 
 
 bridi_tail_start = expr:(CU_clause / ME_clause / NUhA_clause / NU_clause / NA_clause !KU_clause / NAhE_clause !BO_clause / selbri / tag bridi_tail_start / KE_clause bridi_tail_start / bridi_tail) 
 
 //// EXP-MODIF: JACU
-bridi_tail_1 = expr:(bridi_tail_2 (gihek !(tag? BO_clause) !(tag? KE_clause) free* bridi_tail_2 tail_terms)*) 
+bridi_tail_1 = start:bridi_tail_2 repeat:(gihek !(tag? BO_clause) !(tag? KE_clause) free* bridi_tail_2 tail_terms)* {
+  return repeat.reduce(function (a, b) {
+    a = _fill_jek(a, _fill_free(b[0], b[3]), b[4]);
+    a.tail_terms = b[5];
+    a.structure = a.structure.concat(a.tail_terms);
+    return a;
+  }, start);
+}
 
 //// EXP-MODIF: GI TAG BO + JACU
-bridi_tail_2 = expr:(CU_elidible bridi_tail_3 ((gihek tag? / GI_clause tag) BO_clause free* bridi_tail_2 tail_terms)?) 
+bridi_tail_2 = cu:CU_elidible start:bridi_tail_3 repeat:((gihek tag? / GI_clause tag) BO_clause free* bridi_tail_2 tail_terms)? {
+  start.cu = cu;
+  start.structure = [cu, start.structure];
+  if (repeat) {
+    start = _fill_jek(start, repeat[0][0], repeat[3], repeat[0][1], _fill_free(repeat[1], repeat[2]));
+    start.tail_terms = repeat[4];
+    start.structure = start.structure.concat(start.tail_terms);
+  }
+  return start;
+}
 
 //// EXP-MODIF: terms before selbri after cu
-bridi_tail_3 = expr:(gek_sentence / (terms CU_elidible)* selbri tail_terms)
+bridi_tail_3 = gek_sentence / (preterms:(terms CU_elidible)* selbri:selbri tail_terms:tail_terms {
+  return {
+    structure: [preterms, selbri, tail_terms],
+    preterms: preterms.map(function (a) { return {terms: a[0].terms, cu: a[1]} }),
+    selbri: selbri, tail_terms: tail_terms,
+  }
+})
 
 //// EXP-FIX: tag? KE --> tag* KE
 gek_sentence = expr:(gek subsentence gik subsentence tail_terms / tag* KE_clause free* gek_sentence KEhE_elidible free* / NA_clause free* gek_sentence) 
 
-tail_terms = expr:(terms? VAU_elidible free*  !ZOhU_clause) 
+tail_terms = terms:terms? vau:VAU_elidible free:free*  !ZOhU_clause { return { terms: terms, vau: _fill_free(vau, free), structure: [terms, vau]} }
 
 terms = expr:terms_1+ { return { terms: expr, structure: expr } }
 
@@ -461,7 +527,7 @@ fa_elided_term = !gek tag:FA_elidible sumti:sumti { return _term({tags: [tag], s
 
 naku_term = na:NA_clause nafree:free* ku:KU_clause kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }
 
-soi_term = soi:SOI_clause soifree:free* bridi:subsentence sehu:SEhU_elidible sehufree:free* { return {tag: _fill_free(soi, soifree), bridi: bridi, terminator: _fill_free(sehu, sehufree)} }
+soi_term = soi:SOI_clause soifree:free* bridi:subsentence sehu:SEhU_elidible sehufree:free* { return {tag: _fill_free(soi, soifree), bridi: bridi, terminator: _fill_free(sehu, sehufree), structure: [soi, bridi, sehu]} }
 
 term_sa = term_start (!term_start (sa_word / SA_clause !term_start ) )* SA_clause &term_1
 
@@ -749,10 +815,25 @@ lerfu_string = expr:(lerfu_word (PA_clause / lerfu_word)*)
 lerfu_word = expr:(BY_clause / LAU_clause lerfu_word / TEI_clause lerfu_string FOI_clause) 
 
 //; gihek = NA_clause? SE_clause? GIhA_clause NAI_clause?
-gihek = expr:(gihek_sa* gihek_1) 
+gihek = sa:gihek_sa* gihek:gihek_1 { if (_empty(sa)) gihek.gihek_sa = sa; return gihek }
 
 //// EXP-MODIF - A/JA/JOI merge, gijek implementaton, add of JA_clause synonym of GIhA_clause
-gihek_1 = expr:(NA_clause? SE_clause? (JOI_clause / GIhA_clause / GI_clause JOI_clause) NAI_clause?) 
+gihek_1 = na:NA_clause? se:SE_clause? joi:(JOI_clause / GIhA_clause / gi_joi) {
+  joi = _duplicate_evil(joi);
+  var structure = [];
+  if (_empty(na)) structure.push(joi.na = na);
+  if (_empty(se)) structure.push(joi.se = se);
+  structure.push(joi.structure || joi.word);
+  joi.structure = structure;
+  return joi;
+}
+
+gi_joi = gi:GI_clause joi:JOI_clause {
+  joi = _duplicate_evil(joi);
+  joi.gi = gi;
+  joi.structure = [gi, joi.structure || joi.word];
+  return joi;
+}
 
 gihek_sa = expr:(gihek_1 (!gihek_1 (sa_word / SA_clause !gihek_1 ) )* SA_clause &gihek) 
 
@@ -1818,7 +1899,7 @@ syllable = expr:(onset !y nucleus coda?) {return _join(expr);}
 consonantal_syllable = expr:(consonant y coda / consonant &syllabic coda) {return _join(expr);}
 
 //// EXP-MODIF: CyC syllables in fuhivla
-coda = expr:(consonant &consonantal_syllable / !any_syllable consonant &any_syllable / syllabic? consonant? &pause) {return _join(expr);}
+coda = expr:(consonant &consonantal_syllable / !any_syllable consonant &any_syllable) {return _join(expr);}
 
 //// EXP-MODIF: CyC syllables in fuhivla
 onset = expr:(h / glide / !consonantal_syllable initial) {return _join(expr);}
