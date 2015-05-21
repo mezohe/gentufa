@@ -261,6 +261,10 @@
         used = right.used;
       }
     } else {
+      if (tail.tail) {
+        var fa_after_head = tail.head && _count_fa(tail.head.terms, last, used);
+        return _count_fa_tail(tail.tail, fa_after_head.last || 1, fa_after_head.used || {});
+      }
       var preterms = {last: last, used: used};
       if (tail.preterms) {
         tail.preterms.every(function (a) {
@@ -338,7 +342,7 @@
   }
 }
 
-fax = expr:(fragment / (a:gek_termset &EOF {return a}) / statement) { return [_bracket(expr), expr] }
+fax = expr:(fragment / statement) { return [_bracket(expr), expr] }
 
 text = intro_null text_part_2 (!text_1 joik_ek)? text_1? faho_clause EOF?
 
@@ -385,6 +389,12 @@ sentence = head:terms? sa:bridi_tail_sa* tail:bridi_tail {
   return ret;
 }
 
+sentence_no_count = head:terms? sa:bridi_tail_sa* tail:bridi_tail {
+  var ret = {structure: [head, tail], head: head, tail: tail};
+  if (sa) ret.bridi_tail_sa = sa;
+  return ret;
+}
+
 // JACU
 //bridi_tail_t1 = expr:(bridi_tail_t2 (joik_ek tag? KE_clause free* bridi_tail KEhE_elidible free*)?) 
 
@@ -395,7 +405,9 @@ sentence_sa = expr:(sentence_start (!sentence_start (sa_word / SA_clause !senten
 
 sentence_start = expr:(I_pre / NIhO_pre) 
 
-subsentence = expr:(sentence / prenex subsentence) 
+subsentence_no_count = expr:(sentence_no_count / prenex subsentence_no_count) 
+
+subsentence = expr:(tag? TUhE_clause free* text_1 TUhU_elidible free* / sentence / prenex subsentence) 
 
 //// EXP-MODIF: GI TAG BO + JACU
 bridi_tail = (start:bridi_tail_1 repeat:((gihek tag? / GI_clause tag) KE_clause free* bridi_tail KEhE_elidible free* tail_terms)? {
@@ -443,7 +455,30 @@ bridi_tail_3 = gek_sentence / (preterms:(terms CU_elidible)* selbri:selbri tail_
 })
 
 //// EXP-FIX: tag? KE --> tag* KE
-gek_sentence = expr:(gek subsentence gik subsentence tail_terms / tag* KE_clause free* gek_sentence KEhE_elidible free* / NA_clause free* gek_sentence) 
+gek_sentence = (gek:gek left:subsentence_no_count gik:gik right:subsentence_no_count tail_terms:tail_terms {
+    gek = _fill_gek(gek, left, gik, right);
+    gek.tail_terms = tail_terms;
+    gek.structure = gek.structure.concat(tail_terms);
+    return gek;
+  }) 
+  / (tag:tag* ke:KE_clause kefree:free* gek:gek_sentence kehe:KEhE_elidible kehefree:free* {
+    gek.ke = _fill_free(ke, kefree);
+    gek.kehe = _fill_free(kehe, kehefree);
+    gek.structure = [tag, ke, gek.structure, kehe];
+    gek.selbri_tags = gek.selbri_tags ? tag.concat(gek.selbri_tags) : tag;
+    return gek;
+  }) 
+  / (tag:tag+ &(NA_clause / GA_clause) gek:gek_sentence {
+    gek.structure = [tag, gek.structure];
+    gek.selbri_tags = gek.selbri_tags ? tag.concat(gek.selbri_tags) : tag;
+    return gek;
+  }) 
+  / (na:NA_clause free:free* gek:gek_sentence { 
+    _fill_free(na, free);
+    gek.structure = [na, gek.structure];
+    gek.selbri_tags = gek.selbri_tags ? [na].concat(gek.selbri_tags) : [na];
+    return gek;
+  })
 
 tail_terms = terms:terms? vau:VAU_elidible free:free*  !ZOhU_clause { return { terms: terms, vau: _fill_free(vau, free), structure: [terms, vau]} }
 

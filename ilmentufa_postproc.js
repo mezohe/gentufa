@@ -216,9 +216,10 @@ function prettify_brackets(str) {
 
 function remove_structure(obj) {
 	if (!obj) return obj;
-	if (Array.isArray(obj)) obj.forEach(remove_structure);
 	if (obj.structure && Array.isArray(obj.structure)) obj.structure.forEach(remove_structure);
 	delete obj.structure;
+	if (typeof obj == "object")
+		Object.keys(obj).map(function (a) { return obj[a] }).forEach(remove_structure);
 	return obj;
 }
 
