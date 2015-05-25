@@ -35,155 +35,12 @@
 alert = console.log;
 
 function camxes_postprocessing(text, mode) {
-	if (!is_string(text)) return "ERROR: Wrong input type.";
-	if (mode == 0) return text;
-	if (text.charAt(0) != '[') return text;
-	/** Condensation **/
-	text = text.replace(/ +/gm, "");
-	text = text.replace(/\r\n|\n|\r/gm, "");
-	if (mode == 1) return text;
-	/** Prettified forms **/
-	var with_selmaho = (mode >= 3 && mode != 5);
-	var with_nodes_labels = (mode == 4 || mode == 7);
-	var without_terminator = (mode >= 5);
-	text = text.replace(/\"/gm, ""); // Delete every quote marks
-	/* Save selmaho and brivla types */
-	text = text.replace(/(gismu|lujvo|fuhivla|cmene|cmevla),([A-Za-z']+)/g, "$1:$2");
-	text = text.replace(/([A-Za-z_]+),([A-Za-z']+)/g, "$1:$2");
-	/* Save a few nodes from deletion (optional) */
-	if (with_nodes_labels) {
-		text = text.replace(/prenex,/g, "PN");
-		text = text.replace(/sentence,\[\[terms,/g, "sentence,[BH[terms,");
-		text = text.replace(/bridi_tail_2,/g, "BT");
-	}
-	/* Delete every remaining node names and commas */
-	text = text.replace(/([A-Za-z0-9_]+,)+\[/g, "[");
-	text = text.replace(/,/gm, "");
-	/* If requested, erase every elided terminators from the output */
-	if (without_terminator)
-		text = erase_elided_terminators(text);
-	/* Cleanup */
-	text = delete_superfluous_brackets(text);
-	text = text.replace(/\[ +/g, "[");
-	text = text.replace(/ +\]/g, "]");
-	text = text.replace(/([A-Z] )\[/g, "$1[");
-	/* Abbreviations */
-	text = text.replace(/(cmene|cmevla):/g, "C:");
-	text = text.replace(/gismu:/g, "G:");
-	text = text.replace(/lujvo:/g, "L:");
-	text = text.replace(/fuhivla/g, "F");
-	text = text.replace(/BRIVLA/g, "Z");
-	/* Making things easier to read */
-	if (!with_selmaho) text = text.replace(/[A-Za-z_]+:/g, "");
-	text = text.replace(/\]\[/g, "] [");
-	text = prettify_brackets(text);
-	text = text.replace(/ +/gm, " ");
-	text = text.replace(/^ +/, "");
-	return text;
-}
-
-function erase_elided_terminators(str) {
-	var i, j;
-	var parachute = 400;
-	str = str.replace(/([a-z']+)`/g, function(v) { return v.toUpperCase(); });
-	str = str.replace(/([A-Z]+)'([A-Z]+)`/g,"$1h$2`");
-	str = str.replace(/([A-Z]+)H([A-Z]+)`/g,"$1h$2`");
-	str = str.replace(/([A-Zh]+)`/g,"$1");
-	do {
-		i = str.search(/\[[A-Zh`]+\]/);
-		if (i < 0) break;
-		j = i + str.substr(i).indexOf("]");
-		while (i-- > 0 && ++j < str.length)
-			if (str[i] != '[' || str[j] != ']') break;
-		i++;
-		j--;
-		//alert("DEL "+str.substr(i,j-i+1));
-		str = str_replace(str, i, j-i+1, "");
-	} while (parachute--);
-	return str;
-}
-
-function delete_superfluous_brackets(string) {
-	/* RATIONALE:
-	 * Here is done the dirty work of removing all those superfluous brackets
-	 * left after our earlier intense session of regexp replacements.
-	 * Admittedly not quite easy to read, but it does the job. :)
-	 */
-	str = string.split("");
-	var i = 0;
-	var parachute = 4000; // Against evil infinite loops.
-	if (str.length < 1) {
-		alert("ERROR: (str.length < 1) @delete_superfluous_brackets");
-		return str;
-	}
-	// We reach the first word
-	while (str[i] == "[") {
-		if (i >= str.length) return; // No word found.
-		i++;
-	}
-	/**
-		### FIRST CLEANUP: BRACKETS SURROUNDING SINGLE WORD ###
-	**/
-	do {
-		/** erase_surrounding_brackets **/
-		var j = i;
-		while (str[i].search(/[A-Za-z'_:~]/) == 0 && i < str.length) i++;
-		while (str[i] == ']') {
-			if (j <= 0) {
-				alert("ERROR: right bracket found without left counterpart.");
-				break;
-			}
-			j--;
-			while (str[j] == ' ') j--;
-			if (str[j] == '[') {
-				str[j] = ' ';
-				str[i++] = ' ';
-			} else break;
-		}
-		/** reach_next_word **/
-		while (str[i] == '[' || str[i] == ']' || str[i] == ' ' && i < str.length)
-			i++;
-	} while (i < str.length && --parachute > 0);
-	if (parachute <= 0)
-		alert("@delete_superfluous_brackets #1: INFINITE LOOP\ni = " + i
-		    + "\nstr from i:\n" + str.slice(i));
-	/**
-		### SECOND CLEANUP: BRACKETS SURROUNDING GROUPS OF WORDS ETC. ###
-	**/
-	i = 0;
-	parachute = 4000;
-	while (i < str.length && parachute-- > 0) {
-		var so, eo, j;
-		// FIRST STEP: reaching the next '['.
-		while (i < str.length && str[i] != '[') i++;
-		so = i;
-		while (i < str.length && str[i] == '[') i++;
-		eo = i;
-		if (i >= str.length) break;
-		if (i - so < 2) continue;
-		j = i;
-		i -= 2;
-		do {
-			var floor;
-			// Now we'll reach the ']' closing the aformentioned '['.
-			floor = 1;
-			while (j < str.length && floor > 0) {
-				if (str[j] == '[') floor++;
-				else if (str[j] == ']') floor--;
-				j++;
-			}
-			// We now erase superfluous brackets
-			while (str[j] == ']' && i >= so) {
-				str[i--] = ' ';
-				str[j++] = ' ';
-			}
-		} while (i >= so && j < str.length && parachute-- > 0);
-		i = eo;
-	}
-	if (parachute <= 0)
-		alert("@delete_superfluous_brackets #2: INFINITE LOOP\ni = " + i
-		    + "\nstr from i:\n" + str.slice(i));
-	return str.join("");
+	if (mode == 0) return JSON.stringify(text);
+	if (mode == 1) return JSON.stringify(remove_structure(text));
+	if (mode == 2) return prettify_brackets(bracket(text));
+	if (mode == 3 || mode == 4) return prettify_brackets(bracket(text, true));
+	if (mode == 5) return prettify_brackets(bracket(text, false, true));
+	if (mode > 5) return prettify_brackets(bracket(text, true, true));
 }
 
 function prettify_brackets(str) {
@@ -221,6 +78,31 @@ function remove_structure(obj) {
 	if (typeof obj == "object")
 		Object.keys(obj).map(function (a) { return obj[a] }).forEach(remove_structure);
 	return obj;
+}
+
+function bracket(array, plus_s, minus_f) {
+	function _bracket(array) {
+		if (Array.isArray(array)) {
+			array = array.filter(function (a) { return a && (!Array.isArray(a) || a.length) && (!minus_f || !a.elided || a.selmaho == "FA") });
+			if (array.length == 1) return _bracket(array[0]);
+			else return "[" + array.map(_bracket).join(" ") + "]";
+		}
+		
+		if (typeof array == "object" && array.structure) {
+			return _bracket(array.structure);
+		}
+		
+		if (typeof array == "object" && array.word) {
+			var /*hoisting*/ ret = _bracket(array.elided ? array.word.toUpperCase() : array.word);
+			return plus_s && array.selmaho && !array.elided ? array.selmaho + ":" + ret : ret;
+		}
+		
+		if (typeof array == "string")
+			return array;
+			
+		return "[???]";
+	}
+	return _bracket(array);
 }
 
 

@@ -51,13 +51,15 @@ var processor = function(client, from, to, text, message) {
 };
 
 function extract_mode(input) {
-  if (input.indexOf("+s ") == '0') {
+  if (input.indexOf("+r ") == '0') {
+    return [input.substr(3), 1];
+  } else if (input.indexOf("+s ") == '0') {
     return [input.substr(3), 3];
   } else if (input.indexOf("-f ") == '0') {
     return [input.substr(3), 5];
   } else if (input.indexOf("-f+s ") == '0') {
     return [input.substr(5), 6];
-  } else return [input, 1];
+  } else return [input, 2];
 }
 
 function run_camxes(input, mode) {
@@ -72,10 +74,7 @@ function run_camxes(input, mode) {
 		syntax_error = true;
 	}
 	if (!syntax_error) {
-		if (mode != 3) {
-			result = result[0];
-			result = camxes_post.prettify(result);
-		} else result = JSON.stringify(camxes_post.remove_structure(result), undefined, 2);
+		result = camxes_post.postprocessing(result, mode);
 	}
 	console.log(result);
 	return result;

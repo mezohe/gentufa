@@ -42,6 +42,9 @@
 {
   _fa_letters = {a: 1, e: 2, i: 3, o: 4, u: 5};
   _letter_fa = Object.keys(_fa_letters).reduce(function (a,b) { a[_fa_letters[b]] = b; return a }, {});
+  _CKTJ = false;
+  _cktj_names = /cykytyjy|creka(tanru(djacu)?)?bu|cektau(jau)?bu|cetki(tau(jau)?)?bu/;
+  
   function _join(arg)
   {
     if (typeof(arg) == "string")
@@ -114,12 +117,21 @@
     if (post) word.post = post;
       
     if (post && post.indicators)
-      _amalgam(word, [word.pre, word.word, post.indicators].filter(_empty));
+      _amalgam(word, [word.pre, _shell(word), post.indicators].filter(_empty));
     else
-      _amalgam(word, [word.pre, word.word].filter(_empty));
+      _amalgam(word, [word.pre, _shell(word)].filter(_empty));
       
     if (_empty(sa)) word.sa = sa;
     return word;
+  }
+  
+  function _shell(word) {
+    var ret = {};
+    if (word.structure) ret.structure = word.structure;
+    else if (word.word) ret.word = word.word;
+    if (word.selmaho) ret.selmaho = word.selmaho;
+    if (word.elided) ret.elided = word.elided;
+    return ret;
   }
   
   function _empty(array) {
@@ -141,10 +153,10 @@
   }
   
   function _fill_jek(left, jek, right, bo_tag, bo, pehe) {
-    jek = _duplicate_evil(jek);
+    jek = _duplicate_less_evil(jek);
     jek.left = left;
     jek.right = right;
-    jek.structure = pehe ? [left, pehe, jek.structure || jek.word] : [left, jek.structure || jek.word];
+    jek.structure = pehe ? [left, pehe, _shell(jek)] : [left, _shell(jek)];
     if (bo_tag) jek.structure.push(jek.bo_tag = bo_tag);
     if (bo) jek.structure.push(jek.bo = bo);
     jek.structure.push(right);
@@ -155,7 +167,7 @@
     gek.left = left;
     gek.right = right;
     gek.gik = gik;
-    gek.structure = [gek.structure || gek.word, left, gik, right];
+    gek.structure = [_shell(gek), left, gik, right];
     return gek;
   }
   
@@ -169,7 +181,7 @@
     } else {
       clause[name] = free;
       if (name == "free") {
-        clause.structure = [clause.structure || clause.word, free];
+        clause.structure = [_shell(clause), free];
       }
     }
     return clause;
@@ -194,6 +206,12 @@
   
   function _duplicate_evil(thing) { // FIXME this murders kittens
     return JSON.parse(JSON.stringify(thing));
+  }
+  
+  function _duplicate_less_evil(thing) {
+    var clone = {};
+    Object.keys(thing).forEach(function (a) { clone[a] = thing[a] });
+    return clone;
   }
   
   function _count_fa(terms, last, used) {
@@ -288,8 +306,8 @@
   
   function _linkargs_attach(linkargs, unit) {
     linkargs.selbri = unit;
-    linkargs.structure = linkargs.inverted ? [linkargs.structure || linkargs.word, unit]
-      : [unit, linkargs.structure || linkargs.word];
+    linkargs.structure = linkargs.inverted ? [_shell(linkargs), unit]
+      : [unit, _shell(linkargs)];
     return linkargs;
   }
   
@@ -342,14 +360,11 @@
   }
 }
 
-fax = expr:(fragment / statement) { return [_bracket(expr), expr] }
+//fax = expr:(fragment / statement) //{ return [_bracket(expr), expr] }
 
-text = intro_null text_part_2 (!text_1 joik_ek)? text_1? faho_clause EOF?
+text = intro_null ind:indicators? free:free* joik:(!text_1 joik_ek)? t1:text_1? faho_clause EOF? { return [ind, _empty(free), _empty(joik), _empty(t1)] }
 
 intro_null = expr:(spaces? su_clause* intro_si_clause) 
-
-//// EXP-MODIF: brivla/cmevla merge
-text_part_2 = expr:(indicators? free*) 
 
 //; intro_sa_clause = SA_clause+ / any_word_SA_handling !(ZEI_clause SA_clause) intro_sa_clause
 intro_si_clause = expr:(si_clause? SI_clause*)  
@@ -364,7 +379,7 @@ paragraphs = expr:(paragraph (NIhO_clause+ free* su_clause* paragraphs)?)
 
 paragraph = expr:((fragment / statement) (I_clause !joik_ek free* (statement / fragment)?)*) 
 
-statement = expr:(statement_1 / prenex statement) 
+statement = expr:(prenex statement / statement_1) 
 
 statement_1 = expr:(statement_2 (I_clause joik_ek statement_2?)*) 
 
@@ -436,7 +451,7 @@ bridi_tail_1 = start:bridi_tail_2 repeat:(gihek !(tag? BO_clause) !(tag? KE_clau
 //// EXP-MODIF: GI TAG BO + JACU
 bridi_tail_2 = cu:CU_elidible start:bridi_tail_3 repeat:((gihek tag? / GI_clause tag) BO_clause free* bridi_tail_2 tail_terms)? {
   start.cu = cu;
-  start.structure = [cu, start.structure];
+  start.structure = [cu, _shell(start)];
   if (repeat) {
     start = _fill_jek(start, repeat[0][0], repeat[3], repeat[0][1], _fill_free(repeat[1], repeat[2]));
     start.tail_terms = repeat[4];
@@ -456,31 +471,39 @@ bridi_tail_3 = gek_sentence / (preterms:(terms CU_elidible)* selbri:selbri tail_
 
 //// EXP-FIX: tag? KE --> tag* KE
 gek_sentence = (gek:gek left:subsentence_no_count gik:gik right:subsentence_no_count tail_terms:tail_terms {
+    gek = _duplicate_less_evil(gek);
     gek = _fill_gek(gek, left, gik, right);
     gek.tail_terms = tail_terms;
     gek.structure = gek.structure.concat(tail_terms);
     return gek;
   }) 
   / (tag:tag* ke:KE_clause kefree:free* gek:gek_sentence kehe:KEhE_elidible kehefree:free* {
+    gek = _duplicate_less_evil(gek);
     gek.ke = _fill_free(ke, kefree);
     gek.kehe = _fill_free(kehe, kehefree);
     gek.structure = [tag, ke, gek.structure, kehe];
     gek.selbri_tags = gek.selbri_tags ? tag.concat(gek.selbri_tags) : tag;
     return gek;
   }) 
-  / (tag:tag+ &(NA_clause / GA_clause) gek:gek_sentence {
+  / (tag:tag+ &(!si_clause !zei_clause !bu_clause (NA_clause / GA_clause)) gek:gek_sentence {
+    gek = _duplicate_less_evil(gek);
     gek.structure = [tag, gek.structure];
     gek.selbri_tags = gek.selbri_tags ? tag.concat(gek.selbri_tags) : tag;
     return gek;
   }) 
   / (na:NA_clause free:free* gek:gek_sentence { 
+    gek = _duplicate_less_evil(gek);
     _fill_free(na, free);
     gek.structure = [na, gek.structure];
     gek.selbri_tags = gek.selbri_tags ? [na].concat(gek.selbri_tags) : [na];
     return gek;
   })
 
-tail_terms = terms:terms? vau:VAU_elidible free:free*  !ZOhU_clause { return { terms: terms, vau: _fill_free(vau, free), structure: [terms, vau]} }
+tail_terms = terms:terms? vau:VAU_elidible free:free*  {
+  var ret = { terms: terms, vau: _fill_free(vau, free), structure: [terms, vau]};
+  if (!_empty(terms.terms) && vau.elided) ret.elided = true;
+  return ret;
+}
 
 terms = expr:terms_1+ { return { terms: expr, structure: expr } }
 
@@ -594,13 +617,13 @@ sumti = sumti:sumti_1 vuho:(VUhO_clause free* vuho_tail?)? {
     sumti.vuho = _fill_free(vuho[0], vuho[1]);
     if (vuho[2]) {
       sumti.relative = vuho[2][0];
-      sumti.structure = [sumti.structure || sumti.word, sumti.vuho, sumti.relative];
+      sumti.structure = [_shell(sumti), sumti.vuho, sumti.relative];
       if (vuho[2][1]) {
         return _fill_jek(sumti, vuho[2][1][0], vuho[2][1][1]); // XXX UGLY UGLY UGLY
       }
       return sumti;
     }
-    sumti.structure = [sumti.structure || sumti.word, sumti.vuho];
+    sumti.structure = [_shell(sumti), sumti.vuho];
   }
   return sumti;
 }
@@ -631,7 +654,7 @@ sumti_4 = sumti_5 / (gek:gek left:sumti gik:gik right:sumti_4 { return _role(_fi
 sumti_5 = (quantifier:quantifier? sumti:sumti_6 relative:relative_clauses?  {
   if (quantifier) sumti.quantifier = quantifier;
   if (relative) sumti.relative = relative;
-  sumti.structure = [quantifier, sumti.structure || sumti.word, relative].filter(_empty);
+  sumti.structure = [quantifier, _shell(sumti), relative].filter(_empty);
   return sumti;
 })
   / (quantifier (selbri / gek_sentence) KU_elidible free* relative_clauses?) 
@@ -640,7 +663,7 @@ sumti_5 = (quantifier:quantifier? sumti:sumti_6 relative:relative_clauses?  {
 sumti_6 = simple_sumti
   / (!tag !selbri lerfu_string BOI_elidible free*)
   / LU_clause text LIhU_elidible free* 
-  / lahe_nahe (relative_clauses? sumti / term) LUhU_elidible free* 
+  / !tag lahe_nahe (relative_clauses? sumti / term) LUhU_elidible free* 
   / LE_clause free* sumti_tail KU_elidible free* 
   / li_clause 
   / (LOhOI_clause free* subsentence KUhAU_elidible free*) 
@@ -686,20 +709,20 @@ selbri_relative_clause_start = expr:(NOhOI_clause)
 //// EXP-MODIF: tag? --> tag*
 selbri = tag:tag* selbri:selbri_1 { 
   if (_empty(tag)) {
-    selbri.structure = [tag, selbri.structure || selbri.word]; 
+    selbri.structure = [tag, _shell(selbri)]; 
     selbri.selbri_tags = selbri.selbri_tags ? tag.concat(selbri.selbri_tags) : tag;
   }
   return selbri
 }
 
 selbri_1 = selbri_2 / (na:NA_clause free:free* selbri:selbri { 
-  selbri.structure = [_fill_free(na, free), selbri.structure || selbri.word];
+  selbri.structure = [_fill_free(na, free), _shell(selbri)];
   selbri.selbri_tags = selbri.selbri_tags ? [na].concat(selbri.selbri_tags) : [na];
   return selbri;
 })
 
 selbri_2 = start:selbri_3 repeat:(CO_clause free* selbri_3)* {
-  return repeat.reduce(function(a, b) { return _tanru(a, b[2], _fill_free(b[0], b[1])) }, start);
+  return repeat.reduce(function(a, b) { return _tanru(b[2], a, _fill_free(b[0], b[1])) }, start);
 }
 
 selbri_3 = expr:(selbri_4+) { return expr.reduce(function(a, b) { return _tanru(a, b) }) }
@@ -854,19 +877,19 @@ gihek = sa:gihek_sa* gihek:gihek_1 { if (_empty(sa)) gihek.gihek_sa = sa; return
 
 //// EXP-MODIF - A/JA/JOI merge, gijek implementaton, add of JA_clause synonym of GIhA_clause
 gihek_1 = na:NA_clause? se:SE_clause? joi:(JOI_clause / GIhA_clause / gi_joi) {
-  joi = _duplicate_evil(joi);
+  joi = _duplicate_less_evil(joi);
   var structure = [];
   if (_empty(na)) structure.push(joi.na = na);
   if (_empty(se)) structure.push(joi.se = se);
-  structure.push(joi.structure || joi.word);
+  structure.push(_shell(joi));
   joi.structure = structure;
   return joi;
 }
 
 gi_joi = gi:GI_clause joi:JOI_clause {
-  joi = _duplicate_evil(joi);
+  joi = _duplicate_less_evil(joi);
   joi.gi = gi;
-  joi.structure = [gi, joi.structure || joi.word];
+  joi.structure = [gi, _shell(joi)];
   return joi;
 }
 
@@ -878,7 +901,7 @@ joik = gaho_pre:GAhO_clause* na:NA_clause? se:SE_clause? joi:JOI_clause gaho_pos
   if (_empty(gaho_pre)) structure.push(joi.gaho_pre = gaho_pre);
   if (_empty(na)) structure.push(joi.na = na);
   if (_empty(se)) structure.push(joi.se = se);
-  structure.push(joi.structure || joi.word);
+  structure.push(_shell(joi));
   if (_empty(gaho_post)) structure.push(joi.gaho_post = gaho_post);
   joi.structure = structure;
   return joi;
@@ -892,12 +915,14 @@ joik_ek_1 = expr:(joik / VUhU_clause) free:free* { return _fill_free(expr, free)
 joik_ek_sa = joik_ek_1 (!joik_ek_1 (sa_word / SA_clause !joik_ek_1 ) )* SA_clause &joik_ek
 
 //// EXP-MODIF: Implementation of gaJA
-gek = expr:(gak joik_ek / (se:SE_clause? ga:GA_clause free:free* { if (se) { ga.se; ga.structure = [se, ga.structure || ga.word] } return _fill_free(ga, free) }) / joik_ek gik / tag gik) 
+gek = (gak joik_ek )
+  / ((joik_ek / tag) gik )
+  / (se:SE_clause? ga:GA_clause free:free* { if (se) { ga.se; ga.structure = [se, _shell(ga)] } return _fill_free(ga, free) }) 
 
 //// EXP-ADD: GAJA
 gak = expr:ga_clause free:free* { return _fill_free(expr, free) }
 
-guhek = se:SE_clause? guha:GUhA_clause free:free* { if (_empty(se)) { guha.se = se; guha.structure = [se, guha.structure || guha.word] } return _fill_free(guha, free) }
+guhek = se:SE_clause? guha:GUhA_clause free:free* { if (_empty(se)) { guha.se = se; guha.structure = [se, _shell(guha)] } return _fill_free(guha, free) }
 
 guk = expr:gu_clause free:free* { return _fill_free(expr, free) } // FIXME: add to guhek!
 
@@ -948,7 +973,7 @@ tag:(tag:(PU_clause / roi_tense / fiho_modal / FA_clause) free:free* { return _f
 //roi_tense = num:( (vei:VEI_clause mex:mex veho:VEhO_elidible { vei.mex = mex; vei.terminator = veho; return vei }) / number ) roi:ROI_clause {
 //  roi.number = num; return roi;
 //}
-roi_tense = num:mex_2 roi:ROI_clause { roi.number = num; roi.structure = [num, roi.structure || roi.word]; return roi }
+roi_tense = num:mex_2 roi:ROI_clause { roi.number = num; roi.structure = [num, _shell(roi)]; return roi }
 
 fiho_modal = fiho:FIhO_clause free:free* selbri:selbri fehu:FEhU_elidible { fiho.selbri = selbri; fiho.terminator = fehu; return { fiho: _fill_free(fiho) } }
 
@@ -974,19 +999,26 @@ free_sei = sei:SEI_clause free:free* terms:(terms CU_elidible free*)* selbri:sel
 
 free_vocative = vocative (relative_clauses? selbri relative_clauses? / sumti)? DOhU_elidible
 
-free_mai = mex:mex_2 mai:MAI_clause { mai.number = mex; mai.structure = [mex, mai.structure || mai.word]; return mai }
+free_mai = mex:mex_2 mai:MAI_clause {
+  mai.number = mex;
+  mai.structure = [mex, _shell(mai)];
+  console.log(mai.word);
+  if (mai.word == "jo'au")
+    _CKTJ = _cktj_names.test(_bracket(mex).replace(/[^a-z]/g, ""));
+  return mai;
+}
 
 free_to = to:TO_clause text:text toi:TOI_elidible {
   to.text = text;
   to.terminator = toi;
-  to.structure = [to.structure || to.word, text, toi];
+  to.structure = [_shell(to), text, toi];
   return to;
 }
 
 //// EXP-MODIF: MEX simplification
-xi_clause = xi:XI_clause free:free* mex:mex_2 { xi.number = mex; _fill_free(xi, free); xi.structure = [xi.structure || xi.word, mex]; return xi }
+xi_clause = xi:XI_clause free:free* mex:mex_2 { xi.number = mex; _fill_free(xi, free); xi.structure = [_shell(xi), mex]; return xi }
 
-vocative = (coi:COI_clause+ doi:DOI_elidible { doi.coi = coi; doi.structure = coi.concat([doi.structure] || doi.word); return doi }) / DOI_clause
+vocative = (coi:COI_clause+ doi:DOI_elidible { doi.coi = coi; doi.structure = coi.concat(_shell(doi)); return doi }) / DOI_clause
 
 indicators = expr:(FUhE_clause / UI_clause / CAI_clause / NAI_clause / FUhO_clause)+ !BU_clause { return expr }
 
@@ -2175,13 +2207,13 @@ LOhO = &cmavo expr:( l o h o ) &post_word {return _word("LOhO", expr);}
 
 LOhU = &cmavo expr:( l o h u ) &post_word {return _word("LOhU", expr);}
 
-LU = &cmavo expr:( l u ) &post_word {return _word("LU", expr);}
+LU = &cmavo expr:( l a h a u / l u ) &post_word {return _word("LU", expr);}
 
 LUhU = &cmavo expr:( l u h u ) &post_word {return _word("LUhU", expr);}
 
 MAhO = &cmavo expr:( m a h o ) &post_word {return _word("MAhO", expr);}
 
-MAI = &cmavo expr:( m o h o / m a i ) &post_word {return _word("MAI", expr);}
+MAI = &cmavo expr:( j o h a u / m o h o / m a i ) &post_word {return _word("MAI", expr);}
 
 //// EXP-ADD: me'au
 ME = &cmavo expr:(m e h a u / m e) &post_word {return _word("ME", expr);}
@@ -2190,7 +2222,7 @@ MEhU = &cmavo expr:( m e h u ) &post_word {return _word("MEhU", expr);}
 
 MOhE = &cmavo expr:( m o h e ) &post_word {return _word("MOhE", expr);}
 
-MOI = &cmavo expr:( m e i / m o i / s i h e / c u h o / v a h e ) &post_word {return _word("MOI", expr);}
+MOI = &cmavo expr:( m o i h o / m e i / m o i / s i h e / c u h o / v a h e ) &post_word {return _word("MOI", expr);}
 
 NA = &cmavo expr:( j a h a / n a ) &post_word {return _word("NA", expr);}
 
@@ -2198,7 +2230,7 @@ NA = &cmavo expr:( j a h a / n a ) &post_word {return _word("NA", expr);}
 NAI = &cmavo expr:( n a i / j a h a i ) &post_word {return _word("NAI", expr);}
 
 //// EXP-ADD: na'ei
-NAhE = &cmavo expr:( n a h e i / t o h e / j e h a / n a h e / n o h e ) &post_word {return _word("NAhE", expr);}
+NAhE = &cmavo expr:( j e h a i / n a h e i / t o h e / j e h a / n a h e / n o h e ) &post_word {return _word("NAhE", expr);}
 
 NAhU = &cmavo expr:( n a h u ) &post_word {return _word("NAhU", expr);}
 
@@ -2206,10 +2238,10 @@ NIhE = &cmavo expr:( n i h e ) &post_word {return _word("NIhE", expr);}
 
 NIhO = &cmavo expr:( n i h o / n o h i ) &post_word {return _word("NIhO", expr);}
 
-NOI = &cmavo expr:( v o i / n o i / p o i ) &post_word {return _word("NOI", expr);}
+NOI = &cmavo expr:( n o i / &{return !_CKTJ} v o i / p o i ) &post_word {return _word("NOI", expr);}
 
 //// EXP-ADD: poi'i, kai'u
-NU = &cmavo expr:(p o i h i / k a i h u / n i / d u h u / s i h o / n u / l i h i / k a / j e i / s u h u / z u h o / m u h e / p u h u / z a h i ) &post_word {return _word("NU", expr);}
+NU = &cmavo expr:( p o i h i / k a i h u / n i / d u h u / s i h o / n u / l i h i / k a / j e i / s u h u / z u h o / m u h e / p u h u / z a h i / &{return _CKTJ} v o i ) &post_word {return _word("NU", expr);}
 
 NUhA = &cmavo expr:( n u h a ) &post_word {return _word("NUhA", expr);}
 
@@ -2256,7 +2288,7 @@ TUhE = &cmavo expr:( t u h e ) &post_word {return _word("TUhE", expr);}
 TUhU = &cmavo expr:( t u h u ) &post_word {return _word("TUhU", expr);}
 
 //// EXP-ADD: ko'oi, si'au, o'ai, xe'e, xo'o
-UI = &cmavo expr:( l i h o i / f u h a u / a h e i / k o h o i / s i h a u / o h a i / x e h e / x o h o / i h a / i e / a h e / u h i / i h o / i h e / a h a / i a / o h i / o h e / e h e / o i / u o / e h i / u h o / a u / u a / a h i / i h u / i i / u h a / u i / a h o / a i / a h u / i u / e i / o h o / e h a / u u / o h a / o h u / u h u / e h o / i o / e h u / u e / i h i / u h e / b a h a / j a h o / c a h e / s u h a / t i h e / k a h u / s e h o / z a h a / p e h i / r u h a / j u h a / t a h o / r a h u / l i h a / b a h u / m u h a / d o h a / t o h u / v a h i / p a h e / z u h u / s a h e / l a h a / k e h u / s a h u / d a h i / j e h u / s a h a / k a u / t a h u / n a h i / j o h a / b i h u / l i h o / p a u / m i h u / k u h i / j i h a / s i h a / p o h o / p e h a / r o h i / r o h e / r o h o / r o h u / r o h a / r e h e / l e h o / j u h o / f u h i / d a i / g a h i / z o h o / b e h u / r i h e / s e h i / s e h a / v u h e / k i h a / x u / g e h e / b u h o / d a h o / r a h o / b i h a ) &post_word {return _word("UI", expr);}
+UI = &cmavo expr:( l i h o i / f u h a u / a h e i / k o h o i / s i h a u / o h a i / x e h e / x o h o / i h a / i e / a h e / u h i / i h o / i h e / a h a / i a / o h i / o h e / e h e / o i / u o / e h i / u h o / a u / u a / a h i / i h u / i i / u h a / u i / a h o / a i / a h u / i u / e i / o h o / e h a / u u / o h a / o h u / u h u / e h o / i o / e h u / u e / i h i / u h e / b a h a / j a h o / c a h e / s u h a / t i h e / k a h u / s e h o / z a h a / p e h i / r u h a / j u h a / t a h o / r a h u / l i h a / b a h u / m u h a / d o h a / t o h u / v a h i / p a h e / z u h u / s a h e / l a h a / k e h u / s a h u / d a h i / j e h u / s a h a / k a u / t a h u / n a h i / j o h a / b i h u / l i h o / p a u / m i h u / k u h i / j i h a / s i h a / p o h o / p e h a / r o h i / r o h e / r o h o / r o h u / r o h a / r e h e / l e h o / j u h o / f u h i / d a i / g a h i / z o h o / b e h u / r i h e / s e h i / s e h a / v u h e / k i h a / x u / g e h e / b u h o / d a h o / r a h o / b i h a / z i h a ) &post_word {return _word("UI", expr);}
 
 VAU = &cmavo expr:( v a u ) &post_word {return _word("VAU", expr);}
 
@@ -2285,7 +2317,7 @@ ZOhU = &cmavo expr:( c e h a i / z o h u ) &post_word {return _word("ZOhU", expr
 // ___ EXPERIMENTAL SELMAHO ___ //
 
 ZOhOI = &cmavo expr:( z o h o i / l a h o i / r a h o i ) &post_word {return _word("ZOhOI", expr);}
-MEhOI = &cmavo expr:( m e h o i ) &post_word {return _word("ZOhOI", expr);}
+MEhOI = &cmavo expr:( m e h o i ) &post_word {return _word("MEhOI", expr);}
 NOhOI = &cmavo expr:( n o h o i / p o h o i ) &post_word {return _word("NOhOI", expr);}
 KUhOI = &cmavo expr:( k u h o i ) &post_word {return _word("KUhOI", expr);}
 LOhOI = &cmavo expr:( l o h o i / x u h u ) &post_word {return _word("LOhOI", expr);}
