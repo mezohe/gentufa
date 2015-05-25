@@ -485,12 +485,12 @@ gek_sentence = (gek:gek left:subsentence_no_count gik:gik right:subsentence_no_c
     gek.selbri_tags = gek.selbri_tags ? tag.concat(gek.selbri_tags) : tag;
     return gek;
   }) 
-  / (tag:tag+ &(!si_clause !zei_clause !bu_clause (NA_clause / GA_clause)) gek:gek_sentence {
-    gek = _duplicate_less_evil(gek);
-    gek.structure = [tag, gek.structure];
-    gek.selbri_tags = gek.selbri_tags ? tag.concat(gek.selbri_tags) : tag;
-    return gek;
-  }) 
+//  / (tag:tag+ &(!si_clause !zei_clause !bu_clause (NA_clause / GA_clause)) gek:gek_sentence {
+//    gek = _duplicate_less_evil(gek);
+//    gek.structure = [tag, gek.structure];
+//    gek.selbri_tags = gek.selbri_tags ? tag.concat(gek.selbri_tags) : tag;
+//    return gek;
+//  }) 
   / (na:NA_clause free:free* gek:gek_sentence { 
     gek = _duplicate_less_evil(gek);
     _fill_free(na, free);
@@ -579,9 +579,9 @@ abs_tag_term = start:(
 }
 /*** END EXP-MODIF ***/
 
-inverted_term = !gek sumti:sumti co:CO_clause tag:tag free* { return _term(_fill_free(tag, free), sumti, co) }
+inverted_term = !gek sumti:sumti co:CO_clause tag:tag free:free* { return _term(_fill_free(tag, free), sumti, co) }
 
-fa_elided_term = !gek tag:FA_elidible sumti:sumti { return _term({tags: [tag], structure: [tag], implicit_fa: true}, sumti) }
+fa_elided_term = tag:FA_elidible sumti:sumti { return _term({tags: [tag], structure: [tag], implicit_fa: true}, sumti) }
 
 naku_term = na:NA_clause nafree:free* ku:KU_clause kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }
 
