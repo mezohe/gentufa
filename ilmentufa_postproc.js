@@ -34,13 +34,15 @@
 
 alert = console.log;
 
+var glossfallback = {};
+var xmlDoc;
+
 function camxes_postprocessing(text, mode) {
-	if (mode == 0) return JSON.stringify(text);
-	if (mode == 1) return JSON.stringify(remove_structure(text));
-	if (mode == 2) return prettify_brackets(bracket(text));
-	if (mode == 3 || mode == 4) return prettify_brackets(bracket(text, true));
-	if (mode == 5) return prettify_brackets(bracket(text, false, true));
-	if (mode > 5) return prettify_brackets(bracket(text, true, true));
+	if (mode.format == "rawstructure") return JSON.stringify(text);
+	if (mode.format == "raw") return JSON.stringify(remove_structure(text));
+	if (mode.format == "brackets") return prettify_brackets(bracket(text, mode));
+	if (mode.format == "gloss") return prettify_brackets(gloss(text, glossfallback));
+	throw "invalid mode";
 }
 
 function prettify_brackets(str) {
@@ -80,12 +82,145 @@ function remove_structure(obj) {
 	return obj;
 }
 
-function bracket(array, plus_s, minus_f) {
+function bracket(array, mode) {
 	function _bracket(array) {
 		if (Array.isArray(array)) {
-			array = array.filter(function (a) { return a && (!Array.isArray(a) || a.length) && (!minus_f || !a.elided || a.selmaho == "FA") });
+			array = array.filter(function (a) { return a && (!Array.isArray(a) || a.length) && (mode.f || !a.elided || a.selmaho == "FA") });
 			if (array.length == 1) return _bracket(array[0]);
 			else return "[" + array.map(_bracket).join(" ") + "]";
+		}
+		
+		if (typeof array == "object" && array.structure) {
+			if (mode.p && array.se_table)
+				return "[" + array.se_table + "]:" + _bracket(array.structure);
+			return _bracket(array.structure);
+		}
+		
+		if (typeof array == "object" && array.word) {
+			var /*hoisting*/ ret = _bracket(array.elided ? array.word.toUpperCase() : array.word);
+			return mode.s && array.selmaho && !array.elided ? array.selmaho + ":" + ret : ret;
+		}
+		
+		if (typeof array == "string")
+			return array;
+			
+		return "[???]";
+	}
+	return _bracket(array);
+}
+
+function _empty(array) {
+	return array && (!Array.isArray(array) || array.length) && array;
+}
+
+function gloss(array, words) {
+	var remove = {
+		ku: 1, ke: 1, "ke'e": 1, vau: 1, "ku'o": 1, kei: 1,
+	};
+	var unconditional = {
+		lu: "«", "li'u": "»", "lo'u": "«", "le'u": "»",
+		to: "(", toi: ")", sei: "(", "se'u": ")",
+	};
+	var english = {
+		"lo": "a(n)", "le": "the", "la": "that-named", "nu": "event-of", "zo": "the-word:", "coi": "hello", "co'o": "goodbye", "ro": "each-of", "ma": "what", "na": "not", "na'e": "not", "nai": "-not", "nelci": "fond-of", "ka": "being", "tu'a": "about", "ie": "yeah", "e'u": "I-suggest", "e": "and", "a": "and/or", "je": "and", "ja": "and/or", "gi'e": ",-and", "gi'a": ",-and/or", "bu'u": "at", "ca": "at-present", "zo'u": ":", "za'a": "as-I-can-see", "za'adai": "as-you-can-see", "pu": "in-past", "ba": "in-future", "vau": "]", "doi": "oh", "uinai": "unfortunately", "u'u": "sorry", "ko": "do-it-so-that-you", "poi": "that", "noi": ", which", "me": "among", "pe'i": "in-my-opinion", "ui": "yay", "ju": "whether-or-not", "gu": "whether-or-not", "gi'u": "whether-or-not", "u": "whether-or-not", "xu": "is-it-true-that", "ka'e": "possibly-can", "re'u": "time", "roi": "times", "mi": "me",
+	};
+	function trygloss (string) {
+		var cnt = xmlDoc.get("/dictionary/direction[1]/valsi[translate(@word,\""+string.toUpperCase()+"\",\""+string+"\")=\""+string+"\"]/glossword[1]");
+		if (cnt) return cnt.attr("word").value();
+	}
+	function trykeyword (string, place) {
+		var cnt = xmlDoc.get("/dictionary/direction[1]/valsi[translate(@word,\""+string.toUpperCase()+"\",\""+string+"\")=\""+string+"\"]/keyword[@place=\"" + (place || 1) + "\"]");
+		if (cnt) return cnt.attr("word").value();
+	}
+
+	function _(string) { // translation shield
+		return string && {translated: string};
+	}
+	function _bridi_tail(tail) {
+		// XXX this dies on conjunctions
+		var preterms = _terms(tail.preterms, tail.selbri);
+		var tail_terms = _terms(tail.tail_terms, tail.selbri);
+		if (!(1 in tail.fa_after_tail.used))
+			return [preterms, _selbri_first(tail.selbri), tail_terms].filter(_empty);
+		else
+			return [preterms, tail_terms].filter(_empty);
+	}
+	function _terms(terms, selbri) {
+		if (!terms || !terms.terms) return null;
+		if (terms.terms.terms) terms = terms.terms; // XXX
+		return terms.terms.map(function (term) {
+			return _term(term, selbri);
+		});
+	}
+	function _selbri_word(selbri) {
+		// XXX HACK HACK
+		while (selbri && selbri.tertau)
+			selbri = selbri.tertau;
+		if (!selbri) return null;
+		return selbri.word || _empty(selbri.structure.filter(function (a) { return typeof a == "string" })) || "SELBRI-NOT-FOUND";
+	}
+	function _term(term, selbri) {
+		if (term.right) {
+			return _conjunction(term, _term, selbri);
+		} else if (term.terms) {
+			return _terms(term, selbri);
+		} else {
+			var fa = _empty(term.tag && term.tag.fa);
+			var selbri_fa = fa && selbri && selbri.se_table[fa[0] - 1];
+			var selbri_word = _selbri_word(selbri); // XXX don't run this for every term
+			var placetable = glossfallback[selbri_word];
+			var ret;
+			if (!fa || !selbri_fa || !placetable) {
+				ret = null;
+			} else if (selbri_fa == 1) {
+				//ret = term.sumti
+				ret = [term.sumti, _(placetable.bridi1post)].filter(_empty);
+			} else if (selbri_fa == 2) {
+				ret = [_(placetable.bridi2), term.sumti, _(placetable.bridi2post)].filter(_empty);
+			} else {
+				ret = [_(placetable.bridirest[selbri_fa - 3]), term.sumti].filter(_empty);
+			}
+			return _empty(ret) || (selbri_fa && selbri_word && [selbri_word + selbri_fa, term.sumti]) || term;
+		}
+	}
+	function _selbri_first(selbri) {
+		var selbri_word = _selbri_word(selbri);
+		var placetable = glossfallback[selbri_word];
+		if (placetable)
+			return placetable.bridi1post;
+		return selbri_word || selbri;
+	}
+	function _conjunction(terjoma, fun, args) {
+		if (terjoma.right) {
+			if (terjoma.left) terjoma.left = fun.call(null, args ? [terjoma.left].concat(args) : terjoma.left);
+			terjoma.right = fun.call(null, args ? [terjoma.right].concat(args) : terjoma.right);
+			return terjoma;
+		}
+		return fun(terjoma);
+	}
+	function _transform(array) {
+		//if (array.word in remove)
+			//array.gloss_elided = true;
+		if (array.role == "bridi") {
+			//return JSON.stringify(remove_structure(array));
+			if (array.head) array.head = _terms(array.head, array.tail.selbri);
+			array.tail = _bridi_tail(array.tail);
+			//return JSON.stringify(remove_structure([array.head, array.tail].filter(_empty)));
+			return [array.head, array.tail].filter(_empty);
+		}
+		return array;
+	}
+	function _bracket(array) {
+		array = _transform(array);
+	
+		if (Array.isArray(array)) {
+			array = array.filter(function (a) { return a && (!Array.isArray(a) || a.length) && !a.gloss_elided && !(a.word in remove) && !(a in remove); });
+			if (array.length == 1) return _bracket(array[0]);
+			else return "[" + array.map(_bracket).join(" ") + "]";
+		}
+		
+		if (typeof array == "object" && array.translated) {
+			return array.translated;
 		}
 		
 		if (typeof array == "object" && array.structure) {
@@ -93,13 +228,13 @@ function bracket(array, plus_s, minus_f) {
 		}
 		
 		if (typeof array == "object" && array.word) {
-			var /*hoisting*/ ret = _bracket(array.elided ? array.word.toUpperCase() : array.word);
-			return plus_s && array.selmaho && !array.elided ? array.selmaho + ":" + ret : ret;
+			return _bracket(array.word);
 		}
 		
-		if (typeof array == "string")
-			return array;
-			
+		if (typeof array == "string") {
+			return unconditional[array] || english[array] || trygloss(array) || array;
+		}
+		console.log(JSON.stringify(array));
 		return "[???]";
 	}
 	return _bracket(array);
@@ -156,4 +291,5 @@ function dbg_bracket_count(str) {
 module.exports.postprocessing = camxes_postprocessing;
 module.exports.prettify = prettify_brackets;
 module.exports.remove_structure = remove_structure;
+module.exports.loadgloss = function (a, b) { glossfallback = a; xmlDoc = b; };
 
