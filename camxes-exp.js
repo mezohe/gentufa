@@ -58290,6 +58290,7 @@ var camxes = (function() {
       var _letter_fa = Object.keys(_fa_letters).reduce(function (a,b) { a[_fa_letters[b]] = b; return a }, {});
       var _se_cmavo = {se: [0, 1], te: [0, 2], ve: [0, 3], xe: [0, 4]};
       var _cktj_names = /cykytyjy|creka(tanru(djacu)?)?bu|cektau(jau)?bu|cetki(tau(jau)?)?bu/;
+      var _g_zoi_delim;
       
       function _join(arg)
       {
@@ -58517,10 +58518,10 @@ var camxes = (function() {
               var left = _count_fa(term.left.terms || [term.left], last, _duplicate_evil(used));
               var right = _count_fa(term.right.terms || [term.right], last, _duplicate_evil(used));
               if (left.abandoned || right.abandoned || left.last != right.last || JSON.stringify(left.used) != JSON.stringify(right.used)) {
-                console.log("abandoned! " + JSON.stringify(left) + JSON.stringify(right))
+                //console.log("abandoned! " + JSON.stringify(left) + JSON.stringify(right))
                 return false;
               } else {
-                console.log("NOT abandoned! " + JSON.stringify(left) + JSON.stringify(right))
+                //console.log("NOT abandoned! " + JSON.stringify(left) + JSON.stringify(right))
                 last = right.last;
                 used = right.used;
               }
@@ -58563,10 +58564,10 @@ var camxes = (function() {
           var left = _count_fa_tail(tail.left, last, _duplicate_evil(used));
           var right = _count_fa_tail(tail.right, last, _duplicate_evil(used));
           if (left.abandoned || right.abandoned || left.last != right.last || JSON.stringify(left.used) != JSON.stringify(right.used)) {
-            console.log("gihek abandoned! " + JSON.stringify(left) + JSON.stringify(right))
+            //console.log("gihek abandoned! " + JSON.stringify(left) + JSON.stringify(right))
             return false;
           } else {
-            console.log("gihek NOT abandoned! " + JSON.stringify(left) + JSON.stringify(right))
+            //console.log("gihek NOT abandoned! " + JSON.stringify(left) + JSON.stringify(right))
             last = right.last;
             used = right.used;
           }
@@ -58680,7 +58681,7 @@ var camxes = (function() {
           alert("ZOI word is not a string");
           return false;
         } else {
-          return (word.toLowerCase.replace(/,/gm,"").replace(/h/g, "'") === _g_zoi_delim);
+          return (word.toLowerCase().replace(/,/gm,"").replace(/h/g, "'") === _g_zoi_delim);
         }
       }
       
