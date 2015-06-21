@@ -365,6 +365,8 @@
   }
   
   function _place_se(se, unit) {
+    if (Array.isArray(unit))
+      unit = {structure: unit};
     unit = _duplicate_less_evil(unit);
     unit.structure = [se, _shell(unit)];
     
@@ -1101,7 +1103,7 @@ tag:(tag:(PU_clause / roi_tense / fiho_modal / FA_clause) free:free* { return _f
 //}
 roi_tense = num:mex_2 roi:ROI_clause { roi.number = num; roi.structure = [num, _shell(roi)]; return roi }
 
-fiho_modal = fiho:FIhO_clause free:free* selbri:selbri fehu:FEhU_elidible { fiho.selbri = selbri; fiho.terminator = fehu; return { fiho: _fill_free(fiho) } }
+fiho_modal = fiho:FIhO_clause free:free* selbri:selbri fehu:FEhU_elidible { fiho.selbri = selbri; fiho.terminator = fehu; return { fiho: _fill_free(fiho), structure: [fiho, selbri, fehu], } }
 
 //// EXP-MODIF: brivla/cmevla merge; MEX simplification
 // EXP-MODIF: attempt to formalize lo'ai..sa'ai..le'ai replacement expressions
@@ -1658,7 +1660,7 @@ NIhE_pre = pre:pre_clause word:NIhE spaces? { return _word_pre(word, pre) }
 // NIhE_no_SA_handling = pre_clause NIhE post_clause
 
 //         new paragraph; change of subject 
-NIhO_clause = sa:sentence_sa* pre:NIhO_pre post:NIhO_post { return _word(pre, post, sa) }
+NIhO_clause = sa:sentence_sa* pre:NIhO_pre post:NIhO_post { return _word_post(pre, post, sa) }
 NIhO_pre = pre:pre_clause word:NIhO spaces? { return _word_pre(word, pre) }
 NIhO_post = su:su_clause* post:post_clause { if (su && su.length) post.su = su; return post }
 // NIhO_no_SA_handling = pre_clause NIhO su_clause* post_clause
