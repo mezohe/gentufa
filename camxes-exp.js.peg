@@ -520,9 +520,9 @@ sentence_sa = expr:(sentence_start (!sentence_start (sa_word / SA_clause !senten
 
 sentence_start = expr:(I_pre / NIhO_pre) 
 
-subsentence_no_count = expr:(sentence_no_count / prenex subsentence_no_count) 
+subsentence_no_count = expr:(prenex subsentence_no_count / sentence_no_count) 
 
-subsentence = expr:(tag? TUhE_clause free* text_1 TUhU_elidible free* / sentence / prenex subsentence) 
+subsentence = expr:(tag? TUhE_clause free* text_1 TUhU_elidible free* / prenex subsentence / sentence) 
 
 //// EXP-MODIF: GI TAG BO + JACU
 bridi_tail = (start:bridi_tail_1 repeat:((gihek tag? / GI_clause tag) KE_clause free* bridi_tail KEhE_elidible free* tail_terms)? {
