@@ -4,7 +4,24 @@ var PEG = require("pegjs")
 // // read peg and build a parser
 var camxes_peg = fs.readFileSync("\camxes-exp.js.peg").toString();
 try {
-	var camxes = PEG.buildParser(camxes_peg, {cache: true, output: "source"});
+	var camxes = PEG.buildParser(camxes_peg, {
+		cache: true, 
+		output: "source",
+		allowedStartRules: [
+			"text",
+			"sentence",
+			"terms",
+			"bridi_tail",
+			"sumti",
+			"selbri",
+			"BRIVLA_clause",
+			"CMAVO",
+			"BRIVLA",
+			"gismu",
+			"lujvo",
+			"fuhivla",
+		],
+	});
 } catch (e) {
 	console.log(JSON.stringify(e));
 	throw e;

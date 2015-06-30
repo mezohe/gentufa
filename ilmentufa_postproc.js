@@ -115,7 +115,7 @@ function _empty(array) {
 
 function gloss(array, words) {
 	var remove = {
-		ku: 1, ke: 1, "ke'e": 1, vau: 1, "ku'o": 1, kei: 1,
+		ku: 1, ke: 1, "ke'e": 1, vau: 1, "ku'o": 1, kei: 1, boi: 1,
 	};
 	var unconditional = {
 		lu: "«", "li'u": "»", "lo'u": "«", "le'u": "»",
@@ -136,14 +136,21 @@ function gloss(array, words) {
 	function _(string) { // translation shield
 		return string && {translated: string};
 	}
-	function _bridi_tail(tail) {
-		// XXX this dies on conjunctions
+	function _bridi_tail(tail, upper_tail_terms_pre) {
+		if (tail.left && tail.right) {
+			var upper_tail_terms_all = [tail.tail_terms].concat(upper_tail_terms_pre).filter(_empty);
+			var left = _bridi_tail(tail.left, upper_tail_terms_all);
+			var right = _bridi_tail(tail.right, upper_tail_terms_all);
+			return [left, tail.jek, tail.bo_tag, tail.bo, right].filter(_empty);
+		}
 		var preterms = _terms(tail.preterms, tail.selbri);
 		var tail_terms = _terms(tail.tail_terms, tail.selbri);
-		if (!(1 in tail.fa_after_tail.used))
-			return [preterms, _selbri_first(tail.selbri), tail_terms].filter(_empty);
+		if (upper_tail_terms_pre)
+			var upper_tail_terms = upper_tail_terms_pre.map(function (a) { return _terms(a, tail.selbri) });
+		if (upper_tail_terms || tail.fa_after_tail && !(1 in tail.fa_after_tail.used))
+			return [preterms, _selbri_first(tail.selbri), tail_terms].concat(upper_tail_terms).filter(_empty);
 		else
-			return [preterms, tail_terms].filter(_empty);
+			return [preterms, tail_terms].concat(upper_tail_terms).filter(_empty);
 	}
 	function _terms(terms, selbri) {
 		if (!terms || !terms.terms) return null;
@@ -154,10 +161,13 @@ function gloss(array, words) {
 	}
 	function _selbri_word(selbri) {
 		// XXX HACK HACK
+		if (selbri && selbri._selbri_word)
+			return selbri._selbri_word;
 		while (selbri && selbri.tertau)
 			selbri = selbri.tertau;
 		if (!selbri) return null;
-		return selbri.word || _empty(selbri.structure.filter(function (a) { return typeof a == "string" })) || "SELBRI-NOT-FOUND";
+		selbri._selbri_word = selbri.word || _empty(selbri.structure.filter(function (a) { return typeof a == "string" })) || "SELBRI-NOT-FOUND";
+		return selbri._selbri_word;
 	}
 	function _term(term, selbri) {
 		if (term.right) {
@@ -166,7 +176,7 @@ function gloss(array, words) {
 			return _terms(term, selbri);
 		} else {
 			var fa = _empty(term.tag && term.tag.fa);
-			var selbri_fa = fa && selbri && selbri.se_table[fa[0] - 1];
+			var selbri_fa = fa && selbri && selbri.se_table && selbri.se_table[fa[0] - 1];
 			var selbri_word = _selbri_word(selbri); // XXX don't run this for every term
 			var placetable = glossfallback[selbri_word];
 			var ret;
@@ -190,6 +200,19 @@ function gloss(array, words) {
 			return placetable.bridi1post;
 		return selbri_word || selbri;
 	}
+	function _selbri_noun(selbri) {
+		if (!selbri) return selbri;
+		if (selbri.left && selbri.right) {
+			var left = _selbri_noun(selbri.left);
+			var right = _selbri_noun(selbri.right);
+			return [left, selbri.jek, selbri.bo_tag, selbri.bo, right].filter(_empty);
+		}
+		if (selbri.tertau) {
+		
+		}
+		var selbri_fa = selbri.se_table[0];
+		var selbri_word = null;
+	}
 	function _conjunction(terjoma, fun, args) {
 		if (terjoma.right) {
 			if (terjoma.left) terjoma.left = fun.call(null, args ? [terjoma.left].concat(args) : terjoma.left);
@@ -207,6 +230,13 @@ function gloss(array, words) {
 			array.tail = _bridi_tail(array.tail);
 			//return JSON.stringify(remove_structure([array.head, array.tail].filter(_empty)));
 			return [array.head, array.tail].filter(_empty);
+		}
+		if (array.role + "DISABLE" == "relativized_selbri") {
+			if (!array.selbri) return array;
+			return [array.quantifier, _selbri_noun(array.selbri), array.relative].filter(_empty);
+		}
+		if (array.role == "precedence") {
+			return array.contents;
 		}
 		return array;
 	}
