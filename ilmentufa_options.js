@@ -5,7 +5,7 @@ var docs = {
 			"  selruhe = optiio+ \" \" selsku / selsku\n" +
 			"  optiio = [+-][a-z]+\n" +
 			"fa (to zo selsku sinxa la'oi text ne lo gerna be lo jbobau toi)\n" +
-			".i lo nu pilno lo optiio zo'u tu'e\n" +
+			".i lo nu pilno lo .optiio zo'u tu'e\n" +
 			"  .i zo'oi  +brackets  noi ditfaulte zo'u lo te pruce cu se melgau je nai cu se fanva\n" +
 			"  .i zo'oi  +gloss                   zo'u lo skami cu spoja\n" + //te pruce cu gloso fi lo glibau (to na sai bredi toi)\n" +
 			"  .i zo'oi  +raw                     zo'u lo te pruce na se melgau\n" +
@@ -70,11 +70,11 @@ var docs = {
 			,
 };
 
-var minisyntax = config.nick + ": (([+-](brackets|gloss|raw|s|f|p|k|voi|ckt|du|su|buhu|bu|zai|po|koi|lau|lerfu|kujoi|diftogoteha|cktj|zaho))+ )? ";
+var minisyntax = config.nick + ": (([+-](brackets|gloss|raw|s|f|p|k|voi|ckt|du|su|buhu|bu|zai|po|koi|lau|lerfu|dujoi|diftogoteha|cktj|zaho))+ )? ";
 
 var minidocs = {
-	"+sidju": "lo sintasa zo'u  " + minisyntax + "LO_SELSKU_POI_TE_GENTUFA\n.i lo ditfaulte zo'u  +brackets+f+voi+buhu\n.i lo nu benji lo sivni notci pe zo'oi +sidju cu rinka lo nu viska lo zmadu",
-	"+help": "syntax:  " + minisyntax + "TEXT_TO_PARSE\ndefault:  +brackets+f+voi+buhu\nSend a private message with \"+help\" to see more",
+	"+sidju": "lo sintasa zo'u  " + minisyntax + "LO_SELSKU_POI_TE_GENTUFA\n.i lo ditfaulte zo'u  +brackets+f+k+voi+buhu\n.i lo nu benji lo sivni notci pe zo'oi +sidju cu rinka lo nu viska lo zmadu",
+	"+help": "syntax:  " + minisyntax + "TEXT_TO_PARSE\ndefault:  +brackets+f+k+voi+buhu\nSend a private message with \"+help\" to see more",
 };
 
 var formats = {

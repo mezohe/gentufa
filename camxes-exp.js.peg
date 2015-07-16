@@ -44,6 +44,7 @@
   var _letter_fa = Object.keys(_fa_letters).reduce(function (a,b) { a[_fa_letters[b]] = b; return a }, {});
   var _se_cmavo = {se: [0, 1], te: [0, 2], ve: [0, 3], xe: [0, 4]};
   var _cktj_names = /cykytyjy|creka(tanru(djacu)?)?bu|cektau(jau)?bu|cetki(tau(jau)?)?bu/;
+  var _stressed_vowels = {a: "à", e: "è", i: "ì", o: "ò", u: "ù"};
   var _g_zoi_delim;
   
   function _join(arg)
@@ -154,7 +155,7 @@
   }
   
   function _fill_jek(left, jek, right, bo_tag, bo, pehe) {
-    jek = {jek: jek};
+    jek = {jek: jek || _fake_jek("ju'e")};
     jek.left = left;
     jek.right = right;
     jek.structure = pehe ? [left, pehe, jek.jek] : [left, jek.jek];
@@ -228,9 +229,9 @@
     };
   }
   
-  function _fake_jek() {
+  function _fake_jek(word) {
     return {
-      structure: [{word: "je", selmaho: "JOI", elided: true}],
+      structure: [{word: word || "je", selmaho: "JOI", elided: true}],
       elided: true,
     };
   }
@@ -479,36 +480,23 @@ statement_2 = expr:(statement_3 (I_clause (!gek joik_ek)? tag? BO_clause free* s
 
 statement_3 = expr:(tag? TUhE_clause free* text_1 TUhU_elidible free* / sentence) 
 
-//// EXP-MODIF: allowing na sequence.
-//// Remove fragments that are now proper statements
 fragment = expr:((!gek joik_ek) free* / !term !tag quantifier / relative_clauses / links / linkargs) 
 
-//// EXP-MODIF: Allowing empty prenexes.
 prenex = expr:(terms? ZOhU_clause free*) 
 
-// EXP-MODIF: JACU
-//sentence = expr:(terms? bridi_tail_t1 (joik_ek bridi_tail / joik_ek tag? KE_clause free* bridi_tail KEhE_elidible free*)*) 
-sentence = head:terms? sa:bridi_tail_sa* tail:bridi_tail {
+sentence = head:terms? tail:bridi_tail {
   var fa_after_head = head && _count_fa(head.terms) || {};
   var fa_after_tail = _count_fa_tail(tail, fa_after_head.last || 1, fa_after_head.used || {});
   tail.fa_after_tail = fa_after_tail;
   var ret = {role: "bridi", structure: [head, tail], head: head, tail: tail, fa_after_head: fa_after_head, fa_after_tail: fa_after_tail};
   //var ret = {role: "bridi", structure: [head, tail], head: head, tail: tail};
-  if (sa) ret.bridi_tail_sa = sa;
   return ret;
 }
 
-sentence_no_count = head:terms? sa:bridi_tail_sa* tail:bridi_tail {
+sentence_no_count = head:terms? tail:bridi_tail {
   var ret = {structure: [head, tail], head: head, tail: tail};
-  if (sa) ret.bridi_tail_sa = sa;
   return ret;
 }
-
-// JACU
-//bridi_tail_t1 = expr:(bridi_tail_t2 (joik_ek tag? KE_clause free* bridi_tail KEhE_elidible free*)?) 
-
-//bridi_tail_t2 = expr:(bridi_tail (joik_ek tag? BO_clause free* bridi_tail)?) 
-// END JACU
 
 sentence_sa = expr:(sentence_start (!sentence_start (sa_word / SA_clause !sentence_start ) )* SA_clause &text_1) 
 
@@ -518,7 +506,6 @@ subsentence_no_count = expr:(prenex subsentence_no_count / sentence_no_count)
 
 subsentence = expr:(tag? TUhE_clause free* text_1 TUhU_elidible free* / prenex subsentence / sentence) 
 
-//// EXP-MODIF: GI TAG BO + JACU
 bridi_tail = (start:bridi_tail_1 repeat:((gihek tag? / GI_clause tag) KE_clause free* bridi_tail KEhE_elidible free* tail_terms)? {
   if (repeat) {
     start = _fill_jek(start, repeat[0][0], _precedence(_fill_free(repeat[1], repeat[2]), repeat[3], _fill_free(repeat[4], repeat[5])), repeat[0][1]);
@@ -528,11 +515,6 @@ bridi_tail = (start:bridi_tail_1 repeat:((gihek tag? / GI_clause tag) KE_clause 
   return start;
 }) / VAU_elidible
 
-bridi_tail_sa = expr:(bridi_tail_start (term / !bridi_tail_start (sa_word / SA_clause !bridi_tail_start ) )* SA_clause &bridi_tail) 
-
-bridi_tail_start = expr:(CU_clause / ME_clause / NUhA_clause / NU_clause / NA_clause !KU_clause / NAhE_clause !BO_clause / selbri / tag bridi_tail_start / KE_clause bridi_tail_start / bridi_tail) 
-
-//// EXP-MODIF: JACU
 bridi_tail_1 = start:bridi_tail_2 repeat:(gihek !(tag? BO_clause) !(tag? KE_clause) free* bridi_tail_2 tail_terms)* {
   return repeat.reduce(function (a, b) {
     a = _fill_jek(a, _fill_free(b[0], b[3]), b[4]);
@@ -548,7 +530,7 @@ cu:CU_clause cufree:free* quant:quantifier? meihi:MEIhI_clause meihifree:free* t
 //{
 //  
 //}
-/ cu:CU_elidible start:bridi_tail_3 repeat:((gihek tag? / GI_clause tag) BO_clause free* bridi_tail_2 tail_terms)? {
+/ cu:CU_elidible start:bridi_tail_3 repeat:((gihek tag? / GI_clause? tag) BO_clause free* bridi_tail_2 tail_terms)? {
   start.cu = cu;
   start.structure = [cu, _shell(start)];
   if (repeat) {
@@ -569,7 +551,6 @@ bridi_tail_3 = gek_sentence
   }
 })
 
-//// EXP-FIX: tag? KE --> tag* KE
 gek_sentence = (gek:gek left:subsentence_no_count gik:gik right:subsentence_no_count tail_terms:tail_terms {
     gek = _fill_gek(gek, left, gik, right);
     gek.tail_terms = tail_terms;
@@ -607,45 +588,27 @@ tail_terms = terms:terms? vau:VAU_elidible free:free*  {
 
 terms = expr:terms_1+ { return { terms: expr, structure: expr } }
 
-//; terms_1 = terms_2 (PEhE_clause free* joik_ek terms_2)*
-
-//; terms_2 = term (CEhE_clause free* term)*
-
-terms_1 = start:terms_2 repeat:(pehe_sa* PEhE_clause free* joik_ek terms_2)* {
+terms_1 = start:terms_2 repeat:(PEhE_clause free* joik_ek terms_2)* {
   repeat.forEach(function(r) {
-    start.pehe = _fill_free(r[1], r[2]);
-    start = _fill_jek(start, r[3], r[4], null, null, start.pehe);
-    if (_empty(r[0])) start.pehe_sa = r[0];
+    start.pehe = _fill_free(r[0], r[1]);
+    start = _fill_jek(start, r[2], r[3], null, null, start.pehe);
   });
   return start;
 }
 
-//// EXP-MODIF: Handling of term absorption as selbri tcita
-terms_2 = start:abs_term repeat:(cehe_sa* CEhE_clause free* abs_term)* {
+terms_2 = start:abs_term repeat:(CEhE_clause free* abs_term)* {
   if (!_empty(repeat)) return start;
   start = [start];
   repeat.forEach(function(r) {
-    var term = r[3];
-    if (_empty(r[0])) term.cehe_sa = r[0];
-    term.cehe = _fill_free(r[1], r[2]);
+    var term = r[2];
+    term.cehe = _fill_free(r[0], r[1]);
     start.push(term);
   });
   return {termset: "cehe", terms: start, structure: start.slice(1).reduce(function (a,b) { return a.concat([b.cehe, b]) }, [start[0]])};
 }
 
-pehe_sa = PEhE_clause (!PEhE_clause (sa_word / SA_clause !PEhE_clause))* SA_clause
+term = tag_term / termset
 
-cehe_sa = CEhE_clause (!CEhE_clause (sa_word / SA_clause !CEhE_clause))* SA_clause
-
-//;term = sumti / ( !gek (tag free*) (sumti / KU_clause? free*) ) / termset / NA_clause KU_clause free*
-
-/*** EXP-MODIF: Handling of term absorbtion as selbri tcita + allowing TAG SUMTI JA TAG SUMTI + SOI clause ***/
-term = sa:term_sa* term:term_1 { if (_empty(sa)) term.term_sa = sa; return term }
-
-term_1 = tag_term / termset
-
-//// EXP-MODIF: NA without KU as a term; free* within NAKU
-// FIXME: The first "!gek" below results in "ge mi ba gi do pu" being ungrammatical.
 tag_term = start:(
   (!gek tag:tag free:free* sumti:(sumti / (ku:KU_elidible free:free* { return _fill_free(ku, free) })) { return _term(_fill_free(tag, free), sumti) })
   / inverted_term / fa_elided_term / naku_term
@@ -658,12 +621,10 @@ tag_term = start:(
   return start;
 }
 
-abs_term = sa:term_sa* term:abs_term_1 { if (_empty(sa)) term.term_sa = sa; return term }
-abs_term_1 = abs_tag_term / termset
+abs_term = abs_tag_term / termset
 
-//// EXP-MODIF: NA without KU as a term; free* within NAKU; postpositions
 abs_tag_term = start:(
-  (!gek tag:tag free:free* !selbri !gek_sentence sumti:(
+  (!gek tag:tag free:free* !BO_clause !selbri !gek_sentence sumti:(
     sumti 
     / (jek:joik_ek sumti:sumti_3 { return _fill_jek(null, jek, sumti) })
     / (ku:KU_elidible free:free* { return _fill_free(ku, free) })
@@ -677,7 +638,6 @@ abs_tag_term = start:(
   });
   return start;
 }
-/*** END EXP-MODIF ***/
 
 inverted_term = !gek sumti:sumti co:CO_clause tag:tag free:free* { return _term(_fill_free(tag, free), sumti, co) }
 
@@ -686,11 +646,6 @@ fa_elided_term = tag:FA_elidible sumti:sumti { return _term({tags: [tag], struct
 naku_term = na:NA_clause nafree:free* ku:KU_clause kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }
 
 soi_term = soi:SOI_clause soifree:free* bridi:subsentence sehu:SEhU_elidible sehufree:free* { return {tag: _fill_free(soi, soifree), bridi: bridi, terminator: _fill_free(sehu, sehufree), structure: [soi, bridi, sehu]} }
-
-term_sa = term_start (!term_start (sa_word / SA_clause !term_start ) )* SA_clause &term_1
-
-//// EXP-MODIF: brivla/cmevla merge; adding LOhOI
-term_start = term_1 / LE_clause / LI_clause / LU_clause / LAhE_clause / quantifier term_start / gek sumti gik / FA_clause / tag term_start / LOhOI_clause
 
 termset = gek_termset 
   / (quantifier? MEIhI_clause free* terms MEIhO_elidible free*)
@@ -712,7 +667,6 @@ terms_gik_terms = left:term middle:(gik / terms_gik_terms) right:term {
   return {left: [left], gik: middle, right: [right]};
 }
 
-//// EXP-MODIF: '?' added after "relative_clauses" + Lunra's add of "(joik_ek sumti)?"
 sumti = sumti:sumti_1 vuho:(VUhO_clause free* vuho_tail?)? {
   if (vuho) {
     sumti.vuho = _fill_free(vuho[0], vuho[1]);
@@ -742,7 +696,7 @@ sumti_2 = start:sumti_3 repeat:(joik_ek sumti_3)* {
   return repeat.reduce(function (a, b) { return _fill_jek(a, b[0], b[1]) }, start);
 }
 
-sumti_3 = start:sumti_4 repeat:(joik_ek tag? BO_clause free* sumti_3)? {
+sumti_3 = start:sumti_4 repeat:(joik_ek? tag? BO_clause free* sumti_3)? {
   if (repeat) {
     return _fill_jek(start, repeat[0], repeat[4], repeat[1], _fill_free(repeat[2], repeat[3]));
   }
@@ -768,7 +722,6 @@ sumti_5 = (quantifier:quantifier? sumti:sumti_6 relative:relative_clauses? {
     }
   }) 
 
-//// EXP-MODIF: brivla/cmevla merge + NAhE+sumti + add of ZOhOI_clause + LAhE term + MEX simplification
 sumti_6 = simple_sumti
   / (!tag !selbri lerfu_string BOI_elidible free*)
   / LU_clause text LIhU_elidible free* 
@@ -792,10 +745,10 @@ li_clause = expr:(LI_clause free* mex LOhO_elidible free*)
 
 //// EXP-MODIF: allow {lo mi e do vu'o noi brodi cu broda} (instead of the previous string) + adding gek_sentence
 sumti_tail = 
-  (rel:relative_clauses? sumti:(!quantifier s:sumti { return s })? tail:sumti_tail_1 { 
-    var relative = rel && sumti ? _fill_jek(rel, _fake_jek(), _fake_nek(sumti)) : rel || sumti && _fake_nek(sumti);
+  (rel:relative_clauses_nek? tail:sumti_tail_1 { 
+    //var relative = rel && sumti ? _fill_jek(rel, _fake_jek(), _fake_nek(sumti)) : rel || sumti && _fake_nek(sumti);
     var copy = _duplicate_less_evil(tail);
-    copy.outer_relative = relative;
+    copy.outer_relative = rel;
     return copy;
   }) 
   / gek_sentence 
@@ -806,34 +759,19 @@ sumti_tail_1 =
   / (quant:quantifier selbri:selbri rel:relative_clauses? { return _relativized_selbri(selbri, rel, null, quant) })
   / (quant:quantifier sumti:sumti { return {quantifier: quant, sumti: sumti, structure: [quant, sumti],} }) 
 
-//// EXP-MODIF: merging ZIhE with JA/JOI + Forethought relative clause connective
 relative_clauses = expr:(relative_clause (joik_ek free* relative_clause)* / gek relative_clauses gik relative_clauses) 
 
-//; relative_clause = GOI_clause free* term GEhU_clause? free* / NOI_clause free* subsentence KUhO_clause? free*
+relative_clauses_nek = expr:(relative_clause_nek (joik_ek free* relative_clause_nek)* / gek relative_clauses gik relative_clauses) 
 
-relative_clause = expr:(relative_clause_sa* relative_clause_1) 
+relative_clause = expr:(GOI_clause free* term GEhU_elidible free* / NOI_clause free* subsentence KUhO_elidible free* ) 
 
-relative_clause_sa = expr:(relative_clause_start (!relative_clause_start (sa_word / SA_clause !relative_clause_start ) )* SA_clause &relative_clause_1) 
+relative_clause_nek = relative_clause / GOI_elidible !quantifier &sumti term GEhU_elidible
 
-relative_clause_1 = expr:(GOI_clause free* term GEhU_elidible free* / NOI_clause free* subsentence KUhO_elidible free* ) 
-
-relative_clause_start = expr:(GOI_clause / NOI_clause) 
-
-//// EXPERIMENTAL
-
-//// + Forethought connective
 selbri_relative_clauses = expr:(selbri_relative_clause (joik_ek free* selbri_relative_clause)* / gek selbri_relative_clauses gik selbri_relative_clauses) 
 
-selbri_relative_clause = expr:(selbri_relative_clause_sa* selbri_relative_clause_1) 
-
-selbri_relative_clause_sa = expr:(selbri_relative_clause_start (!selbri_relative_clause_start (sa_word / SA_clause !selbri_relative_clause_start ) )* SA_clause &selbri_relative_clause_1) 
-
-selbri_relative_clause_1 = expr:(NOhOI_clause free* subsentence KUhOI_elidible free* ) 
-
-selbri_relative_clause_start = expr:(NOhOI_clause) 
+selbri_relative_clause = expr:(NOhOI_clause free* subsentence KUhOI_elidible free* ) 
 
 
-//// EXP-MODIF: tag? --> tag*
 selbri = tag:tag* selbri:selbri_1 { 
   if (_empty(tag)) {
     selbri.structure = [tag, _shell(selbri)]; 
@@ -862,7 +800,7 @@ selbri_4_tag = tag:tag? ke:KE_clause kefree:free* selbri:selbri_3 kehe:KEhE_elid
   return r;
 }
 
-selbri_5 = start:selbri_6 repeat:(joik_ek tag? BO_clause free* selbri_5)? {
+selbri_5 = start:selbri_6 repeat:(joik_ek? tag? BO_clause free* selbri_5)? {
   if (repeat) return _fill_jek(start, repeat[0], repeat[4], repeat[1], _fill_free(repeat[2], repeat[3]));
   return start;
 }
@@ -905,89 +843,44 @@ tanru_unit_2 =
   / (linkargs:linkargs unit:tanru_unit_1 { if (linkargs) { linkargs.inverted = true; return _linkargs_attach(linkargs, unit) } return unit })
   / MEIhE_clause free* sumti+ MEIhO_elidible
 
-//; linkargs = BE_clause free* term links? BEhO_clause? free*
-
-linkargs = sa:linkargs_sa* link:linkargs_1 { if (_empty(sa)) link.linkargs_sa = sa; link.count = _count_fa(link.terms, 2); return link }
-
 //// EXP-MODIF: Tsani: replace "term" with "term?" for allowing empty BE clauses
-linkargs_1 = be:BE_clause befree:free* term:term? links:links* beho:BEhO_elidible behofree:free* {
-  return {
+linkargs = be:BE_clause befree:free* term:term? links:links* beho:BEhO_elidible behofree:free* {
+  var ret = {
     be: _fill_free(be, befree),
     terms: links.reduce(function (a, b) { return b.term ? a.concat(b.term) : a }, term ? [term] : []),
     beho: _fill_free(beho, behofree),
     structure: [[be, term]].concat(links).concat(beho),
-  }
+  };
+  ret.count = _count_fa(ret.terms, 2);
+  return ret;
 }
 
-linkargs_sa = expr:(linkargs_start (!linkargs_start (sa_word / SA_clause !linkargs_start ) )* SA_clause &linkargs_1) 
-
-linkargs_start = expr:BE_clause
-
-//; links = BEI_clause free* term links?
-
-links = expr:(links_sa* links_1) { if (expr[0]) expr[1].links_sa = expr[0]; return expr[1] }
-
 //// EXP-MODIF: Tsani: replace "term" with "term?" for allowing empty BE clauses
-links_1 =  bei:BEI_clause free:free* term:term? { return {bei: _fill_free(bei, free), term: term, structure: [bei, term]} }
+links =  bei:BEI_clause free:free* term:term? { return {bei: _fill_free(bei, free), term: term, structure: [bei, term]} }
 
-links_sa = expr:(links_start (!links_start (sa_word / SA_clause !links_start ) )* SA_clause &links_1) 
-
-links_start = expr:(BEI_clause)
-
-//// EXP-MODIF: MEX simplification
 quantifier = !selbri !sumti_6 mex:mex { return mex }
-
-//;mex = mex_1 (operator mex_1)* / rp_clause
 
 //// EXP-MODIF: MEX simplification
 mex = expr:(mex_1 (operator mex_1)* ) { return expr[1].reduce(function (a, b) { return _fill_jek(a, b[0], b[1]) }, expr[0]); }
 
-mex_1 = expr:( gek_mex (operator tag? BO_clause free* mex_1)? ) { if (expr[1]) return _fill_jek(expr[0], expr[1][0], expr[1][4], expr[1][1], _fill_free(expr[1][2], expr[1][3])); return expr[0]; }
+mex_1 = expr:( gek_mex (operator? tag? BO_clause free* mex_1)? ) { if (expr[1]) return _fill_jek(expr[0], expr[1][0], expr[1][4], expr[1][1], _fill_free(expr[1][2], expr[1][3])); return expr[0]; }
 
 gek_mex = (gek:gek left:mex gik:gik right:mex_2 { return _fill_gek(gek, left, gik, right) }) / mex_2
 
-mex_2 = expr:( number BOI_elidible free* / lerfu_string BOI_elidible free* / VEI_clause free* mex VEhO_elidible free* / NIhE_clause free* selbri TEhU_elidible free* / MOhE_clause sumti TEhU_elidible free* / lahe_nahe mex LUhU_elidible free* / (PEhO_clause free*)? operator mex+ KUhE_elidible free* / FUhA_clause rp_expression ) 
+mex_2 = expr:( number BOI_elidible free* / lerfu_string BOI_elidible free* / VEI_clause free* mex VEhO_elidible free* / NIhE_clause free* selbri TEhU_elidible free* / MOhE_clause sumti TEhU_elidible free* / lahe_nahe mex LUhU_elidible free* / (PEhO_clause free*)? operator mex+ KUhE_elidible free* / FUhA_clause rp_expression / JOhI_clause free* gek_mex+ TEhU_elidible free* ) 
 
 rp_expression = expr:( mex (rp_expression operator)* ) 
 
-//mex_sa = expr:(mex_start (!mex_start (sa_word / SA_clause !mex_start) )* SA_clause &mex) 
-
-//mex_start = expr:(FUhA_clause / PEhO_clause / operand_start) 
-//// END OF EXP-MODIF: MEX simplification
-
-//; operator = operator_1 (joik_ek operator_1 / joik_ek tag? KE_clause free* operator KEhE_clause? free*)*
-
-operator = expr:(operator_sa* operator_0) { return { structure: expr[1] } } 
+operator = expr:operator_0 { return { structure: expr } } 
 
 operator_0 = expr:(operator_1 (joik_ek operator_1 / joik_ek tag? KE_clause free* operator KEhE_elidible free*)*) 
 
-operator_sa = expr:(operator_start (!operator_start (sa_word / SA_clause !operator_start) )* SA_clause &operator_0) 
-
-operator_start = expr:(guhek / KE_clause / SE_clause? NAhE_clause / SE_clause? MAhO_clause / SE_clause? VUhU_clause) 
-
-operator_1 = expr:(operator_2 / guhek operator_1 gik operator_2 / operator_2 joik_ek tag? BO_clause free* operator_1) 
+operator_1 = expr:(operator_2 / guhek operator_1 gik operator_2 / operator_2 joik_ek? tag? BO_clause free* operator_1) 
 
 operator_2 = expr:(mex_operator / KE_clause free* operator KEhE_elidible free*) 
 
 //// EXP-MODIF: MEX simplification
 mex_operator = expr:(SE_clause free* mex_operator / NAhE_clause free* mex_operator / MAhO_clause free* mex TEhU_elidible free* / NAhU_clause free* selbri TEhU_elidible free* / joik_ek free*) 
-
-//; operand = operand_1 (joik_ek tag? KE_clause free* operand KEhE_clause? free*)?
-
-operand = expr:(operand_sa* operand_0) 
-
-operand_0 = expr:(operand_1 (joik_ek tag? KE_clause free* operand KEhE_elidible free*)?) 
-
-operand_sa = expr:(operand_start (!operand_start (sa_word / SA_clause !operand_start) )* SA_clause &operand_0) 
-
-operand_start = expr:(quantifier / lerfu_word / NIhE_clause / MOhE_clause / JOhI_clause / gek / LAhE_clause / NAhE_clause) 
-
-operand_1 = expr:(operand_2 (joik_ek operand_2)*) 
-
-operand_2 = expr:(operand_3 (joik_ek tag? BO_clause free* operand_2)?) 
-
-//// EXP-MODIF: BO optional in NAhE+BO+operand
-operand_3 = expr:(lerfu_string !MOI_clause BOI_elidible free* / NIhE_clause free* selbri TEhU_elidible free* / MOhE_clause free* sumti TEhU_elidible free* / JOhI_clause free* gek_mex+ TEhU_elidible free* / gek operand gik operand_3 / lahe_nahe operand LUhU_elidible free* / quantifier) 
 
 //// EXP-MODIF
 number = expr:(number_initial (number_initial / &{return !options.lerfu} lerfu_word)*) 
@@ -1000,11 +893,8 @@ lerfu_string = expr:(lerfu_word (&{return !options.lerfu} PA_clause / lerfu_word
 // ** BU clauses are part of BY_clause
 lerfu_word = expr:(BY_clause / LAU_clause lerfu_word / TEI_clause lerfu_string FOI_clause) 
 
-//; gihek = NA_clause? SE_clause? GIhA_clause NAI_clause?
-gihek = sa:gihek_sa* gihek:gihek_1 { if (_empty(sa)) gihek.gihek_sa = sa; return gihek }
-
 //// EXP-MODIF - A/JA/JOI merge, gijek implementaton, add of JA_clause synonym of GIhA_clause
-gihek_1 = na:NA_clause? se:SE_clause? joi:(JOI_clause / GIhA_clause / gi_joi) {
+gihek = na:NA_clause? se:SE_clause? joi:(JOI_clause / GIhA_clause / gi_joi) {
   joi = _duplicate_less_evil(joi);
   var structure = [];
   if (_empty(na)) structure.push(joi.na = na);
@@ -1021,8 +911,6 @@ gi_joi = gi:GI_clause joi:JOI_clause {
   return joi;
 }
 
-gihek_sa = expr:(gihek_1 (!gihek_1 (sa_word / SA_clause !gihek_1 ) )* SA_clause &gihek) 
-
 //// EXP-MODIF: A-JA-JOI merge
 joik = gaho_pre:GAhO_clause* na:NA_clause? se:SE_clause? joi:JOI_clause gaho_post:GAhO_clause* {
   joi = _duplicate_less_evil(joi);
@@ -1036,12 +924,7 @@ joik = gaho_pre:GAhO_clause* na:NA_clause? se:SE_clause? joi:JOI_clause gaho_pos
   return joi;
 }
 
-//; joik_ek = joik free* / ek free*
-joik_ek = sa:joik_ek_sa* ek:joik_ek_1 { if (_empty(sa)) ek.joik_ek_sa = sa; return ek }
-
-joik_ek_1 = expr:(joik / VUhU_clause) free:free* { return _fill_free(expr, free) }
-
-joik_ek_sa = joik_ek_1 (!joik_ek_1 (sa_word / SA_clause !joik_ek_1 ) )* SA_clause &joik_ek
+joik_ek = expr:(joik / VUhU_clause) free:free* { return _fill_free(expr, free) }
 
 //// EXP-MODIF: Implementation of gaJA
 gek = (gak joik_ek )
@@ -1099,9 +982,6 @@ tag:(tag:(PU_clause / roi_tense / fiho_modal / FA_clause) free:free* { return _f
   return r;
 }
 
-//roi_tense = num:( (vei:VEI_clause mex:mex veho:VEhO_elidible { vei.mex = mex; vei.terminator = veho; return vei }) / number ) roi:ROI_clause {
-//  roi.number = num; return roi;
-//}
 roi_tense = num:mex_2 roi:ROI_clause { roi.number = num; roi.structure = [num, _shell(roi)]; return roi }
 
 fiho_modal = fiho:FIhO_clause free:free* selbri:selbri fehu:FEhU_elidible { fiho.selbri = selbri; fiho.terminator = fehu; return { fiho: _fill_free(fiho), structure: [fiho, selbri, fehu], } }
@@ -1207,7 +1087,7 @@ bu_tail = expr:BU_clause+ {
   }
 }
 
-pre_zei_bu = !BU_clause !ZEI_clause !SI_clause !SA_clause !SU_clause !FAhO_clause word:any_word_SA_handling si:si_clause? {
+pre_zei_bu = !BU_clause !ZEI_clause !SI_clause !SA_clause !FAhO_clause word:any_word_SA_handling si:si_clause? {
   if (si) word.si = si;
   return word;
 }
@@ -1245,7 +1125,7 @@ known_cmavo_SA = BAhE_pre / BE_pre / BEI_pre / BEhO_pre / BO_pre / BOI_pre / BU_
 // Do *NOT* delete the line above!
 
 // SU clauses
-su_clause = (erasable_clause / su_word)* SU_clause 
+su_clause = (erasable_clause / su_word)* SU_clause !SI_clause
 
 // Handling of SI and interactions with zo and lo'u...le'u
 
@@ -1271,7 +1151,7 @@ FA_elidible = expr:(FA_clause?) {return expr || {selmaho: "FA", word: "fi'a", el
 FEhU_elidible = expr:(FEhU_clause?) {return expr || _elided("FEhU");}
 // FOI and FUhO are never elidible
 GEhU_elidible = expr:(GEhU_clause?) {return expr || _elided("GEhU");}
-SELBRI_elidible = expr:(GOhA_clause?) {return expr || _elided("COhE");}
+GOI_elidible = expr:(GEhU_clause?) {return expr || {selmaho: "GOI", word: "ne", elided: true};}
 KEI_elidible = expr:(KEI_clause?)   {return expr || _elided("KEI");}
 KEhE_elidible = expr:(KEhE_clause?) {return expr || _elided("KEhE");}
 KU_elidible = expr:(KU_clause?)     {return expr || _elided("KU");}
@@ -1987,28 +1867,24 @@ cmavo_form = expr:(!h !cluster onset (nucleus h)* (!stressed nucleus / nucleus !
 //___________________________________________________________________
 
 //// EXP-MODIF: logbanu lujvo
-brivla = !cmavo !slinkuhi expr:( (init:(!any_extended_rafsi yless:y_less_rafsi !any_extended_rafsi { return yless })* fin:((extended_rafsi / y_rafsi) (initial_rafsi / logbanu_rafsi)*)? { return fin ? init.concat(fin[0]).concat(fin[1]) : init }) brivla_core) { return expr[0] ? expr[0].concat(expr[1]) : expr[1]; }
+brivla = !cmavo !slihykru expr:( (init:(!any_fuhivla_rafsi yless:y_less_rafsi !any_fuhivla_rafsi { return yless })* fin:((extended_rafsi / y_rafsi) (initial_rafsi / logbanu_rafsi)*)? { return fin ? init.concat(fin[0]).concat(fin[1]) : init }) brivla_core) { return expr[0] ? expr[0].concat(expr[1]) : expr[1]; }
 
 brivla_core = expr:(fuhivla / gismu / CVV_final_rafsi / stressed_initial_rafsi short_final_rafsi) { return [].concat(expr) }
 
 //// EXP-MODIF: logbanu lujvo
 stressed_initial_rafsi = expr:(stressed_extended_rafsi / stressed_y_rafsi / stressed_y_less_rafsi / stressed_logbanu_rafsi) { return _join(expr); }
 
-initial_rafsi = expr:(extended_rafsi / y_rafsi / !any_extended_rafsi y_less_rafsi !any_extended_rafsi) { return _join(expr); }
+initial_rafsi = expr:(extended_rafsi / y_rafsi / !any_fuhivla_rafsi y_less_rafsi !any_fuhivla_rafsi) { return _join(expr); }
 
 //___________________________________________________________________
 
-any_extended_rafsi = expr:(fuhivla / fuhivla_rafsi / stressed_fuhivla_rafsi) { return _join(expr); }
+any_fuhivla_rafsi = expr:(fuhivla / fuhivla_rafsi / stressed_fuhivla_rafsi) { return _join(expr); }
 
 fuhivla = expr:(fuhivla_head stressed_syllable consonantal_syllable* final_syllable) { return _join(expr); }
 
-stressed_extended_rafsi = expr:(stressed_brivla_rafsi / stressed_fuhivla_rafsi) { return _join(expr); }
+stressed_extended_rafsi = expr:(stressed_hy_rafsi / stressed_fuhivla_rafsi) { return _join(expr); }
 
-extended_rafsi = expr:(brivla_rafsi / fuhivla_rafsi) { return _join(expr); }
-
-stressed_brivla_rafsi = expr:((long_rafsi stressed_vowel / stressed_CVV_rafsi / stressed_CCV_rafsi) h y) { return _join(expr); }
-
-brivla_rafsi = expr:((long_rafsi unstressed_vowel / CVV_rafsi / CCV_rafsi) h y h?) { return _join(expr); }
+extended_rafsi = expr:(hy_rafsi / fuhivla_rafsi) { return _join(expr); }
 
 stressed_fuhivla_rafsi = expr:(fuhivla_head stressed_syllable consonantal_syllable* onset y) { return _join(expr); }
 
@@ -2022,11 +1898,12 @@ fuhivla_head = expr:(!rafsi_string brivla_head) { return _join(expr); }
 
 brivla_head = expr:(!cmavo !slinkuhi !h &onset unstressed_syllable*) { return _join(expr); }
 
-slinkuhi = expr:(!rafsi_string consonant rafsi_string / blahypre_string) { return _join(expr); }
+slinkuhi = expr:(!rafsi_string consonant rafsi_string) { return _join(expr); }
+slinkuhi_ignore = slinkuhi .+
 
-rafsi_string = expr:(y_less_rafsi* (gismu / CVV_final_rafsi / stressed_y_less_rafsi short_final_rafsi_nonlogbanu / y_rafsi / stressed_y_rafsi / stressed_y_less_rafsi? initial_pair y / hy_rafsi / stressed_hy_rafsi)) { return _join(expr); }
+rafsi_string = expr:(y_less_rafsi* (gismu / CVV_final_rafsi / stressed_y_less_rafsi short_final_rafsi_nonlogbanu / y_rafsi / stressed_y_rafsi / stressed_y_less_rafsi? initial_pair y / hy_rafsi &onset / stressed_hy_rafsi &onset)) { return _join(expr); }
 
-blahypre_string = (CCV_rafsi / stressed_CCV_rafsi) h y
+slihykru = (CCV_rafsi / stressed_CCV_rafsi) h y onset
 
 //___________________________________________________________________
 
@@ -2059,9 +1936,9 @@ y_rafsi = expr:((long_rafsi / CVC_rafsi) y !coda h?) { return _join(expr); }
 
 y_less_rafsi = expr:(!y_rafsi !stressed_y_rafsi !hy_rafsi !stressed_hy_rafsi (CVC_rafsi / CCV_rafsi / CVV_rafsi) !h) { return _join(expr); }
 
-hy_rafsi = expr:((long_rafsi vowel / CCV_rafsi / CVV_rafsi) h y h?)
+hy_rafsi = expr:((long_rafsi unstressed_vowel / CCV_rafsi / CVV_rafsi) !consonantal_syllable h y h?) { return _join(expr); }
 
-stressed_hy_rafsi = expr:((long_rafsi stressed_vowel / stressed_CCV_rafsi / stressed_CVV_rafsi) h y h?)
+stressed_hy_rafsi = expr:((long_rafsi stressed_vowel / stressed_CCV_rafsi / stressed_CVV_rafsi) !consonantal_syllable h y h?) { return _join(expr); }
 
 //// EXP-MODIF: CyC syllables in fuhivla
 long_rafsi = expr:(initial_pair unstressed_vowel !consonantal_syllable consonant / consonant unstressed_vowel consonant !consonantal_syllable consonant) { return _join(expr); }
@@ -2080,11 +1957,12 @@ r_hyphen = expr:(r &consonant / n &r) { return _join(expr); }
 
 final_syllable = expr:(onset !y !stressed nucleus !cmevla &post_word) {return _join(expr);}
 
-stressed_syllable = expr:(&stressed syllable / syllable &stress) {return _join(expr);}
+stressed_syllable = expr:(&stressed syllable / syllable &stress)
+  {return _join(expr).replace(/[aeiou]/, function (a) { return _stressed_vowels[a] });}
 
-stressed_diphthong = expr:(&stressed diphthong / diphthong &stress) {return _join(expr);}
+stressed_diphthong = expr:(&stressed diphthong / diphthong &stress) {return {ai: "ài", ei: "èi", oi: "òi", au: "àu"}[_join(expr)];}
 
-stressed_vowel = expr:(&stressed vowel / vowel &stress) {return _join(expr);}
+stressed_vowel = expr:(&stressed vowel / vowel &stress) {return _stressed_vowels[_join(expr)];}
 
 //// EXP-MODIF: CyC syllables in fuhivla
 unstressed_syllable = expr:(consonantal_syllable / !stressed syllable !stress) {return _join(expr);}
@@ -2095,7 +1973,7 @@ unstressed_vowel = expr:(!stressed vowel !stress) {return _join(expr);}
 
 //// FIX: Xorxes' fix for fu'ivla rafsi stress
 //// EXP-MODIF: CyC syllables in fuhivla
-stress = expr:((consonant y coda / consonant / glide)* h? y? syllable pause) {return _join(expr);}
+stress = expr:(((consonant / h) y coda / consonant / glide)* h? y? syllable pause) {return _join(expr);}
 
 stressed = expr:(onset comma* [AEIOU]) {return _join(expr);}
 
@@ -2106,20 +1984,20 @@ syllable = expr:(onset !y nucleus coda?) {return _join(expr);}
 
 //// FIX: preventing {bla'ypre} from being a valid lujvo
 //// EXP-MODIF: CyC syllables in fuhivla
-consonantal_syllable = expr:(consonant y coda / consonant &syllabic coda) //{return _join(expr);}
+consonantal_syllable = expr:((consonant / h) y coda / consonant &syllabic coda) //{return _join(expr);}
  {var foo = _join(expr); if (foo.length == 2) return foo[0] + "y" + foo[1]; return foo }
 
 //// EXP-MODIF: CyC syllables in fuhivla
 coda = expr:(consonant &consonantal_syllable / !any_syllable consonant &any_syllable) {return _join(expr);}
 
 //// EXP-MODIF: CyC syllables in fuhivla
-onset = expr:(h / glide / !consonantal_syllable initial) {return _join(expr);}
+onset = !consonantal_syllable expr:(h / glide / initial) {return _join(expr);}
 
 nucleus = expr:(vowel / diphthong / y !nucleus) {return _join(expr);}
 
 //_________________________________________________________________
 
-glide = expr:(i / u) &nucleus !glide {return expr;}
+glide = expr:(i { return "ĭ" } / u { return "ŭ" }) &nucleus !glide {return expr;}
 
 diphthong = expr:(a u !u / (a i / e i / o i) !i) !nucleus {return _join(expr);}
 
@@ -2135,7 +2013,7 @@ o = comma* [oO] {return "o";}
 
 u = comma* [uU] {return "u";}
 
-y = comma* [yY] !nucleus {return "y";}
+y = comma* [yY] !(!y nucleus) {return "y";}
 
 
 //___________________________________________________________________
@@ -2248,7 +2126,7 @@ BOI = &cmavo expr:( b o i ) &post_word {return _word("BOI", expr);}
 BU = &cmavo expr:( &{return options.buhu == "bu"} b u h u / &{return options.buhu != "bu"} b u ) &post_word {return _word(options.buhu == "bu" ? "BUhU" : "BU", expr);}
 
 //// EXP-MODIF: Adding .uy and .iy (Selpa'i)
-BY = &cmavo expr:(ybu / j o h o / r u h o / g e h o / j e h o / l o h a / n a h a / s e h e / t o h a / g a h e / y h y / a h y / e h y / i h y / o h y / u h y / b y / c y / d y / f y / g y / j y / k y / l y / m y / n y / p y / r y / s y / t y / v y / x y / z y / u y / i y ) &post_word {return _word("BY", expr);}
+BY = &cmavo expr:(ybu / j o h o / r u h o / g e h o / j e h o / l o h a / n a h a / &{return !options.diftogoteha} s e h e / t o h a / g a h e / y h y / a h y / e h y / i h y / o h y / u h y / b y / c y / d y / f y / g y / j y / k y / l y / m y / n y / p y / r y / s y / t y / v y / x y / z y / u y / i y ) &post_word {return _word("BY", expr);}
 
 CAI = &cmavo expr:( p e i / c a i / c u h i / s a i / r u h e / m a u h i / d a u h i / m e h a i ) &post_word {return _word("CAI", expr);}
 
@@ -2317,7 +2195,7 @@ KEhE = &cmavo expr:( k e h e ) &post_word {return _word("KEhE", expr);}
 KEI = &cmavo expr:( k e i ) &post_word {return _word("KEI", expr);}
 
 //// EXP-ADD: xai
-KOhA = &cmavo expr:( d a h u / d a h e / d i h u / d i h e / d e h u / d e h e / d e i / d o h i / m i h o / m i h a i / m a h a / m i h a / d o h o / k o h a / f o h u / k o h e / k o h i / k o h o / k o h u / f o h a / f o h e / f o h i / f o h o / v o h a / v o h e / v o h i / v o h o / v o h u / &{return options.lau} l a u / r u / r i / r a / t a / t u / t i / z i h o / &{return !options.ckt} k e h a / m a / z u h i / z o h e / &{return !options.ckt} c e h u / d a / d e / d i / k o / m i / d o / x a i / &{return options.ckt} c e / &{return options.ckt} k i ) &post_word { return _word("KOhA", expr);}
+KOhA = &cmavo expr:( &{return options.diftogoteha} s e h e / d a h u / d a h e / d i h u / d i h e / d e h u / d e h e / d e i / d o h i / m i h o / m i h a i / m a h a / m i h a / d o h o / k o h a / f o h u / k o h e / k o h i / k o h o / k o h u / f o h a / f o h e / f o h i / f o h o / v o h a / v o h e / v o h i / v o h o / v o h u / &{return options.lau} l a u / r u / r i / r a / t a / t u / t i / z i h o / &{return !options.ckt} k e h a / m a / z u h i / z o h e / &{return !options.ckt} c e h u / d a / d e / d i / k o / m i / d o / x a i / &{return options.ckt} c e / &{return options.ckt} k i ) &post_word { return _word("KOhA", expr);}
 
 KU = &cmavo expr:( k u ) &post_word {return _word("KU", expr);}
 
