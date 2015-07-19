@@ -85,7 +85,7 @@ function remove_structure(obj) {
 function bracket(array, mode) {
 	function _bracket(array) {
 		if (Array.isArray(array)) {
-			array = array.filter(function (a) { return a && (!Array.isArray(a) || a.length) && (mode.f || !a.elided || a.selmaho == "FA") });
+			array = array.filter(function (a) { return a && (!Array.isArray(a) || a.length) && (mode.f || !a.elided) });
 			if (array.length == 1) return _bracket(array[0]);
 			else return "[" + array.map(_bracket).join(" ") + "]";
 		}
@@ -136,6 +136,16 @@ function gloss(array, words) {
 	function _(string) { // translation shield
 		return string && {translated: string};
 	}
+	function _normalize(string) {
+		if (string == null) return null;
+		return string.replace(/\./g, "")
+				.replace(/à/g, "a")
+				.replace(/è/g, "e")
+				.replace(/[ìĭ]/g, "i")
+				.replace(/ò/g, "o")
+				.replace(/[ùŭ]/g, "u")
+				;
+	}
 	function _bridi_tail(tail, upper_tail_terms_pre) {
 		if (tail.left && tail.right) {
 			var upper_tail_terms_all = [tail.tail_terms].concat(upper_tail_terms_pre).filter(_empty);
@@ -178,7 +188,7 @@ function gloss(array, words) {
 			var fa = _empty(term.tag && term.tag.fa);
 			var selbri_fa = fa && selbri && selbri.se_table && selbri.se_table[fa[0] - 1];
 			var selbri_word = _selbri_word(selbri); // XXX don't run this for every term
-			var placetable = glossfallback[selbri_word];
+			var placetable = glossfallback[_normalize(selbri_word)];
 			var ret;
 			if (!fa || !selbri_fa || !placetable) {
 				ret = null;
@@ -262,6 +272,7 @@ function gloss(array, words) {
 		}
 		
 		if (typeof array == "string") {
+			array = _normalize(array);
 			return unconditional[array] || english[array] || trygloss(array) || array;
 		}
 		console.log(JSON.stringify(array));

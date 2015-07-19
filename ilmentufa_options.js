@@ -26,6 +26,8 @@ var docs = {
 			"  .i zo'oi  +koi                     zo'u zo koi cmavo ma'oi ui je nai ma'oi pu\n" +
 			"  .i zo'oi  +lau                     zo'u zo lau cmavo ma'oi ko'a je nai ma'oi lau noi se cmene zo ce'a\n" +
 			"  .i zo'oi  +lerfu                   zo'u na ka'e ku su'o lerpoi cu se pagbu ge su'o vlale'u gi su'o nacle'u \n" +
+			"  .i zo'oi  +rafcau                  zo'u lo se gu rafcla valstuge'a gi rafcau valturge'a cu se pilno \n" +
+			"                                          (to pa javni zo'u ro brivla da jai cuntu toi) \n" +
 			"  .i zo'oi  +dujoi                   zo'u zo du cmavo ma'oi joi je nai ma'oi go'a\n" +
 			"  .i zo'oi  +diftogoteha             zo'u zo si'u cmavo ma'oi ui je nai ma'oi pu\n" +
 			"                                          .i je zo di'o cmavo ma'oi coi je nai ma'oi pu \n" +
@@ -61,6 +63,7 @@ var docs = {
 			"  +koi                : {koi} is in UI, not PU\n" +
 			"  +lau                : {lau} is in KOhA, not LAU, which is named CEhA\n" +
 			"  +lerfu              : no letter or number sequence may contain both letters and numbers\n" +
+			"  +rafcau             : rafsi-free morphology (single brivla rule)\n" +
 			"  +dujoi              : {du} is in JOI, not GOhA\n" +
 			"  +diftogoteha        : {si'u} is in UI, not PU, {di'o} is in COI, not PU, and {se'e} is in KOhA, not BY\n" +
 			"  +cktj               : all of +voi, +ckt, +du, +su, +zai, +lau, +po, and +koi are active\n" +
@@ -70,7 +73,7 @@ var docs = {
 			,
 };
 
-var minisyntax = config.nick + ": (([+-](brackets|gloss|raw|s|f|p|k|voi|ckt|du|su|buhu|bu|zai|po|koi|lau|lerfu|dujoi|diftogoteha|cktj|zaho))+ )? ";
+var minisyntax = config.nick + ": (([+-](brackets|gloss|raw|s|f|p|k|voi|ckt|du|su|buhu|bu|zai|po|koi|lau|lerfu|rafcau|dujoi|diftogoteha|cktj|zaho))+ )? ";
 
 var minidocs = {
 	"+sidju": "lo sintasa zo'u  " + minisyntax + "LO_SELSKU_POI_TE_GENTUFA\n.i lo ditfaulte zo'u  +brackets+f+k+voi+buhu\n.i lo nu benji lo sivni notci pe zo'oi +sidju cu rinka lo nu viska lo zmadu",
@@ -101,6 +104,7 @@ var ret = {
 	lerfu: false,
 	dujoi: false,
 	diftogoteha: false,
+	rafcau: false,
 	startRule: "text",
 };
 var flag_pattern = "[+-]\\w+"

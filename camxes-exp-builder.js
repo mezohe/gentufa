@@ -33,6 +33,8 @@ try {
 			"slihykru",
 			"slinkuhi",
 			"slinkuhi_ignore",
+			"tense_modal",
+			"abs_tag_term",
 		],
 	});
 } catch (e) {
