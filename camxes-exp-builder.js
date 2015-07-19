@@ -35,6 +35,7 @@ try {
 			"slinkuhi_ignore",
 			"tense_modal",
 			"abs_tag_term",
+			"brivla_rafcau",
 		],
 	});
 } catch (e) {

@@ -1865,7 +1865,7 @@ cmavo_form = expr:(!h !cluster onset (nucleus h)* (!stressed nucleus / nucleus !
 //// EXP-MODIF: logbanu lujvo
 brivla = !cmavo !slihykru expr:( (init:(!any_fuhivla_rafsi yless:y_less_rafsi !any_fuhivla_rafsi { return yless })* fin:((extended_rafsi / y_rafsi) (initial_rafsi / logbanu_rafsi)*)? { return fin ? init.concat(fin[0]).concat(fin[1]) : init }) brivla_core) { return expr[0] ? expr[0].concat(expr[1]) : expr[1]; }
 
-brivla_rafcau = !cmavo !slihykru !slinkuhi !h expr:((unstressed_syllable any_unstressed_syllable*)? stressed_syllable medial_syllable* unstressed_syllable) { return _join(expr) }
+brivla_rafcau = !cmavo !slihykru !slinkuhi !h expr:((!stressed syllable !stress any_unstressed_syllable*)? stressed_syllable medial_syllable* unstressed_syllable) { return _join(expr) }
 
 brivla_core = expr:(fuhivla / gismu / CVV_final_rafsi / stressed_initial_rafsi short_final_rafsi) { return [].concat(expr) }
 
@@ -1901,7 +1901,7 @@ brivla_head = expr:(!cmavo !slinkuhi !h &onset unstressed_syllable*) { return _j
 slinkuhi = expr:(!rafsi_string consonant rafsi_string) { return _join(expr); }
 slinkuhi_ignore = slinkuhi .+
 
-rafsi_string = expr:(y_less_rafsi* (gismu / CVV_final_rafsi / stressed_y_less_rafsi short_final_rafsi_nonlogbanu / y_rafsi / stressed_y_rafsi / stressed_y_less_rafsi? initial_pair y / hy_rafsi &onset / stressed_hy_rafsi &onset)) { return _join(expr); }
+rafsi_string = expr:(y_less_rafsi* (gismu / CVV_final_rafsi / stressed_y_less_rafsi short_final_rafsi_nonlogbanu / y_rafsi / stressed_y_rafsi / hy_rafsi &onset / stressed_hy_rafsi &onset)) { return _join(expr); }
 
 slihykru = (CCV_rafsi / stressed_CCV_rafsi) h y onset
 
