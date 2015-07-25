@@ -9,6 +9,7 @@ try {
 		output: "source",
 		allowedStartRules: [
 			"text",
+			"any_word", // the parser makes use of this internally
 			"sentence",
 			"terms",
 			"bridi_tail",
@@ -16,6 +17,7 @@ try {
 			"selbri",
 			"BRIVLA_clause",
 			"CMAVO",
+			"cmavo",
 			"BRIVLA",
 			"gismu",
 			"lujvo",
@@ -34,7 +36,7 @@ try {
 			"slinkuhi",
 			"slinkuhi_ignore",
 			"tense_modal",
-			"abs_tag_term",
+			"abs_term",
 			"brivla_rafcau",
 		],
 	});
@@ -49,7 +51,7 @@ var buffer = new Buffer('var camxes = ');
 fs.writeSync(fd, buffer, 0, buffer.length);
 buffer = new Buffer(camxes);
 fs.writeSync(fd, buffer, 0, buffer.length);
-buffer = new Buffer("\n\nmodule.exports = camxes;\n\nterm = process.argv[2];\nif (term !== undefined && typeof term.valueOf() === 'string')\n  console.log(JSON.stringify(camxes.parse(term)));\n\n");
+buffer = new Buffer("\n\nmodule.exports = camxes;\n\nterm = process.argv[2];\nif (term !== undefined && typeof term.valueOf() === 'string')\n  console.log(JSON.stringify(require('./ilmentufa_postproc.js').remove_structure(camxes.parse(term))));\n\n");
 fs.writeSync(fd, buffer, 0, buffer.length);
 fs.close(fd);
 

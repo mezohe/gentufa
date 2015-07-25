@@ -111,10 +111,12 @@
   }
   
   function _word_pre(word, pre) {
-    if (pre[0] && pre[0].length)
-      word.pre = pre[0];
-    if (pre[1])
-      word.word = pre[1] + word.word;
+    if (pre) {
+      if (pre[0] && pre[0].length)
+        word.pre = pre[0];
+      if (_empty(pre[1]))
+        word.word = pre[1] + word.word;
+    }
     return word;
   }
   function _word_post(word, post, sa) {
@@ -399,6 +401,11 @@
     return linkargs;
   }
   
+  function _string(string) {
+    
+    return {structure: string};
+  }
+  
   function _role(thing, role) {
     thing.role = role;
     return thing;
@@ -412,7 +419,7 @@
   // === ZOI functions === //
 
   function _zoi_assign_delim(word) {
-    var a = word.word.split(",");
+    var a = word.word.replace(/\./gm, "").split(",");
     if (a.length > 0) _g_zoi_delim = a[a.length - 1];
     else _g_zoi_delim = "";
     return word;
@@ -425,7 +432,12 @@
       alert("ZOI word is not a string");
       return false;
     } else {
-      return (word.toLowerCase().replace(/,/gm,"").replace(/h/g, "'") === _g_zoi_delim);
+      try {
+        var parsed = peg$parse(word.toLowerCase(), {startRule: "any_word"});
+        return (parsed.word || parsed).replace(/\./gm, "") === _g_zoi_delim;
+      } catch (e) {
+        return false;
+      }
     }
   }
   
@@ -436,7 +448,7 @@
       alert("ZOI word is not a string");
       return false;
     } else {
-      word = word.split(",");
+      word = word.replace(/\./gm, "").split(",");
       if (word.length > 0) word = word[word.length - 1];
       else word = "";
       return (word === _g_zoi_delim);
@@ -501,19 +513,12 @@ subsentence_no_count = expr:(prenex subsentence_no_count / sentence_no_count)
 
 subsentence = expr:(tag? TUhE_clause free* text_1 TUhU_elidible free* / prenex subsentence / sentence) 
 
-bridi_tail = (start:bridi_tail_1 repeat:((gihek tag? / GI_clause tag) KE_clause free* bridi_tail KEhE_elidible free* tail_terms)? {
-  if (repeat) {
-    start = _fill_jek(start, repeat[0][0], _precedence(_fill_free(repeat[1], repeat[2]), repeat[3], _fill_free(repeat[4], repeat[5])), repeat[0][1]);
-    start.tail_terms = repeat[6];
-    start.structure = start.structure.concat(start.tail_terms);
-  }
-  return start;
-}) / VAU_elidible
+bridi_tail = bridi_tail_1 / VAU_elidible
 
-bridi_tail_1 = start:bridi_tail_2 repeat:(gihek !(tag? BO_clause) !(tag? KE_clause) free* bridi_tail_2 tail_terms)* {
+bridi_tail_1 = start:bridi_tail_2 repeat:((gihek (tag:tag &KE_clause { return tag })? / GI_clause tag &KE_clause) !(tag? BO_clause) free* bridi_tail_2 tail_terms)* {
   return repeat.reduce(function (a, b) {
-    a = _fill_jek(a, _fill_free(b[0], b[3]), b[4]);
-    a.tail_terms = b[5];
+    a = _fill_jek(a, _fill_free(b[0][0], b[2]), b[3], b[0][1]);
+    a.tail_terms = b[4];
     a.structure = a.structure.concat(a.tail_terms);
     return a;
   }, start);
@@ -521,7 +526,7 @@ bridi_tail_1 = start:bridi_tail_2 repeat:(gihek !(tag? BO_clause) !(tag? KE_clau
 
 //// EXP-MODIF: GI TAG BO + JACU
 bridi_tail_2 = 
-cu:CU_clause cufree:free* quant:quantifier? meihi:MEIhI_clause meihifree:free* tails:bridi_tail_1+ tail_terms:tail_terms meiho:MEIhO_elidible meihofree:free*
+cu:CU_clause cufree:free* quant:quantifier? meihi:NUhI_clause meihifree:free* tails:bridi_tail_1+ tail_terms:tail_terms meiho:NUhU_elidible meihofree:free*
 //{
 //  
 //}
@@ -544,7 +549,9 @@ bridi_tail_3 = gek_sentence
     preterms: preterms.map(function (a) { return {terms: a[0].terms, cu: a[1]} }),
     selbri: selbri, tail_terms: tail_terms,
   }
-})
+}) / ke:KE_clause kefree:free* contents:bridi_tail kehe:KEhE_elidible kehefree:free* {
+  return _precedence(_fill_free(ke, kefree), contents, _fill_free(kehe, kehefree));
+}
 
 gek_sentence = (gek:gek left:subsentence_no_count gik:gik right:subsentence_no_count tail_terms:tail_terms {
     gek = _fill_gek(gek, left, gik, right);
@@ -560,12 +567,12 @@ gek_sentence = (gek:gek left:subsentence_no_count gik:gik right:subsentence_no_c
     gek.selbri_tags = gek.selbri_tags ? tag.concat(gek.selbri_tags) : tag;
     return gek;
   }) 
-//  / (tag:tag+ &(!si_clause !zei_clause !bu_clause (NA_clause / GA_clause)) gek:gek_sentence {
-//    gek = _duplicate_less_evil(gek);
-//    gek.structure = [tag, gek.structure];
-//    gek.selbri_tags = gek.selbri_tags ? tag.concat(gek.selbri_tags) : tag;
-//    return gek;
-//  }) 
+  / (tag:tag+ &(!si_clause !zei_clause !bu_clause (NA_clause / GA_clause)) gek:gek_sentence {
+    gek = _duplicate_less_evil(gek);
+    gek.structure = [tag, gek.structure];
+    gek.selbri_tags = gek.selbri_tags ? tag.concat(gek.selbri_tags) : tag;
+    return gek;
+  }) 
   / (na:NA_clause free:free* gek:gek_sentence { 
     gek = _duplicate_less_evil(gek);
     _fill_free(na, free);
@@ -602,32 +609,28 @@ terms_2 = start:abs_term repeat:(CEhE_clause free* abs_term)* {
   return {termset: "cehe", terms: start, structure: start.slice(1).reduce(function (a,b) { return a.concat([b.cehe, b]) }, [start[0]])};
 }
 
-term = tag_term / termset
-
-tag_term = start:(
+term = start:(termset /
   (!gek tag:tag free:free* sumti:(sumti / (ku:KU_elidible free:free* { return _fill_free(ku, free) })) { return _term(_fill_free(tag, free), sumti) })
   / inverted_term / fa_elided_term / naku_term
-  / (!gek !joik_ek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }) 
+  / (!(!sumti !gek_termset gek) !joik_ek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }) 
   / soi_term
-) repeat:(joik_ek tag_term)* {
+) repeat:(joik_ek term)* {
   repeat.forEach(function (r) {
     start = _fill_jek(start, r[0], r[1]);
   });
   return start;
 }
 
-abs_term = abs_tag_term / termset
-
-abs_tag_term = start:(
+abs_term = start:(termset /
   (!gek tag:tag free:free* !BO_clause !selbri !gek_sentence sumti:(
     sumti 
     / (jek:joik_ek sumti:sumti_3 { return _fill_jek(null, jek, sumti) })
     / (ku:KU_elidible free:free* { return _fill_free(ku, free) })
     ) { return _term(_fill_free(tag, free), sumti) })
   / inverted_term / fa_elided_term / naku_term
-  / (!selbri !gek_sentence !joik_ek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) })
+  / (!selbri !(!sumti !gek_termset gek_sentence) !joik_ek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) })
   / soi_term
-) repeat:(joik_ek abs_tag_term)* {
+) repeat:(joik_ek abs_term)* {
   repeat.forEach(function (r) {
     start = _fill_jek(start, r[0], r[1]);
   });
@@ -643,10 +646,9 @@ naku_term = na:NA_clause nafree:free* ku:KU_clause kufree:free* { return _term(_
 soi_term = soi:SOI_clause soifree:free* bridi:subsentence sehu:SEhU_elidible sehufree:free* { return {tag: _fill_free(soi, soifree), bridi: bridi, terminator: _fill_free(sehu, sehufree), structure: [soi, bridi, sehu]} }
 
 termset = gek_termset 
-  / (quantifier? MEIhI_clause free* terms MEIhO_elidible free*)
   / (NUhI_clause free* gek terms NUhU_elidible free* gik terms NUhU_elidible free*) 
-  / (nuhi:NUhI_clause nuhifree:free* terms:terms nuhu:NUhU_elidible nuhufree:free* { return {
-    termset: "nuhi", terms: terms.terms, nuhi: _fill_free(nuhi, nuhifree), nuhu: _fill_free(nuhu, nuhufree), structure: [nuhi, terms.structure, nuhu],
+  / (quantifier:quantifier? nuhi:NUhI_clause nuhifree:free* terms:terms nuhu:NUhU_elidible nuhufree:free* { return {
+    termset: "nuhi", quantifier: quantifier, terms: terms.terms, nuhi: _fill_free(nuhi, nuhifree), nuhu: _fill_free(nuhu, nuhufree), structure: [quantifier, nuhi, terms.structure, nuhu].filter(_empty),
   } }) 
 
 gek_termset = gek:gek tgt:terms_gik_terms {
@@ -680,12 +682,7 @@ sumti = sumti:sumti_1 vuho:(VUhO_clause free* vuho_tail?)? {
 
 vuho_tail = relative_clauses (joik_ek sumti)?
 
-sumti_1 = start:sumti_2 repeat:(joik_ek tag? KE_clause free* sumti KEhE_elidible free*)? {
-  if (repeat) {
-    return _fill_jek(start, repeat[0], _role(_precedence(_fill_free(repeat[2], repeat[3]), repeat[4], _fill_free(repeat[5], repeat[6])), "sumti"), repeat[1]);
-  }
-  return start;
-}
+sumti_1 = sumti_2
 
 sumti_2 = start:sumti_3 repeat:(joik_ek sumti_3)* {
   return repeat.reduce(function (a, b) { return _fill_jek(a, b[0], b[1]) }, start);
@@ -698,7 +695,9 @@ sumti_3 = start:sumti_4 repeat:(joik_ek? tag? BO_clause free* sumti_3)? {
   return start;
 }
 
-sumti_4 = sumti_5 / (gek:gek left:sumti gik:gik right:sumti_4 { return _role(_fill_gek(gek, left, gik, right), "sumti") }) 
+sumti_4 = ke:KE_clause kefree:free* sumti:sumti kehe:KEhE_elidible kehefree:free*
+    { return _precedence(_fill_free(ke, kefree), sumti, _fill_free(kehe, kehefree)) } 
+  / sumti_5 / (gek:gek left:sumti gik:gik right:sumti_4 { return _role(_fill_gek(gek, left, gik, right), "sumti") }) 
 
 //// EXP-MODIF: quantifier+gek_sentence
 sumti_5 = (quantifier:quantifier? sumti:sumti_6 relative:relative_clauses? {
@@ -767,19 +766,16 @@ selbri_relative_clauses = expr:(selbri_relative_clause (joik_ek free* selbri_rel
 selbri_relative_clause = expr:(NOhOI_clause free* subsentence KUhOI_elidible free* ) 
 
 
-selbri = tag:tag* selbri:selbri_1 { 
+selbri = tag:(tag / na:NA_clause free:free* { return _fill_free(na, free) })* selbri:selbri_1 { 
   if (_empty(tag)) {
+    selbri = _duplicate_less_evil(selbri);
     selbri.structure = [tag, _shell(selbri)]; 
     selbri.selbri_tags = selbri.selbri_tags ? tag.concat(selbri.selbri_tags) : tag;
   }
   return selbri
 }
 
-selbri_1 = selbri_2 / (na:NA_clause free:free* selbri:selbri { 
-  selbri.structure = [_fill_free(na, free), _shell(selbri)];
-  selbri.selbri_tags = selbri.selbri_tags ? [na].concat(selbri.selbri_tags) : [na];
-  return selbri;
-})
+selbri_1 = selbri_2
 
 selbri_2 = start:selbri_3 repeat:(CO_clause free* selbri_3)* {
   return repeat.reduce(function(a, b) { return _tanru(b[2], a, _fill_free(b[0], b[1])) }, start);
@@ -878,11 +874,11 @@ operator_2 = expr:(mex_operator / KE_clause free* operator KEhE_elidible free*)
 mex_operator = expr:(SE_clause free* mex_operator / NAhE_clause free* mex_operator / MAhO_clause free* mex TEhU_elidible free* / NAhU_clause free* selbri TEhU_elidible free* / joik_ek free*) 
 
 //// EXP-MODIF
-number = expr:(number_initial (number_initial / &{return !options.lerfu} lerfu_word)*) 
+number = number_initial / init:PA_clause fin:(PA_clause / &{return !options.lerfu} lerfu_word)* { return _string([init].concat(fin)) }
 
-number_initial = PA_clause / (NIhE_clause free* selbri TEhU_elidible free*) / (MOhE_clause free* sumti TEhU_elidible free*)
+number_initial = NIhE_clause free* selbri TEhU_elidible free* / MOhE_clause free* sumti TEhU_elidible free*
 
-lerfu_string = expr:(lerfu_word (&{return !options.lerfu} PA_clause / lerfu_word)*) 
+lerfu_string = init:lerfu_word fin:(&{return !options.lerfu} PA_clause / lerfu_word)* { return _string([init].concat(fin)) }
 
 
 // ** BU clauses are part of BY_clause
@@ -1027,7 +1023,7 @@ indicators = expr:(FUhE_clause / UI_clause / CAI_clause / NAI_clause / FUhO_clau
 // Magic Words
 // ****************
 
-zei_clause = pre:pre_clause post:zei_clause_no_pre { post.pre = pre; post.structure = (post.post ? [pre, _shell(post), post.post.indicators] : [pre, _shell(post)]).filter(_empty); return post }
+zei_clause = pre:pre_clause_no_dot post:zei_clause_no_pre { post.pre = pre; post.structure = (post.post ? [pre, _shell(post), post.post.indicators] : [pre, _shell(post)]).filter(_empty); return post }
 
 zei_clause_no_pre = 
 pre:pre_zei_bu 
@@ -1049,7 +1045,7 @@ post:post_clause {
 }
 // zei_clause_no_SA = pre_zei_bu_no_SA (zei_tail? bu_tail)* zei_tail
 
-bu_clause = pre:pre_clause post:bu_clause_no_pre { post.pre = pre; post.structure = (post.post ? [pre, _shell(post), post.post.indicators] : [pre, _shell(post)]).filter(_empty); return post }
+bu_clause = pre:pre_clause_no_dot post:bu_clause_no_pre { post.pre = pre; post.structure = (post.post ? [pre, _shell(post), post.post.indicators] : [pre, _shell(post)]).filter(_empty); return post }
 bu_clause_no_pre = pre:pre_zei_bu zei:(b:bu_tail? z:zei_tail { return {bu_tail: b, zei_tail: z} })* tail:bu_tail post:post_clause {
   var r = {selmaho: "BY", word: pre.word, subsumed: [pre], post: post };
   zei.forEach(function (zei) {
@@ -1107,6 +1103,7 @@ post_clause = spaces? si:si_clause? !ZEI_clause !BU_clause indicators:indicators
 indicator_post_clause = !BU_clause spaces? !ZEI_clause !BU_clause
 
 pre_clause = BAhE_clause* (&(nucleus / cmevla) {return "."})?
+pre_clause_no_dot = a:BAhE_clause* { return _empty(a) && [a, null] }
 
 //// EXP-DELETION: brivla/cmevla merge
 //any_word_SA_handling = BRIVLA_pre / known_cmavo_SA / !known_cmavo_pre CMAVO_pre / CMEVLA_pre
@@ -1510,10 +1507,6 @@ MEIhE_clause = pre:MEIhE_pre post:post_clause { return _word_post(pre, post) }
 MEIhE_pre = pre:pre_clause word:MEIhE spaces? { return _word_pre(word, pre) }
 // MEIhE_no_SA_handling = pre_clause MEIhE post_clause
 
-MEIhI_clause = pre:MEIhI_pre post:post_clause { return _word_post(pre, post) }
-MEIhI_pre = pre:pre_clause word:MEIhI spaces? { return _word_pre(word, pre) }
-// MEIhI_no_SA_handling = pre_clause MEIhI post_clause
-
 MEIhO_clause = pre:MEIhO_pre post:post_clause { return _word_post(pre, post) }
 MEIhO_pre = pre:pre_clause word:MEIhO spaces? { return _word_pre(word, pre) }
 // MEIhO_no_SA_handling = pre_clause MEIhO post_clause
@@ -1839,11 +1832,12 @@ zohoi_word = expr:non_space+ { return _join(expr) }
 
 //___________________________________________________________________
 
-cmevla = expr:(jbocme / zifcme) dot:(!(post_word nucleus) {return "."})? { return _join(expr) + (dot || ""); }
+//cmevla = expr:(jbocme / zifcme) dot:(!(post_word nucleus) {return "."})? { return _join(expr) + (dot || ""); }
+cmevla = expr:zifcme dot:(!(post_word nucleus) {return "."})? { return _join(expr) + (dot || ""); }
 
-zifcme = (!h (nucleus / glide / h / consonant !pause / digit)* consonant &pause)
+zifcme = (!h (any_syllable / nucleus / glide / h / consonant !pause / digit)* consonant &pause)
 
-jbocme = (&zifcme (any_syllable / digit)* &pause)
+// jbocme = (&zifcme (any_syllable / digit)* &pause)
 
 //cmevla = !h cmevla_syllable* &consonant coda? consonantal_syllable* onset &pause
 
@@ -1894,14 +1888,18 @@ logbanu_rafsi = expr:(!fuhivla consonant unstressed_vowel !coda !CCV_rafsi !stre
 logbanu_tail = any_fuhivla_rafsi? (logbanu_tail_1+ rafsi_string / logbanu_tail_1*) &post_word
 logbanu_tail_1 = gismu &post_word / fuhivla &post_word / fuhivla_rafsi / stressed_fuhivla_rafsi / y_rafsi / stressed_y_rafsi / CVV_rafsi (h y h?) / stressed_CVV_rafsi (h y)? / CVC_rafsi / stressed_CVC_rafsi / logbanu_rafsi / stressed_logbanu_rafsi
 
-fuhivla_head = expr:(!rafsi_string brivla_head) { return _join(expr); }
+fuhivla_head = expr:(!lujvly brivla_head) { return _join(expr); }
 
 brivla_head = expr:(!cmavo !slinkuhi !h &onset unstressed_syllable*) { return _join(expr); }
 
 slinkuhi = expr:(!rafsi_string consonant rafsi_string) { return _join(expr); }
 slinkuhi_ignore = slinkuhi .+
 
-rafsi_string = expr:(y_less_rafsi* (gismu / CVV_final_rafsi / stressed_y_less_rafsi short_final_rafsi_nonlogbanu / y_rafsi / stressed_y_rafsi / hy_rafsi &onset / stressed_hy_rafsi &onset)) { return _join(expr); }
+rafsi_string = expr:(y_less_rafsi* rafsi_string_1) { return _join(expr); }
+rafsi_string_1 = gismu / CVV_final_rafsi / stressed_y_less_rafsi short_final_rafsi_nonlogbanu / y_rafsi / stressed_y_rafsi / hy_rafsi &onset / stressed_hy_rafsi &onset
+
+lujvly = expr:((!lujvly_1 y_less_rafsi)* (lujvly_1 / rafsi_string_1))
+lujvly_1 = (stressed_y_less_rafsi / y_less_rafsi) initial_pair y
 
 slihykru = (CCV_rafsi / stressed_CCV_rafsi) h y onset
 
@@ -2252,8 +2250,6 @@ MEhU = &cmavo expr:( m e h u ) &post_word {return _word("MEhU", expr);}
 MOhE = &cmavo expr:( m o h e ) &post_word {return _word("MOhE", expr);}
 
 MEIhE = &cmavo expr:( m e i h e ) &post_word {return _word("MEIhE", expr);}
-
-MEIhI = &cmavo expr:( m e i h i ) &post_word {return _word("MEIhI", expr);}
 
 MEIhO = &cmavo expr:( m e i h o ) &post_word {return _word("MEIhO", expr);}
 
