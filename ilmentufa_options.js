@@ -97,7 +97,7 @@ var ret = {
 	ckt: false,
 	du: false,
 	su: false,
-	buhu: null,
+	buhu: "buhu",
 	po: false,
 	koi: false,
 	lau: false,
