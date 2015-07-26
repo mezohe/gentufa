@@ -145,7 +145,7 @@ var c_voi = toggle("zo voi cmavo ma'oi nu", "voi"),
     c_lerfu = toggle("ro lerpoi zo'u pa da lerkle", "lerfu"),
     c_rafcau = toggle("se gu rafcla valstuge'a gi rafcau valturge'a", "rafcau"),
     c_diftogoteha = toggle("lo clani cmavo cu se terpa", "diftogoteha");
-var micro_checks = [c_voi, c_ckt, c_du, c_buhu, c_bu, c_zai, c_po, c_koi, c_lau, c_lerfu, c_rafcau, c_diftogoteha];
+var micro_checks = [c_voi, c_ckt, c_du, c_su, c_buhu, c_bu, c_zai, c_po, c_koi, c_lau, c_lerfu, c_rafcau, c_diftogoteha];
 var c_fadni = {name: "fadni jbobau", 
                conds: [c_voi, c_ckt, c_du, c_su, c_bu, c_zai, c_po, c_koi, c_lau, c_lerfu, c_diftogoteha],
                get: function () { return this.conds.every(function (a) { return !a.get() }) },
