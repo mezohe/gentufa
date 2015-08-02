@@ -611,7 +611,7 @@ terms_2 = start:abs_term repeat:(CEhE_clause free* abs_term)* {
 
 term = start:(termset /
   (!gek tag:tag free:free* sumti:(sumti / (ku:KU_elidible free:free* { return _fill_free(ku, free) })) { return _term(_fill_free(tag, free), sumti) })
-  / inverted_term / fa_elided_term / naku_term
+  / inverted_term / naku_term
   / (!(!sumti !gek_termset gek) !joik_ek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }) 
   / soi_term
 ) repeat:(joik_ek term)* {
@@ -619,7 +619,7 @@ term = start:(termset /
     start = _fill_jek(start, r[0], r[1]);
   });
   return start;
-}
+} / fa_elided_term
 
 abs_term = start:(termset /
   (!gek tag:tag free:free* !BO_clause !selbri !gek_sentence sumti:(
@@ -627,7 +627,7 @@ abs_term = start:(termset /
     / (jek:joik_ek sumti:sumti_3 { return _fill_jek(null, jek, sumti) })
     / (ku:KU_elidible free:free* { return _fill_free(ku, free) })
     ) { return _term(_fill_free(tag, free), sumti) })
-  / inverted_term / fa_elided_term / naku_term
+  / inverted_term / naku_term
   / (!selbri !(!sumti !gek_termset gek_sentence) !joik_ek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) })
   / soi_term
 ) repeat:(joik_ek abs_term)* {
@@ -635,7 +635,7 @@ abs_term = start:(termset /
     start = _fill_jek(start, r[0], r[1]);
   });
   return start;
-}
+} / fa_elided_term
 
 inverted_term = !gek sumti:sumti co:CO_clause tag:tag free:free* { return _term(_fill_free(tag, free), sumti, co) }
 
@@ -646,9 +646,22 @@ naku_term = na:NA_clause nafree:free* ku:KU_clause kufree:free* { return _term(_
 soi_term = soi:SOI_clause soifree:free* bridi:subsentence sehu:SEhU_elidible sehufree:free* { return {tag: _fill_free(soi, soifree), bridi: bridi, terminator: _fill_free(sehu, sehufree), structure: [soi, bridi, sehu]} }
 
 termset = gek_termset 
-  / (NUhI_clause free* gek terms NUhU_elidible free* gik terms NUhU_elidible free*) 
+  / NUhI_clause free* gek terms NUhU_elidible free* gik terms NUhU_elidible free*
+  / (quantifier:quantifier? nuhi:KE_clause nuhifree:free* &tense_modal terms:terms nuhu:KEhE_elidible nuhufree:free* { return {
+    termset: "nuhi", 
+    quantifier: quantifier, 
+    terms: terms.terms, 
+    nuhi: _fill_free(nuhi, nuhifree), 
+    nuhu: _fill_free(nuhu, nuhufree), 
+    structure: [quantifier, nuhi, terms.structure, nuhu].filter(_empty),
+  } }) 
   / (quantifier:quantifier? nuhi:NUhI_clause nuhifree:free* terms:terms nuhu:NUhU_elidible nuhufree:free* { return {
-    termset: "nuhi", quantifier: quantifier, terms: terms.terms, nuhi: _fill_free(nuhi, nuhifree), nuhu: _fill_free(nuhu, nuhufree), structure: [quantifier, nuhi, terms.structure, nuhu].filter(_empty),
+    termset: "nuhi", 
+    quantifier: quantifier, 
+    terms: terms.terms, 
+    nuhi: _fill_free(nuhi, nuhifree), 
+    nuhu: _fill_free(nuhu, nuhufree), 
+    structure: [quantifier, nuhi, terms.structure, nuhu].filter(_empty),
   } }) 
 
 gek_termset = gek:gek tgt:terms_gik_terms {
@@ -926,9 +939,10 @@ gek = (gak joik_ek )
 //// EXP-ADD: GAJA
 gak = expr:ga_clause free:free* { return _fill_free(expr, free) }
 
-guhek = se:SE_clause? guha:GUhA_clause free:free* { if (_empty(se)) { guha.se = se; guha.structure = [se, _shell(guha)] } return _fill_free(guha, free) }
+guhek = guk joik_ek
+  / se:SE_clause? guha:GUhA_clause free:free* { if (_empty(se)) { guha.se = se; guha.structure = [se, _shell(guha)] } return _fill_free(guha, free) }
 
-guk = expr:gu_clause free:free* { return _fill_free(expr, free) } // FIXME: add to guhek!
+guk = expr:gu_clause free:free* { return _fill_free(expr, free) }
 
 gik = expr:GI_clause free:free* { return _fill_free(expr, free) }
 
@@ -943,8 +957,12 @@ tag = start:tense_modal repeat:(joik_ek tense_modal)* {
 }
 
 //// EXP-MODIF: MEX simplification
-tense_modal = nahe:NAhE_clause* se:SE_clause? fehe:FEhE_clause*
-tag:(tag:(PU_clause / roi_tense / fiho_modal / FA_clause) free:free* { return _fill_free(tag, free) })+ {
+tense_modal = 
+  guhek:guhek left:tag gik:gik right:(ke:KE_clause kefree:free* tag:tag kehe:KEhE_elidible? kehefree:free* {
+      return _precedence(_fill_free(ke, kefree), tag, _fill_free(kehe, kehefree)) } / tense_modal) {
+    return _fill_gek(guhek, left, gik, right);
+  } / nahe:NAhE_clause* se:SE_clause? fehe:FEhE_clause*
+    tag:(tag:(PU_clause / roi_tense / fiho_modal / FA_clause) free:free* { return _fill_free(tag, free) })+ {
   var r = {tags: tag, structure: tag};
   var last_fa = 0;
   var used_fa = {};
