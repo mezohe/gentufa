@@ -821,7 +821,7 @@ tanru_unit_1 = (unit:tanru_unit_2 linkargs:linkargs? { return linkargs ? _linkar
 
 // ** zei is part of BRIVLA_clause
 //// EXP-MODIF: brivla / cmevla merge + add of MEhOI_clause + add of "linkargs tanru_unit_1 / " (for {jai be broda}) + MEX simplification
-tanru_unit_2 = 
+tanru_unit_2 = expr:(
   (brivla:(BRIVLA_clause / MEhOI_clause) free:free* { return _place_shell(_fill_free(brivla, free)) }) 
   / (ke:KE_clause kefree:free* selbri:selbri_3 kehe:KEhE_elidible kehefree:free* { return _precedence(_fill_free(ke, kefree), selbri, _fill_free(kehe, kehefree)) }) 
   / (ME_clause free* (sumti / mex) MEhU_elidible free* MOI_clause? free*) 
@@ -833,6 +833,7 @@ tanru_unit_2 =
   / (NU_clause free* (joik_ek NU_clause free*)* subsentence KEI_elidible free*) 
   / (linkargs:linkargs unit:tanru_unit_1 { if (linkargs) { linkargs.inverted = true; return _linkargs_attach(linkargs, unit) } return unit })
   / MEIhE_clause free* sumti+ MEIhO_elidible
+  ) { return expr.structure ? expr : {structure: expr} }
 
 //// EXP-MODIF: Tsani: replace "term" with "term?" for allowing empty BE clauses
 linkargs = be:BE_clause befree:free* term:term? links:links* beho:BEhO_elidible behofree:free* {
