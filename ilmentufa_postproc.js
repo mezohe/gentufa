@@ -92,12 +92,12 @@ function bracket(array, mode) {
 		
 		if (typeof array == "object" && array.structure) {
 			if (mode.p && array.se_table)
-				return "[" + array.se_table + "]:" + _bracket(array.structure);
-			return _bracket(array.structure);
+				return "[" + array.se_table + "]:" + _bracket(array.structure) + _fuhe(array);
+			return _bracket(array.structure) + _fuhe(array);
 		}
 		
 		if (typeof array == "object" && array.word) {
-			var /*hoisting*/ ret = _bracket(array.elided ? array.word.toUpperCase() : array.word);
+			var /*hoisting*/ ret = _bracket(array.elided ? array.word.toUpperCase() : array.word) + _fuhe(array);
 			return mode.s && array.selmaho && !array.elided ? array.selmaho + ":" + ret : ret;
 		}
 		
@@ -105,6 +105,9 @@ function bracket(array, mode) {
 			return array;
 			
 		return "[???]";
+	}
+	function _fuhe(array) {
+		return array.fuhe ? "_" + array.fuhe : "";
 	}
 	return _bracket(array);
 }

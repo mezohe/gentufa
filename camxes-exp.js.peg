@@ -45,7 +45,7 @@
   var _se_cmavo = {se: [0, 1], te: [0, 2], ve: [0, 3], xe: [0, 4]};
   var _cktj_names = /cykytyjy|creka(tanru(djacu)?)?bu|cektau(jau)?bu|cetki(tau(jau)?)?bu/;
   var _stressed_vowels = {a: "à", e: "è", i: "ì", o: "ò", u: "ù"};
-  var _g_zoi_delim;
+  var _g_zoi_delim, _g_fuhe = 0;
   
   function _join(arg)
   {
@@ -462,7 +462,7 @@
 
 //fax = expr:(fragment / statement) //{ return [_bracket(expr), expr] }
 
-text = intro_null ind:indicators? free:free* joik:(!gek !text_1 joik_ek)? t1:text_1? faho_clause EOF? { return [ind, _empty(free), _empty(joik), _empty(t1)] }
+text = intro_null free:free* joik:(!gek !text_1 joik_ek)? t1:text_1? faho_clause EOF? { return [_empty(free), _empty(joik), _empty(t1)] }
 
 intro_null = expr:(spaces? su_clause* intro_si_clause) 
 
@@ -513,7 +513,7 @@ subsentence_no_count = expr:(prenex subsentence_no_count / sentence_no_count)
 
 subsentence = expr:(tag? TUhE_clause free* text_1 TUhU_elidible free* / prenex subsentence / sentence) 
 
-bridi_tail = bridi_tail_1 / VAU_elidible
+bridi_tail = bridi_tail_1 / VAU_elidible free*
 
 bridi_tail_1 = start:bridi_tail_2 repeat:((gihek (tag:tag &KE_clause { return tag })? / GI_clause tag &KE_clause) !(tag? BO_clause) free* bridi_tail_2 tail_terms)* {
   return repeat.reduce(function (a, b) {
@@ -998,7 +998,7 @@ fiho_modal = fiho:FIhO_clause free:free* selbri:selbri fehu:FEhU_elidible { fiho
 
 //// EXP-MODIF: brivla/cmevla merge; MEX simplification
 // EXP-MODIF: attempt to formalize lo'ai..sa'ai..le'ai replacement expressions
-free = free_sei / free_vocative / free_mai / free_to / xi_clause / LOhAI_clause
+free = indicators / vocative / free_mai / xi_clause
 
 free_sei = sei:SEI_clause free:free* terms:(terms CU_elidible free*)* selbri:selbri end:SEhU_elidible {
   var r = {
@@ -1036,7 +1036,8 @@ xi_clause = xi:XI_clause free:free* mex:mex_2 { xi.number = mex; _fill_free(xi, 
 
 vocative = (coi:COI_clause+ doi:DOI_elidible { doi.coi = coi; doi.structure = coi.concat(_shell(doi)); return doi }) / DOI_clause
 
-indicators = expr:(FUhE_clause / UI_clause / CAI_clause / NAI_clause / FUhO_clause)+ !BU_clause { return expr }
+indicators = expr:(FUhE_clause / UI_clause / CAI_clause / NAI_clause / FUhO_clause / free_sei / free_to / LOhAI_clause
+)+ !BU_clause { return expr }
 
 // ****************
 // Magic Words
@@ -1119,7 +1120,9 @@ post_clause = spaces? si:si_clause? !ZEI_clause !BU_clause indicators:indicators
   if (indicators) r.indicators = indicators;
   return (r.si || r.indicators) && r;
 }
-indicator_post_clause = !BU_clause spaces? !ZEI_clause !BU_clause
+indicator_post_clause = !BU_clause spaces? si:si_clause? !ZEI_clause !BU_clause {
+  return si && {si: si};
+}
 
 pre_clause = BAhE_clause* (&(nucleus / cmevla) {return "."})?
 pre_clause_no_dot = a:BAhE_clause* { return _empty(a) && [a, null] }
@@ -1214,7 +1217,7 @@ BEI_pre = pre:pre_clause word:BEI spaces? { return _word_pre(word, pre) }
 // BEI_no_SA_handling = pre_clause BEI post_clause
 
 //         terminates BEBEI specified descriptors 
-BEhO_clause = pre:BEhO_pre post:post_clause { return _word_post(pre, post) }
+BEhO_clause = pre:BEhO_pre post:indicator_post_clause { return _word_post(pre, post) }
 BEhO_pre = pre:pre_clause word:BEhO spaces? { return _word_pre(word, pre) }
 // BEhO_no_SA_handling = pre_clause BEhO post_clause
 
@@ -1224,7 +1227,7 @@ BO_pre = pre:pre_clause word:BO spaces? { return _word_pre(word, pre) }
 // BO_no_SA_handling = pre_clause BO post_clause
 
 //         number or lerfu_string terminator 
-BOI_clause = pre:BOI_pre post:post_clause { return _word_post(pre, post) }
+BOI_clause = pre:BOI_pre post:indicator_post_clause { return _word_post(pre, post) }
 BOI_pre = pre:pre_clause word:BOI spaces? { return _word_pre(word, pre) }
 // BOI_no_SA_handling = pre_clause BOI post_clause
 
@@ -1276,7 +1279,7 @@ DOI_pre = pre:pre_clause word:DOI spaces? { return _word_pre(word, pre) }
 // DOI_no_SA_handling = pre_clause DOI post_clause
 
 //         terminator for DOI_marked vocatives 
-DOhU_clause = pre:DOhU_pre post:post_clause { return _word_post(pre, post) }
+DOhU_clause = pre:DOhU_pre post:indicator_post_clause { return _word_post(pre, post) }
 DOhU_pre = pre:pre_clause word:DOhU spaces? { return _word_pre(word, pre) }
 // DOhU_no_SA_handling = pre_clause DOhU post_clause
 
@@ -1297,7 +1300,7 @@ FEhE_pre = pre:pre_clause word:FEhE spaces? { return _word_pre(word, pre) }
 // FEhE_no_SA_handling = pre_clause FEhE post_clause
 
 //         ends bridi to modal conversion 
-FEhU_clause = pre:FEhU_pre post:post_clause { return _word_post(pre, post) }
+FEhU_clause = pre:FEhU_pre post:indicator_post_clause { return _word_post(pre, post) }
 FEhU_pre = pre:pre_clause word:FEhU spaces? { return _word_pre(word, pre) }
 // FEhU_no_SA_handling = pre_clause FEhU post_clause
 
@@ -1317,12 +1320,12 @@ FUhA_pre = pre:pre_clause word:FUhA spaces? { return _word_pre(word, pre) }
 // FUhA_no_SA_handling = pre_clause FUhA post_clause
 
 //         open long scope for indicator 
-FUhE_clause = pre:FUhE_pre post:indicator_post_clause { return _word_post(pre, post) }
+FUhE_clause = pre:FUhE_pre post:indicator_post_clause { var ret = _word_post(pre, post); ret.fuhe = ++_g_fuhe; return ret }
 FUhE_pre = pre:pre_clause word:FUhE spaces? { return _word_pre(word, pre) }
 // FUhE_no_SA_handling = pre_clause FUhE post_clause
 
 //         close long scope for indicator 
-FUhO_clause = pre:FUhO_pre post:indicator_post_clause { return _word_post(pre, post) }
+FUhO_clause = pre:FUhO_pre post:indicator_post_clause { if (_g_fuhe < 1) throw "FUhO requires FUhE to its left"; var ret = _word_post(pre, post); ret.fuhe = _g_fuhe--; return ret }
 FUhO_pre = pre:pre_clause word:FUhO spaces? { return _word_pre(word, pre) }
 // FUhO_no_SA_handling = pre_clause FUhO post_clause
 
@@ -1338,7 +1341,7 @@ GAhO_pre = pre:pre_clause word:GAhO spaces? { return _word_pre(word, pre) }
 // GAhO_no_SA_handling = pre_clause GAhO post_clause
 
 //         marker ending GOI relative clauses 
-GEhU_clause = pre:GEhU_pre post:post_clause { return _word_post(pre, post) }
+GEhU_clause = pre:GEhU_pre post:indicator_post_clause { return _word_post(pre, post) }
 GEhU_pre = pre:pre_clause word:GEhU spaces? { return _word_pre(word, pre) }
 // GEhU_no_SA_handling = pre_clause GEhU post_clause
 
@@ -1395,12 +1398,12 @@ KE_pre = pre:pre_clause word:KE spaces? { return _word_pre(word, pre) }
 // KE_no_SA_handling = pre_clause KE post_clause
 
 //         right terminator for KE groups 
-KEhE_clause = pre:KEhE_pre post:post_clause { return _word_post(pre, post) }
+KEhE_clause = pre:KEhE_pre post:indicator_post_clause { return _word_post(pre, post) }
 KEhE_pre = pre:pre_clause word:KEhE spaces? { return _word_pre(word, pre) }
 // KEhE_no_SA_handling = pre_clause KEhE post_clause
 
 //         right terminator, NU abstractions 
-KEI_clause = pre:KEI_pre post:post_clause { return _word_post(pre, post) }
+KEI_clause = pre:KEI_pre post:indicator_post_clause { return _word_post(pre, post) }
 KEI_pre = pre:pre_clause word:KEI spaces? { return _word_pre(word, pre) }
 KEI_no_SA_handling = pre_clause KEI post_clause
 
@@ -1410,7 +1413,7 @@ KOhA_pre = pre:pre_clause word:KOhA spaces? { return _word_pre(word, pre) }
 // KOhA_no_SA_handling = pre_clause KOhA spaces?
 
 //         right terminator for descriptions, etc. 
-KU_clause = pre:KU_pre post:post_clause { return _word_post(pre, post) }
+KU_clause = pre:KU_pre post:indicator_post_clause { return _word_post(pre, post) }
 KU_pre = pre:pre_clause word:KU spaces? { return _word_pre(word, pre) }
 // KU_no_SA_handling = pre_clause KU post_clause
 
@@ -1420,7 +1423,7 @@ KUhE_pre = pre:pre_clause word:KUhE spaces? { return _word_pre(word, pre) }
 // KUhE_no_SA_handling = pre_clause KUhE post_clause
 
 //         right terminator, NOI relative clauses 
-KUhO_clause = pre:KUhO_pre post:post_clause { return _word_post(pre, post) }
+KUhO_clause = pre:KUhO_pre post:indicator_post_clause { return _word_post(pre, post) }
 KUhO_pre = pre:pre_clause word:KUhO spaces? { return _word_pre(word, pre) }
 // KUhO_no_SA_handling = pre_clause KUhO post_clause
 
@@ -1453,12 +1456,12 @@ LI_pre = pre:pre_clause word:LI spaces? { return _word_pre(word, pre) }
 // LI_no_SA_handling = pre_clause LI post_clause
 
 //         grammatical text right quote 
-LIhU_clause = pre:LIhU_pre post:post_clause { return _word_post(pre, post) }
+LIhU_clause = pre:LIhU_pre post:indicator_post_clause { return _word_post(pre, post) }
 LIhU_pre = pre:pre_clause word:LIhU spaces? { return _word_pre(word, pre) }
 // LIhU_no_SA_handling = pre_clause LIhU post_clause
 
 //         elidable terminator for LI 
-LOhO_clause = pre:LOhO_pre post:post_clause { return _word_post(pre, post) }
+LOhO_clause = pre:LOhO_pre post:indicator_post_clause { return _word_post(pre, post) }
 LOhO_pre = pre:pre_clause word:LOhO spaces? { return _word_pre(word, pre) }
 // LOhO_no_SA_handling = pre_clause LOhO post_clause
 
@@ -1492,7 +1495,7 @@ LU_post = spaces?
 // LU_no_SA_handling = pre_clause LU post_clause
 
 //         LAhE close delimiter 
-LUhU_clause = pre:LUhU_pre post:post_clause { return _word_post(pre, post) }
+LUhU_clause = pre:LUhU_pre post:indicator_post_clause { return _word_post(pre, post) }
 LUhU_pre = pre:pre_clause word:LUhU spaces? { return _word_pre(word, pre) }
 // LUhU_no_SA_handling = pre_clause LUhU post_clause
 
@@ -1503,7 +1506,7 @@ MAhO_pre = pre:pre_clause word:MAhO spaces? { return _word_pre(word, pre) }
 // MAhO_no_SA_handling = pre_clause MAhO post_clause
 
 //         change numbers to utterance ordinals 
-MAI_clause = pre:MAI_pre post:post_clause { return _word_post(pre, post) }
+MAI_clause = pre:MAI_pre post:indicator_post_clause { return _word_post(pre, post) }
 MAI_pre = pre:pre_clause word:MAI spaces? { return _word_pre(word, pre) }
 // MAI_no_SA_handling = pre_clause MAI post_clause
 
@@ -1513,7 +1516,7 @@ ME_pre = pre:pre_clause word:ME spaces? { return _word_pre(word, pre) }
 // ME_no_SA_handling = pre_clause ME post_clause
 
 //         terminator for ME 
-MEhU_clause = pre:MEhU_pre post:post_clause { return _word_post(pre, post) }
+MEhU_clause = pre:MEhU_pre post:indicator_post_clause { return _word_post(pre, post) }
 MEhU_pre = pre:pre_clause word:MEhU spaces? { return _word_pre(word, pre) }
 // MEhU_no_SA_handling = pre_clause MEhU post_clause
 
@@ -1526,12 +1529,12 @@ MEIhE_clause = pre:MEIhE_pre post:post_clause { return _word_post(pre, post) }
 MEIhE_pre = pre:pre_clause word:MEIhE spaces? { return _word_pre(word, pre) }
 // MEIhE_no_SA_handling = pre_clause MEIhE post_clause
 
-MEIhO_clause = pre:MEIhO_pre post:post_clause { return _word_post(pre, post) }
+MEIhO_clause = pre:MEIhO_pre post:indicator_post_clause { return _word_post(pre, post) }
 MEIhO_pre = pre:pre_clause word:MEIhO spaces? { return _word_pre(word, pre) }
 // MEIhO_no_SA_handling = pre_clause MEIhO post_clause
 
 //         change number to selbri 
-MOI_clause = pre:MOI_pre post:post_clause { return _word_post(pre, post) }
+MOI_clause = pre:MOI_pre post:indicator_post_clause { return _word_post(pre, post) }
 MOI_pre = pre:pre_clause word:MOI spaces? { return _word_pre(word, pre) }
 // MOI_no_SA_handling = pre_clause MOI post_clause
 
@@ -1587,7 +1590,7 @@ NUhI_pre = pre:pre_clause word:NUhI spaces? { return _word_pre(word, pre) }
 // NUhI_no_SA_handling = pre_clause NUhI post_clause
 
 //         marks the middle and end of a termset 
-NUhU_clause = pre:NUhU_pre post:post_clause { return _word_post(pre, post) }
+NUhU_clause = pre:NUhU_pre post:indicator_post_clause { return _word_post(pre, post) }
 NUhU_pre = pre:pre_clause word:NUhU spaces? { return _word_pre(word, pre) }
 // NUhU_no_SA_handling = pre_clause NUhU post_clause
 
@@ -1612,7 +1615,7 @@ PU_pre = pre:pre_clause word:PU spaces? { return _word_pre(word, pre) }
 // PU_no_SA_handling = pre_clause PU post_clause
 
 //         converts number to extensional tense 
-ROI_clause = pre:ROI_pre post:post_clause { return _word_post(pre, post) }
+ROI_clause = pre:ROI_pre post:indicator_post_clause { return _word_post(pre, post) }
 ROI_pre = pre:pre_clause word:ROI spaces? { return _word_pre(word, pre) }
 // ROI_no_SA_handling = pre_clause ROI post_clause
 
@@ -1631,7 +1634,7 @@ SEI_pre = pre:pre_clause word:SEI spaces? { return _word_pre(word, pre) }
 // SEI_no_SA_handling = pre_clause SEI post_clause
 
 //         metalinguistic bridi end marker 
-SEhU_clause = pre:SEhU_pre post:post_clause { return _word_post(pre, post) }
+SEhU_clause = pre:SEhU_pre post:indicator_post_clause { return _word_post(pre, post) }
 SEhU_pre = pre:pre_clause word:SEhU spaces? { return _word_pre(word, pre) }
 // SEhU_no_SA_handling = pre_clause SEhU post_clause
 
@@ -1658,12 +1661,12 @@ TEI_pre = pre:pre_clause word:TEI spaces? { return _word_pre(word, pre) }
 // TEI_no_SA_handling = pre_clause TEI post_clause
 
 //         left discursive parenthesis 
-TO_clause = pre:TO_pre post:post_clause { return _word_post(pre, post) }
+TO_clause = pre:TO_pre post:indicator_post_clause { return _word_post(pre, post) }
 TO_pre = pre:pre_clause word:TO spaces? { return _word_pre(word, pre) }
 // TO_no_SA_handling = pre_clause TO post_clause
 
 //         right discursive parenthesis 
-TOI_clause = pre:TOI_pre post:post_clause { return _word_post(pre, post) }
+TOI_clause = pre:TOI_pre post:indicator_post_clause { return _word_post(pre, post) }
 TOI_pre = pre:pre_clause word:TOI spaces? { return _word_pre(word, pre) }
 // TOI_no_SA_handling = pre_clause TOI post_clause
 
@@ -1674,7 +1677,7 @@ TUhE_post = su:su_clause* spaces? { return su }
 // TUhE_no_SA_handling = pre_clause TUhE su_clause* post_clause
 
 //         multiple utterance end scope mark 
-TUhU_clause = pre:TUhU_pre post:post_clause { return _word_post(pre, post) }
+TUhU_clause = pre:TUhU_pre post:indicator_post_clause { return _word_post(pre, post) }
 TUhU_pre = pre:pre_clause word:TUhU spaces? { return _word_pre(word, pre) }
 // TUhU_no_SA_handling = pre_clause TUhU post_clause
 
@@ -1685,7 +1688,7 @@ UI_pre = pre:pre_clause word:UI spaces? { return _word_pre(word, pre) }
 // UI_no_SA_handling = pre_clause UI post_clause
 
 //         end simple bridi or bridi_tail 
-VAU_clause = pre:VAU_pre post:post_clause { return _word_post(pre, post) }
+VAU_clause = pre:VAU_pre post:indicator_post_clause { return _word_post(pre, post) }
 VAU_pre = pre:pre_clause word:VAU spaces? { return _word_pre(word, pre) }
 // VAU_no_SA_handling = pre_clause VAU post_clause
 
@@ -1695,7 +1698,7 @@ VEI_pre = pre:pre_clause word:VEI spaces? { return _word_pre(word, pre) }
 // VEI_no_SA_handling = pre_clause VEI post_clause
 
 //         right MEX bracket 
-VEhO_clause = pre:VEhO_pre post:post_clause { return _word_post(pre, post) }
+VEhO_clause = pre:VEhO_pre post:indicator_post_clause { return _word_post(pre, post) }
 VEhO_pre = pre:pre_clause word:VEhO spaces? { return _word_pre(word, pre) }
 // VEhO_no_SA_handling = pre_clause VEhO post_clause
 
@@ -1705,7 +1708,7 @@ VUhU_pre = pre:pre_clause word:VUhU spaces? { return _word_pre(word, pre) }
 // VUhU_no_SA_handling = pre_clause VUhU post_clause
 
 // glue between logically connected sumti and relative clauses 
-VUhO_clause = pre:VUhO_pre post:post_clause { return _word_post(pre, post) }
+VUhO_clause = pre:VUhO_pre post:indicator_post_clause { return _word_post(pre, post) }
 VUhO_pre = pre:pre_clause word:VUhO spaces? { return _word_pre(word, pre) }
 // VUhO_no_SA_handling = pre_clause VUhO post_clause
 
@@ -1748,7 +1751,7 @@ ZOI_pre = pre:pre_clause word:ZOI spaces? open:zoi_open spaces? quoted:zoi_word*
 // ZOI_no_SA_handling = pre_clause ZOI spaces? zoi_open zoi_word* zoi_close spaces?
 
 //         prenex terminator (not elidable) 
-ZOhU_clause = pre:ZOhU_pre post:post_clause { return _word_post(pre, post) }
+ZOhU_clause = pre:ZOhU_pre post:indicator_post_clause { return _word_post(pre, post) }
 ZOhU_pre = pre:pre_clause word:ZOhU spaces? { return _word_pre(word, pre) }
 // ZOhU_no_SA_handling = pre_clause ZOhU post_clause
 
@@ -1767,13 +1770,13 @@ MEhOI_pre = pre:pre_clause word:MEhOI spaces? quoted:zohoi_word spaces? {
 NOhOI_clause = pre:NOhOI_pre post:post_clause { return _word_post(pre, post) }
 NOhOI_pre = pre:pre_clause word:NOhOI spaces? { return _word_pre(word, pre) }
 
-KUhOI_clause = pre:KUhOI_pre post:post_clause { return _word_post(pre, post) }
+KUhOI_clause = pre:KUhOI_pre post:indicator_post_clause { return _word_post(pre, post) }
 KUhOI_pre = pre:pre_clause word:KUhOI spaces? { return _word_pre(word, pre) }
 
 LOhOI_clause = pre:LOhOI_pre post:post_clause { return _word_post(pre, post) }
 LOhOI_pre = pre:pre_clause word:LOhOI spaces? { return _word_pre(word, pre) }
 
-KUhAU_clause = pre:KUhAU_pre post:post_clause { return _word_post(pre, post) }
+KUhAU_clause = pre:KUhAU_pre post:indicator_post_clause { return _word_post(pre, post) }
 KUhAU_pre = pre:pre_clause word:KUhAU spaces? { return _word_pre(word, pre) }
 
 ga_clause = pre:ga_pre post:post_clause { return _word_post(pre, post) }
