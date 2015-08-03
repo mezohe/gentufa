@@ -10338,7 +10338,7 @@ var camxes = (function() {
 
       s0 = peg$parseindicators();
       if (s0 === peg$FAILED) {
-        s0 = peg$parsevocative();
+        s0 = peg$parsefree_vocative();
         if (s0 === peg$FAILED) {
           s0 = peg$parsefree_mai();
           if (s0 === peg$FAILED) {

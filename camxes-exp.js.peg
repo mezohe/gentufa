@@ -998,7 +998,7 @@ fiho_modal = fiho:FIhO_clause free:free* selbri:selbri fehu:FEhU_elidible { fiho
 
 //// EXP-MODIF: brivla/cmevla merge; MEX simplification
 // EXP-MODIF: attempt to formalize lo'ai..sa'ai..le'ai replacement expressions
-free = indicators / vocative / free_mai / xi_clause
+free = indicators / free_vocative / free_mai / xi_clause
 
 free_sei = sei:SEI_clause free:free* terms:(terms CU_elidible free*)* selbri:selbri end:SEhU_elidible {
   var r = {
