@@ -1474,6 +1474,8 @@ LOhU_pre = pre:pre_clause word:LOhU spaces? quoted:(!LEhU w:any_word { return w 
   word.word = "[" + word.word + " " + quoted.map(_bracket).join(" ") + " " + subsumed.word + "]";
   return _word_pre(word, pre);
 }
+
+eternal_lohu = any_word*
 // LOhU_no_SA_handling = pre_clause LOhU spaces? (!LEhU any_word)* LEhU_clause spaces?
 
 // EXP-MODIF: attempt to formalize lo'ai..sa'ai..le'ai replacement expressions

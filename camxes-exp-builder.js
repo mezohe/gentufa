@@ -10,6 +10,7 @@ try {
 		allowedStartRules: [
 			"text",
 			"any_word", // the parser makes use of this internally
+			"eternal_lohu",
 			"sentence",
 			"terms",
 			"bridi_tail",
