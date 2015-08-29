@@ -250,12 +250,18 @@
     return clone;
   }
   
-  function _count_fa(terms, last, used) {
+  function _count_fa(terms, last, used, forgetful) {
     if (!last) last = 1;
     if (!used) used = {};
     function count_single(term) {
       if (!term.tag) {
         if (term.termset) {
+          if (term.quantifier) {
+            var ret = _count_fa(term.terms, last, used, true);
+            last = ret.last;
+            used = ret.used;
+            return !ret.abandoned;
+          }
           return term.terms.every(count_single);
         }
         if (term.left && term.right) {
@@ -280,7 +286,8 @@
           used[num] = true;
         });
         term.fa = term.tagged_fa;
-        while (++last in used);
+        if (!forgetful)
+          while (++last in used);
       }
       if (term.implicit_fa) {
         term.implicit_fa = last;
@@ -290,14 +297,17 @@
         else
           term.fa = [last];
         if (term.tags && term.tags[0]) {
-          var /*hoisting!*/ fa_word = "f" + (_letter_fa[last] || "axi" + last);
+          var /*hoisting!*/ fa_word = "f" + (_letter_fa[last] || "axi" + last + term.boi);
           term.tags[0].word = fa_word;
         }
-        while (++last in used);
+        if (!forgetful)
+          while (++last in used);
       }
       return true;
     }
     var abandon = !terms.every(count_single);
+    if (forgetful && last in used)
+      while (++last in used);
     return {last: last, used: used, abandoned: abandon};
   }
   
@@ -639,7 +649,7 @@ abs_term = start:(termset /
 
 inverted_term = !gek sumti:sumti co:CO_clause tag:tag free:free* { return _term(_fill_free(tag, free), sumti, co) }
 
-fa_elided_term = tag:FA_elidible sumti:sumti { return _term({tags: [tag], structure: [tag], implicit_fa: true, elided: true}, sumti) }
+fa_elided_term = tag:FA_elidible boi:(&(number / lerfu_string) { return true })? sumti:sumti { return _term({tags: [tag], structure: [tag], implicit_fa: true, elided: true, boi: boi ? "boi" : ""}, sumti) }
 
 naku_term = na:NA_clause nafree:free* ku:KU_clause kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }
 
@@ -835,7 +845,7 @@ tanru_unit_1 = (unit:tanru_unit_2 linkargs:linkargs? { return linkargs ? _linkar
 // ** zei is part of BRIVLA_clause
 //// EXP-MODIF: brivla / cmevla merge + add of MEhOI_clause + add of "linkargs tanru_unit_1 / " (for {jai be broda}) + MEX simplification
 tanru_unit_2 = expr:(
-  (brivla:(BRIVLA_clause / MEhOI_clause / GOhOI_clause) free:free* { return _place_shell(_fill_free(brivla, free)) }) 
+  (brivla:(BRIVLA_clause / MUhOI_clause / MEhOI_clause / GOhOI_clause) free:free* { return _place_shell(_fill_free(brivla, free)) }) 
   / (ke:KE_clause kefree:free* selbri:selbri_3 kehe:KEhE_elidible kehefree:free* { return _precedence(_fill_free(ke, kefree), selbri, _fill_free(kehe, kehefree)) }) 
   / (ME_clause free* (sumti / mex) MEhU_elidible free* MOI_clause? free*) 
   / (mex MOI_clause free*) 
@@ -970,7 +980,7 @@ tense_modal =
   var tagged_fa = get_fa(last_tag);
   function get_fa(tag) {
     if (typeof tag.word != "string") return;
-    if (tag.word.match(/f[aeiou]/))
+    if (tag.word.match(/^f[aeiou]$/))
       return _fa_letters[tag.word[1]];
   }
   tag.forEach(function (a) {
@@ -1132,7 +1142,7 @@ pre_clause_no_dot = a:BAhE_clause* { return _empty(a) && [a, null] }
 any_word_SA_handling = BRIVLA_pre / known_cmavo_SA / CMAVO_pre
 
 //// EXP-DEL: LA_pre, for brivla/cmevla merge
-known_cmavo_SA = BAhE_pre / BE_pre / BEI_pre / BEhO_pre / BO_pre / BOI_pre / BU_pre / BY_pre / CAI_pre / CEI_pre / CEhE_pre / CO_pre / COI_pre / CU_pre / DOI_pre / DOhU_pre / FA_pre / FEhE_pre / FEhU_pre / FIhO_pre / FOI_pre / FUhA_pre / FUhE_pre / FUhO_pre / GA_pre / GAhO_pre / GEhU_pre / GI_pre / GIhA_pre / GOI_pre / GOhA_pre / GOhOI_pre / GUhA_pre / I_pre / JAI_pre / JOI_pre / JOhI_pre / KE_pre / KEI_pre / KEhE_pre / KOhA_pre / KU_pre / KUhE_pre / KUhO_pre / LAU_pre / LE_pre / LEhU_pre / LI_pre / LIhU_pre / LOhO_pre / LOhU_pre / LU_pre / LUhU_pre / MAI_pre / MAhO_pre / ME_pre / MEhOI_pre / MEhU_pre / MOI_pre / MOhE_pre / NA_pre / NAI_pre / NAhE_pre / NAhU_pre / NIhE_pre / NIhO_pre / NOI_pre / NU_pre / NUhA_pre / NUhI_pre / NUhU_pre / PA_pre / PEhE_pre / PEhO_pre / PU_pre / ROI_pre / SA_pre / SE_pre / SEI_pre / SEhU_pre / SI_clause / SOI_pre / SU_pre / TEI_pre / TEhU_pre / TO_pre / TOI_pre / TUhE_pre / TUhU_pre / UI_pre / VAU_pre / VEI_pre / VEhO_pre / VUhO_pre / VUhU_pre / XI_pre / ZEI_pre / ZO_pre / ZOI_pre / ZOhOI_pre / ZOhU_pre
+known_cmavo_SA = BAhE_pre / BE_pre / BEI_pre / BEhO_pre / BO_pre / BOI_pre / BU_pre / BY_pre / CAI_pre / CEI_pre / CEhE_pre / CO_pre / COI_pre / CU_pre / DOI_pre / DOhU_pre / FA_pre / FEhE_pre / FEhU_pre / FIhO_pre / FOI_pre / FUhA_pre / FUhE_pre / FUhO_pre / GA_pre / GAhO_pre / GEhU_pre / GI_pre / GIhA_pre / GOI_pre / GOhA_pre / GOhOI_pre / GUhA_pre / I_pre / JAI_pre / JOI_pre / JOhI_pre / KE_pre / KEI_pre / KEhE_pre / KOhA_pre / KU_pre / KUhE_pre / KUhO_pre / LAU_pre / LE_pre / LEhU_pre / LI_pre / LIhU_pre / LOhO_pre / LOhU_pre / LU_pre / LUhU_pre / MAI_pre / MAhO_pre / ME_pre / MEhOI_pre / MEhU_pre / MEIhE_pre / MEIhO_pre / MOI_pre / MOhE_pre / MUhOI_pre / NA_pre / NAI_pre / NAhE_pre / NAhU_pre / NIhE_pre / NIhO_pre / NOI_pre / NU_pre / NUhA_pre / NUhI_pre / NUhU_pre / PA_pre / PEhE_pre / PEhO_pre / PU_pre / ROI_pre / SA_pre / SE_pre / SEI_pre / SEhU_pre / SI_clause / SOI_pre / SU_pre / TEI_pre / TEhU_pre / TO_pre / TOI_pre / TUhE_pre / TUhU_pre / UI_pre / VAU_pre / VEI_pre / VEhO_pre / VUhO_pre / VUhU_pre / XI_pre / ZEI_pre / ZO_pre / ZOI_pre / ZOhOI_pre / ZOhU_pre
 
 // Handling of spaces and things like spaces.
 // ___ SPACE ___
@@ -1539,6 +1549,17 @@ MEIhO_pre = pre:pre_clause word:MEIhO spaces? { return _word_pre(word, pre) }
 MOI_clause = pre:MOI_pre post:indicator_post_clause { return _word_post(pre, post) }
 MOI_pre = pre:pre_clause word:MOI spaces? { return _word_pre(word, pre) }
 // MOI_no_SA_handling = pre_clause MOI post_clause
+
+MUhOI_clause = pre:MUhOI_pre post:post_clause { return _word_post(pre, post) }
+//// EXP-EDIT: ZOI fix
+MUhOI_pre = pre:pre_clause word:MUhOI spaces? open:zoi_open spaces? quoted:zoi_word* close:zoi_close spaces? {
+  word.subsumed = [open, close];
+  word.quoted = quoted || [];
+  word.quoted.word = _join(word.quoted);
+  word.single_word = word.word;
+  word.word = "[" + word.word + " " + open.word + " " + word.quoted.word + " " + close.word + "]";
+  return _word_pre(word, pre)
+}
 
 //         bridi negation  
 NA_clause = pre:NA_pre post:post_clause { return _word_post(pre, post) }
@@ -2284,6 +2305,8 @@ MEIhE = &cmavo expr:( m e i h e ) &post_word {return _word("MEIhE", expr);}
 MEIhO = &cmavo expr:( m e i h o ) &post_word {return _word("MEIhO", expr);}
 
 MOI = &cmavo expr:( m o i h o / m ei / m oi / s i h e / c u h o / v a h e ) &post_word {return _word("MOI", expr);}
+
+MUhOI = &cmavo expr:( m u h oi ) &post_word {return _word("MUhOI", expr);}
 
 NA = &cmavo expr:( j a h a / n a ) &post_word {return _word("NA", expr);}
 
