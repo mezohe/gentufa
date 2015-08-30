@@ -71,6 +71,7 @@
   }
   
   function _quote(word, quote) {
+    word = _duplicate_less_evil(word);
     word.quote = quote;
     word.single_word = word.word;
     word.word = "[" + word.word + " " + (quote.word || quote).replace(/[\][{}()<>]/g, "") + "]";
@@ -111,6 +112,7 @@
   }
   
   function _word_pre(word, pre) {
+    word = _duplicate_less_evil(word);
     if (pre) {
       if (pre[0] && pre[0].length)
         word.pre = pre[0];
@@ -1133,7 +1135,8 @@ indicator_post_clause = !BU_clause spaces? si:si_clause? !ZEI_clause !BU_clause 
   return si && {si: si};
 }
 
-pre_clause = BAhE_clause* (&(nucleus / cmevla) {return "."})?
+pre_clause = BAhE_clause* pre_dot
+pre_dot = (&(nucleus / cmevla) {return "."})?
 pre_clause_no_dot = a:BAhE_clause* { return _empty(a) && [a, null] }
 
 //// EXP-DELETION: brivla/cmevla merge
@@ -1762,12 +1765,15 @@ ZO_pre = pre:pre_clause word:ZO spaces? quoted:any_word spaces? {
 //         delimited quote marker 
 ZOI_clause = pre:ZOI_pre post:post_clause { return _word_post(pre, post) }
 //// EXP-EDIT: ZOI fix
-ZOI_pre = pre:pre_clause word:ZOI spaces? open:zoi_open spaces? quoted:zoi_word* close:zoi_close spaces? {
+ZOI_pre = pre:pre_clause word:ZOI spaces? open:zoi_open spaces? quoted:zoi_word* close:zoi_close dot:(post_word &. !nucleus !cmevla { return "." })? spaces? {
   word.subsumed = [open, close];
   word.quoted = quoted || [];
   word.quoted.word = _join(word.quoted);
   word.single_word = word.word;
-  word.word = "[" + word.word + " " + open.word + " " + word.quoted.word + " " + close.word + "]";
+  var open_word = open.word.match(/\.$/) ? open.word : open.word + ".";
+  var close_word = _empty(dot) ? close.word + dot : close.word;
+  if (close_word[0] != ".") close_word = "." + close_word;
+  word.word = "[" + word.word + " " + open_word + " " + word.quoted.word + " " + close_word + "]";
   return _word_pre(word, pre)
 }
 // ZOI_no_SA_handling = pre_clause ZOI spaces? zoi_open zoi_word* zoi_close spaces?
@@ -1868,7 +1874,13 @@ CMAVO = expr:(BAhE / BE / BEI / BEhO / BO / BOI / BU / BY / CAI / CEI / CEhE / C
 // word = expr:lojban_word / non_lojban_word { return expr; }
 
 // lojban_word = expr:(cmevla / cmavo / brivla) { return expr; }
-lojban_word = expr:(CMAVO / BRIVLA) { return expr; }
+lojban_word = dot:pre_dot expr:(CMAVO / BRIVLA) {
+  if (_empty(dot)) {
+    expr = _duplicate_less_evil(expr); 
+    expr.word = dot + expr.word;
+  }
+  return expr;
+}
 
 any_word = expr:lojban_word spaces? { return expr; }
 
