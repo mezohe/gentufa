@@ -57576,13 +57576,12 @@ var camxes = (function() {
         function count_single(term) {
           if (!term.tag) {
             if (term.termset) {
-              if (term.quantifier) {
-                var ret = _count_fa(term.terms, last, used, true);
+              var ret = _count_fa(term.terms, last, used, term.quantifier);
+              if (!term.quantifier) {
                 last = ret.last;
                 used = ret.used;
-                return !ret.abandoned;
               }
-              return term.terms.every(count_single);
+              return !ret.abandoned;
             }
             if (term.left && term.right) {
               var left = _count_fa(term.left.terms || [term.left], last, _duplicate_evil(used));
