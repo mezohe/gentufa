@@ -2953,7 +2953,7 @@ var camxes = (function() {
     }
 
     function peg$parsebridi_tail_2() {
-      var s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10;
+      var s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11;
 
       var key    = peg$currPos * 634 + 21,
           cached = peg$resultsCache[key];
@@ -2965,7 +2965,7 @@ var camxes = (function() {
       }
 
       s0 = peg$currPos;
-      s1 = peg$parseCU_clause();
+      s1 = peg$parseCU_elidible();
       if (s1 !== peg$FAILED) {
         s2 = [];
         s3 = peg$parsefree();
@@ -2988,30 +2988,48 @@ var camxes = (function() {
                 s6 = peg$parsefree();
               }
               if (s5 !== peg$FAILED) {
-                s6 = [];
-                s7 = peg$parsebridi_tail_1();
+                s6 = peg$currPos;
+                peg$silentFails++;
+                s7 = peg$parseselbri();
+                if (s7 === peg$FAILED) {
+                  s7 = peg$parseCU_clause();
+                }
+                peg$silentFails--;
                 if (s7 !== peg$FAILED) {
-                  while (s7 !== peg$FAILED) {
-                    s6.push(s7);
-                    s7 = peg$parsebridi_tail_1();
-                  }
+                  peg$currPos = s6;
+                  s6 = void 0;
                 } else {
                   s6 = peg$FAILED;
                 }
                 if (s6 !== peg$FAILED) {
-                  s7 = peg$parsetail_terms();
+                  s7 = [];
+                  s8 = peg$parsebridi_tail_1();
+                  if (s8 !== peg$FAILED) {
+                    while (s8 !== peg$FAILED) {
+                      s7.push(s8);
+                      s8 = peg$parsebridi_tail_1();
+                    }
+                  } else {
+                    s7 = peg$FAILED;
+                  }
                   if (s7 !== peg$FAILED) {
-                    s8 = peg$parseNUhU_elidible();
+                    s8 = peg$parsetail_terms();
                     if (s8 !== peg$FAILED) {
-                      s9 = [];
-                      s10 = peg$parsefree();
-                      while (s10 !== peg$FAILED) {
-                        s9.push(s10);
-                        s10 = peg$parsefree();
-                      }
+                      s9 = peg$parseNUhU_elidible();
                       if (s9 !== peg$FAILED) {
-                        s1 = [s1, s2, s3, s4, s5, s6, s7, s8, s9];
-                        s0 = s1;
+                        s10 = [];
+                        s11 = peg$parsefree();
+                        while (s11 !== peg$FAILED) {
+                          s10.push(s11);
+                          s11 = peg$parsefree();
+                        }
+                        if (s10 !== peg$FAILED) {
+                          s1 = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10];
+                          s0 = s1;
+                        } else {
+                          peg$currPos = s0;
+                          s0 = peg$FAILED;
+                        }
                       } else {
                         peg$currPos = s0;
                         s0 = peg$FAILED;

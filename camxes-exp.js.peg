@@ -537,7 +537,7 @@ bridi_tail_1 = start:bridi_tail_2 repeat:((gihek (tag:tag &KE_clause { return ta
 
 //// EXP-MODIF: GI TAG BO + JACU
 bridi_tail_2 = 
-cu:CU_clause cufree:free* quant:quantifier? meihi:NUhI_clause meihifree:free* tails:bridi_tail_1+ tail_terms:tail_terms meiho:NUhU_elidible meihofree:free*
+cu:CU_elidible cufree:free* quant:quantifier? meihi:NUhI_clause meihifree:free* &(selbri / CU_clause) tails:bridi_tail_1+ tail_terms:tail_terms meiho:NUhU_elidible meihofree:free*
 //{
 //  
 //}
