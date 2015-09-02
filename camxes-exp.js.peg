@@ -315,16 +315,20 @@
   function _count_fa_tail(tail, last, used) {
     if (tail == null) return null;
     if (tail.contents) tail = tail.contents;
-    if (tail.left && tail.right) {
-      var left = _count_fa_tail(tail.left, last, _duplicate_evil(used));
-      var right = _count_fa_tail(tail.right, last, _duplicate_evil(used));
-      if (left.abandoned || right.abandoned || left.last != right.last || JSON.stringify(left.used) != JSON.stringify(right.used)) {
+    var tails = tail.tails || (tail.left && tail.right ? [tail.left, tail.right] : null);
+    if (tails) {
+      var counts = tails.map(function (tail) { return _count_fa_tail(tail, last, _duplicate_less_evil(used)) });
+      if (counts.some(function (tail, i, a) {
+            return tail.abandoned
+              || i > 0 && tail.last != a[i - 1].last
+              || i > 0 && JSON.stringify(tail.used) != JSON.stringify(a[i - 1].used) 
+          })) {
         //console.log("gihek abandoned! " + JSON.stringify(left) + JSON.stringify(right))
         return false;
       } else {
         //console.log("gihek NOT abandoned! " + JSON.stringify(left) + JSON.stringify(right))
-        last = right.last;
-        used = right.used;
+        last = counts[tails.length - 1].last;
+        used = counts[tails.length - 1].used;
       }
     } else {
       if (tail.tail) {
@@ -343,6 +347,23 @@
       last = 1; while (++last in used);
     }
     if (tail.tail_terms && tail.tail_terms.terms) {
+      if (tail.selbri && tail.selbri.co) {
+        var /* hoisting */ postterms = _count_fa(tail.tail_terms.terms.terms, 2, {});
+        if (postterms.abandoned) {
+          preterms.abandoned = true;
+          return preterms;
+        }
+        return {
+          used: Object.keys(postterms.used).reduce(function (a, b) {
+              if (postterms[b])
+                a[b] = postterms[b];
+              return a;
+            }, _duplicate_less_evil(preterms.used)),
+          last: Math.max(preterms.last, postterms.last),
+          coleft: preterms,
+          coright: postterms,
+        };
+      }
       preterms = _count_fa(tail.tail_terms.terms.terms, last, used);
     }
     return preterms;
@@ -516,7 +537,7 @@ sentence_no_count = head:terms? tail:bridi_tail {
   return ret;
 }
 
-sentence_sa = expr:(sentence_start (!sentence_start (sa_word / SA_clause !sentence_start ) )* SA_clause &text_1) 
+sentence_sa = expr:(sentence_start? (!sentence_start (sa_word / SA_clause !sentence_start ) )* SA_clause &text_1) 
 
 sentence_start = expr:(I_pre / NIhO_pre) 
 
@@ -537,10 +558,15 @@ bridi_tail_1 = start:bridi_tail_2 repeat:((gihek (tag:tag &KE_clause { return ta
 
 //// EXP-MODIF: GI TAG BO + JACU
 bridi_tail_2 = 
-cu:CU_elidible cufree:free* quant:quantifier? meihi:NUhI_clause meihifree:free* &(selbri / CU_clause) tails:bridi_tail_1+ tail_terms:tail_terms meiho:NUhU_elidible meihofree:free*
-//{
-//  
-//}
+cu:CU_elidible cufree:free* quant:quantifier? meihi:NUhI_clause meihifree:free* &(selbri / CU_clause) tails:bridi_tail_1+ meiho:NUhU_elidible meihofree:free* tail_terms:tail_terms
+{
+  return {
+    structure: [_fill_free(cu, cufree), quant, _fill_free(meihi, meihifree), tails, _fill_free(meiho, meihofree), tail_terms],
+    tails: tails,
+    tail_terms: tail_terms,
+    quantifier: quant,
+  }
+}
 / cu:CU_elidible start:bridi_tail_3 repeat:((gihek tag? / GI_clause? tag) BO_clause free* bridi_tail_2 tail_terms)? {
   start.cu = cu;
   start.structure = [cu, _shell(start)];
