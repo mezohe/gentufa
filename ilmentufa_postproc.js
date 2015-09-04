@@ -41,6 +41,7 @@ function camxes_postprocessing(text, mode) {
 	if (mode.format == "rawstructure") return JSON.stringify(text);
 	if (mode.format == "raw") return JSON.stringify(remove_structure(text));
 	if (mode.format == "brackets") return prettify_brackets(bracket(text, mode));
+	if (mode.format == "text") return prettify_brackets(bracket(text, mode)).replace(/[\][(){}<>¹²³⁴⁵⁶⁷⁸⁹]/g, "");
 	if (mode.format == "gloss") return prettify_brackets(gloss(text, glossfallback));
 	throw "invalid mode";
 }

@@ -124,6 +124,8 @@ function box(toggle) {
 var output_checks = [
   {name: "lo te pruce cu fegli", get: function () { return g_options.format == "raw" }, 
                       set: function (value) { g_options.format = value ? "raw" : "brackets" },},
+  {name: "lo stura lerfu na se viska", get: function () { return g_options.format == "text" }, 
+                      set: function (value) { g_options.format = value ? "text" : "brackets" },},
   toggle("viska lo selma'o cmene", "s"),
   toggle("viska lo se rivbi famyma'o", "f"),
   toggle("viska lo srana be ma'oi se", "p"),
@@ -142,16 +144,17 @@ var c_voi = toggle("zo voi cmavo ma'oi nu", "voi"),
     c_po = toggle("lo'u po po'e le'u dunli lu xu'u ku'au li'u", "po"),
     c_koi = toggle("zo koi cmavo ma'oi ui", "koi"),
     c_lau = toggle("zo lau cmavo ma'oi ko'a", "lau"),
+    c_faje = toggle("lu fa je ti li'u je lu fa noi mo li'u gendra", "faje"),
     c_lerfu = toggle("ro lerpoi zo'u pa da lerkle", "lerfu"),
     c_rafcau = toggle("se gu rafcla valstuge'a gi rafcau valturge'a", "rafcau"),
     c_diftogoteha = toggle("lo clani cmavo cu se terpa", "diftogoteha");
-var micro_checks = [c_voi, c_ckt, c_du, c_su, c_buhu, c_bu, c_zai, c_po, c_koi, c_lau, c_lerfu, c_rafcau, c_diftogoteha];
+var micro_checks = [c_voi, c_ckt, c_du, c_su, c_buhu, c_bu, c_zai, c_po, c_koi, c_lau, c_faje, c_lerfu, c_rafcau, c_diftogoteha];
 var c_fadni = {name: "fadni jbobau", 
-               conds: [c_voi, c_ckt, c_du, c_su, c_bu, c_zai, c_po, c_koi, c_lau, c_lerfu, c_diftogoteha],
+               conds: [c_voi, c_ckt, c_du, c_su, c_bu, c_zai, c_po, c_koi, c_lau, c_faje, c_lerfu, c_diftogoteha],
                get: function () { return this.conds.every(function (a) { return !a.get() }) },
                set: function (a) { if (a) { this.conds.forEach(function (b) { b.set(false) }); c_buhu.set(true) } },},
     c_cetki = {name: "cetkitaujbo", 
-               conds: [c_voi, c_ckt, c_du, c_su, c_zai, c_po, c_koi, c_lau, not(c_lerfu), not(c_diftogoteha)],
+               conds: [c_voi, c_ckt, c_du, c_su, c_zai, c_po, c_koi, c_lau, c_faje, not(c_lerfu), not(c_diftogoteha)],
                get: function () { return this.conds.every(function (a) { return a.get() }) },
                set: function (a) { if (a) { this.conds.forEach(function (b) { b.set(true) }) } },},
     /*c_xorxo = {name: "xorjbo", 
@@ -159,7 +162,7 @@ var c_fadni = {name: "fadni jbobau",
                get: function () { return this.conds.every(function (a) { return a.get() }) },
                set: function (a) { if (a) { this.conds.forEach(function (b) { b.set(true) }) } },},*/
     c_djemu = {name: "djemyjbo", 
-               conds: [c_voi, c_ckt, c_du, c_su, c_zai, c_po, c_koi, c_lau, c_diftogoteha, not(c_lerfu)],
+               conds: [c_voi, c_ckt, c_du, c_su, c_zai, c_po, c_koi, c_lau, c_diftogoteha, c_faje, not(c_lerfu)],
                get: function () { return this.conds.every(function (a) { return a.get() }) },
                set: function (a) { if (a) { this.conds.forEach(function (b) { b.set(true) }) } },};
 

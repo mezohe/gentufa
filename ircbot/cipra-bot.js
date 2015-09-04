@@ -121,12 +121,13 @@ function extract_mode(input) {
 				ret.lau = bool;
 				ret.po = bool;
 				ret.koi = bool;
+				ret.faje = bool;
 				if (name == "zaho")
 					ret.diftogoteha = bool;
 			} else if (name in buhu) {
 				ret.buhu = bool ? name : "buhu";
 			} else if (name in formats) {
-				ret.format = bool ? formats[name] : "brackets";
+				ret.format = bool ? formats[name] : name == "brackets" ? "text" : "brackets";
 			} else if (name in ret) {
 				ret[name] = bool;
 			} else {

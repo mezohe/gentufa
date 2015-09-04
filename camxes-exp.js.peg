@@ -646,33 +646,43 @@ terms_2 = start:abs_term repeat:(CEhE_clause free* abs_term)* {
   return {termset: "cehe", terms: start, structure: start.slice(1).reduce(function (a,b) { return a.concat([b.cehe, b]) }, [start[0]])};
 }
 
-term = start:(termset /
-  (!gek tag:tag free:free* sumti:(sumti / (ku:KU_elidible free:free* { return _fill_free(ku, free) })) { return _term(_fill_free(tag, free), sumti) })
+term = tag_term / fa_elided_term
+
+tag_term = start:(termset /
+  (!gek tag:tag free:free* sumti:(
+    sumti 
+    / &{return options.faje} (jek:joik_ek sumti:sumti_3 { return _fill_jek(null, jek, sumti) })
+    / &{return options.faje} relative_clauses
+    / (ku:KU_elidible free:free* { return _fill_free(ku, free) })
+    ) { return _term(_fill_free(tag, free), sumti) })
   / inverted_term / naku_term
   / (!(!sumti !gek_termset gek) !joik_ek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }) 
   / soi_term
-) repeat:(joik_ek term)* {
+) repeat:(joik_ek tag_term)* {
   repeat.forEach(function (r) {
     start = _fill_jek(start, r[0], r[1]);
   });
   return start;
-} / fa_elided_term
+}
 
-abs_term = start:(termset /
+abs_term = abs_tag_term / fa_elided_term
+
+abs_tag_term = start:(termset /
   (!gek tag:tag free:free* !BO_clause !selbri !gek_sentence sumti:(
     sumti 
-    / (jek:joik_ek sumti:sumti_3 { return _fill_jek(null, jek, sumti) })
+    / &{return options.faje} (jek:joik_ek sumti:sumti_3 { return _fill_jek(null, jek, sumti) })
+    / &{return options.faje} relative_clauses
     / (ku:KU_elidible free:free* { return _fill_free(ku, free) })
     ) { return _term(_fill_free(tag, free), sumti) })
   / inverted_term / naku_term
   / (!selbri !(!sumti !gek_termset gek_sentence) !joik_ek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) })
   / soi_term
-) repeat:(joik_ek abs_term)* {
+) repeat:(joik_ek abs_tag_term)* {
   repeat.forEach(function (r) {
     start = _fill_jek(start, r[0], r[1]);
   });
   return start;
-} / fa_elided_term
+}
 
 inverted_term = !gek sumti:sumti co:CO_clause tag:tag free:free* { return _term(_fill_free(tag, free), sumti, co) }
 
@@ -684,7 +694,7 @@ soi_term = soi:SOI_clause soifree:free* bridi:subsentence sehu:SEhU_elidible seh
 
 termset = gek_termset 
   / NUhI_clause free* gek terms NUhU_elidible free* gik terms NUhU_elidible free*
-  / (quantifier:quantifier? nuhi:KE_clause nuhifree:free* &tense_modal terms:terms nuhu:KEhE_elidible nuhufree:free* { return {
+  / (quantifier:quantifier? nuhi:KE_clause nuhifree:free* &(gek? tense_modal / termset) terms:terms nuhu:KEhE_elidible nuhufree:free* { return {
     termset: "nuhi", 
     quantifier: quantifier, 
     terms: terms.terms, 
@@ -993,10 +1003,13 @@ tag = start:tense_modal repeat:(joik_ek tense_modal)* {
   return start;
 }
 
+tag_ke = ke:KE_clause kefree:free* tag:tag kehe:KEhE_elidible? kehefree:free* {
+  return _precedence(_fill_free(ke, kefree), tag, _fill_free(kehe, kehefree))
+}
+
 //// EXP-MODIF: MEX simplification
 tense_modal = 
-  guhek:guhek left:tag gik:gik right:(ke:KE_clause kefree:free* tag:tag kehe:KEhE_elidible? kehefree:free* {
-      return _precedence(_fill_free(ke, kefree), tag, _fill_free(kehe, kehefree)) } / tense_modal) {
+  guhek:guhek left:tag gik:gik right:(tag_ke / tense_modal) {
     return _fill_gek(guhek, left, gik, right);
   } / nahe:NAhE_clause* se:SE_clause? fehe:FEhE_clause*
     tag:(tag:(PU_clause / roi_tense / fiho_modal / FA_clause) free:free* { return _fill_free(tag, free) })+ {
@@ -1791,7 +1804,7 @@ ZO_pre = pre:pre_clause word:ZO spaces? quoted:any_word spaces? {
 //         delimited quote marker 
 ZOI_clause = pre:ZOI_pre post:post_clause { return _word_post(pre, post) }
 //// EXP-EDIT: ZOI fix
-ZOI_pre = pre:pre_clause word:ZOI spaces? open:zoi_open spaces? quoted:zoi_word* close:zoi_close dot:(post_word &. !nucleus !cmevla { return "." })? spaces? {
+ZOI_pre = pre:pre_clause word:ZOI spaces? open:zoi_open spaces? quoted:zoi_word* close:zoi_close dot:(&(post_word &. !nucleus !cmevla) { return "." })? spaces? {
   word.subsumed = [open, close];
   word.quoted = quoted || [];
   word.quoted.word = _join(word.quoted);
@@ -1987,7 +2000,7 @@ rafsi_string = expr:(y_less_rafsi* rafsi_string_1) { return _join(expr); }
 rafsi_string_1 = gismu / CVV_final_rafsi / stressed_y_less_rafsi short_final_rafsi_nonlogbanu / y_rafsi / stressed_y_rafsi / hy_rafsi &onset / stressed_hy_rafsi &onset
 
 lujvly = expr:((!lujvly_1 y_less_rafsi)* (lujvly_1 / rafsi_string_1))
-lujvly_1 = (stressed_y_less_rafsi / y_less_rafsi) initial_pair y
+lujvly_1 = (stressed_y_less_rafsi / y_less_rafsi) initial_pair y !coda
 
 slihykru = (CCV_rafsi / stressed_CCV_rafsi) h y onset
 
@@ -2059,27 +2072,28 @@ unstressed_vowel = expr:(!stressed vowel !stress) {return _join(expr);}
 
 //// FIX: Xorxes' fix for fu'ivla rafsi stress
 //// EXP-MODIF: CyC syllables in fuhivla
-stress = expr:(((consonant / h) y coda / consonant / glide)* h? y? syllable pause) {return _join(expr);}
+stress = expr:((any_onset y coda / consonant / glide)* h? y? syllable pause) {return _join(expr);}
 
 stressed = expr:(onset comma* [AEIOU]) {return _join(expr);}
 
 //// EXP-MODIF: CyC syllables in fuhivla
-any_syllable = expr:(consonantal_syllable / syllable / onset y !nucleus) {return _join(expr);}
-any_unstressed_syllable = expr:(consonantal_syllable / !stressed onset nucleus coda? !stress) { return _join(expr) }
+any_syllable = expr:(medial_syllable / syllable) {return _join(expr);}
+any_unstressed_syllable = expr:(medial_syllable / !stressed onset !y nucleus coda? !stress) { return _join(expr) }
 medial_syllable = expr:(consonantal_syllable / onset y) { return _join(expr) }
 
 syllable = expr:(onset !y nucleus coda?) {return _join(expr);}
 
 //// FIX: preventing {bla'ypre} from being a valid lujvo
 //// EXP-MODIF: CyC syllables in fuhivla
-consonantal_syllable = expr:((consonant / h) y coda / consonant &syllabic coda) //{return _join(expr);}
+consonantal_syllable = expr:(any_onset y coda / consonant &syllabic coda) //{return _join(expr);}
  {var foo = _join(expr); if (foo.length == 2) return foo[0] + "y" + foo[1]; return foo }
 
 //// EXP-MODIF: CyC syllables in fuhivla
-coda = expr:(consonant &consonantal_syllable / !any_syllable consonant &any_syllable) {return _join(expr);}
+coda = expr:(!any_syllable consonant &any_syllable) {return _join(expr);}
 
 //// EXP-MODIF: CyC syllables in fuhivla
-onset = !consonantal_syllable expr:(h / glide / initial) {return _join(expr);}
+any_onset = expr:(h / glide / initial) {return _join(expr);}
+onset = !consonantal_syllable expr:(any_onset) {return expr;}
 
 nucleus = expr:(vowel / diphthong / y !nucleus) {return _join(expr);}
 
@@ -2156,7 +2170,7 @@ s = comma* [sS] !h !glide !s !c !voiced {return "s";}
 
 c = comma* [cC] !h !glide !c !s !voiced {return "c";}
 
-x = comma* [xX] !h !glide !x !k !voiced {return "x";}
+x = comma* [xX] !h !glide !x !voiced {return "x";}
 
 k = comma* [kK] !h !k !x !voiced {return "k";}
 

@@ -6,9 +6,10 @@ var docs = {
 			"  optiio = [+-][a-z]+\n" +
 			"fa (to zo selsku sinxa la'oi text ne lo gerna be lo jbobau toi)\n" +
 			".i lo nu pilno lo .optiio zo'u tu'e\n" +
-			"  .i zo'oi  +brackets  noi ditfaulte zo'u lo te pruce cu se melgau je nai cu se fanva\n" +
-			"  .i zo'oi  +gloss                   zo'u lo skami cu spoja\n" + //te pruce cu gloso fi lo glibau (to na sai bredi toi)\n" +
-			"  .i zo'oi  +raw                     zo'u lo te pruce na se melgau\n" +
+			"  .i zo'oi  +stura     noi ditfaulte zo'u lo te pruce cu se melgau\n" +
+			"  .i zo'oi  +flecu                   zo'u lo te pruce cu se melgau je na se pagbu lo stura lerfu\n" +
+			"  .i zo'oi  +glosa                   zo'u lo skami cu spoja\n" + //te pruce cu gloso fi lo glibau (to na sai bredi toi)\n" +
+			"  .i zo'oi  +krasi                   zo'u lo te pruce na se melgau\n" +
 			"  .i zo'oi  +s                       zo'u lo cmene be lo selma'o cu pagbu\n" +
 			"  .i zo'oi  +f         noi ditfaulte zo'u lo famyma'o poi jai se rivbi cu pagbu\n" +
 			"  .i zo'oi  +p                       zo'u lo tersumpoi pe lo selbrisle cu pagbu\n" +
@@ -25,6 +26,7 @@ var docs = {
 			"                                          .i je ma'oi ku'au se cmene zo po'e noi cmavo vo'a je nai ma'oi goi \n" +
 			"  .i zo'oi  +koi                     zo'u zo koi cmavo ma'oi ui je nai ma'oi pu\n" +
 			"  .i zo'oi  +lau                     zo'u zo lau cmavo ma'oi ko'a je nai ma'oi lau noi se cmene zo ce'a\n" +
+			"  .i zo'oi  +faje                    zo'u lo sumtcita cu se sumti lo ra'abri je lo simsa be lo'u je ti le'u ka'e ku \n" +
 			"  .i zo'oi  +lerfu                   zo'u na ka'e ku su'o lerpoi cu se pagbu ge su'o vlale'u gi su'o nacle'u \n" +
 			"  .i zo'oi  +rafcau                  zo'u lo se gu rafcla valstuge'a gi rafcau valturge'a cu se pilno \n" +
 			"                                          (to pa javni zo'u ro brivla da jai cuntu toi) \n" +
@@ -44,7 +46,8 @@ var docs = {
 			"  option = [+-][a-z]+\n" +
 			"(\"text\" refers to the \"text\" rule of the Lojban grammar)\n" +
 			"Use of options:\n" +
-			"  +brackets  (default): the output is prettified but not translated\n" +
+			"  +brackets  (default): the output is prettified\n" +
+			"  +text               : the output is prettified and brackets are removed\n" +
 			"  +gloss              : the computer explodes\n" + //output is glossed into English (not by any means complete)\n" +
 			"  +raw                : the output is not prettified\n" +
 			"  +s                  : selma'o names are shown\n" +
@@ -62,6 +65,7 @@ var docs = {
 			"                        and {po'e} is not in GOI, but in KUhAU, which is named POhE\n" +
 			"  +koi                : {koi} is in UI, not PU\n" +
 			"  +lau                : {lau} is in KOhA, not LAU, which is named CEhA\n" +
+			"  +faje               : tags can take relative clauses or phrases like \"je ti\" as arguments\n" +
 			"  +lerfu              : no letter or number sequence may contain both letters and numbers\n" +
 			"  +rafcau             : rafsi-free morphology (single brivla rule)\n" +
 			"  +dujoi              : {du} is in JOI, not GOhA\n" +
@@ -73,16 +77,17 @@ var docs = {
 			,
 };
 
-var minisyntax = config.nick + ": (([+-](brackets|gloss|raw|s|f|p|k|voi|ckt|du|su|buhu|bu|zai|po|koi|lau|lerfu|rafcau|dujoi|diftogoteha|cktj|zaho))+ )? ";
+var minisyntax = config.nick + ": (([+-](brackets|gloss|raw|s|f|p|k|voi|ckt|du|su|buhu|bu|zai|po|koi|lau|faje|lerfu|rafcau|dujoi|diftogoteha|cktj|zaho))+ )? ";
 
 var minidocs = {
-	"+sidju": "lo sintasa zo'u  " + minisyntax + "LO_SELSKU_POI_TE_GENTUFA\n.i lo ditfaulte zo'u  +brackets+f+k+voi+buhu\n.i lo nu benji lo sivni notci pe zo'oi +sidju cu rinka lo nu viska lo zmadu",
-	"+help": "syntax:  " + minisyntax + "TEXT_TO_PARSE\ndefault:  +brackets+f+k+voi+buhu\nSend a private message with \"+help\" to see more",
+	"+sidju": "lo sintasa zo'u  " + minisyntax + "LO_SELSKU_POI_SE_GENTUFA\n.i lo ditfaulte zo'u  +brackets+f+k+voi+buhu+faje\n.i lo nu benji lo sivni notci pe zo'oi +sidju cu rinka lo nu viska lo zmadu",
+	"+help": "syntax:  " + minisyntax + "TEXT_TO_PARSE\ndefault:  +brackets+f+k+voi+buhu+faje\nSend a private message with \"+help\" to see more",
 };
 
 var formats = {
-	brackets: "brackets", gloss: "gloss", raw: "raw",
-	b: "brackets", g: "gloss", r: "raw",
+	brackets: "brackets", text: "text", gloss: "gloss", raw: "raw",
+	b: "brackets", t: "text", g: "gloss", r: "raw",
+	stura: "brackets", flecu: "text", glosa: "gloss", gloso: "gloss", krasi: "raw",
 };
 var buhu = {
 	buhu: 1, zai: 1, bu: 1,
@@ -101,6 +106,7 @@ var ret = {
 	po: false,
 	koi: false,
 	lau: false,
+	faje: true,
 	lerfu: false,
 	dujoi: false,
 	diftogoteha: false,
