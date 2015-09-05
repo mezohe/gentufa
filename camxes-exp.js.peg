@@ -74,7 +74,10 @@
     word = _duplicate_less_evil(word);
     word.quote = quote;
     word.single_word = word.word;
-    word.word = "[" + word.word + " " + (quote.word || quote).replace(/[\][{}()<>]/g, "") + "]";
+    if (options.text)
+      word.word = word.word + " " + (quote.word || quote);
+    else
+      word.word = "[" + word.word + " " + (quote.word || quote).replace(/[\][{}()<>]/g, "") + "]";
     return word;
   }
   
@@ -96,6 +99,7 @@
     if (Array.isArray(array)) {
       array = array.filter(_empty);
       if (array.length == 1) return _bracket(array[0]);
+      else if (options.format == "text") return array.map(_bracket).join(" ");
       else return "[" + array.map(_bracket).join(" ") + "]";
     }
     
@@ -492,9 +496,7 @@
   }
 }
 
-//fax = expr:(fragment / statement) //{ return [_bracket(expr), expr] }
-
-text = intro_null free:free* joik:(!gek !text_1 joik_ek)? t1:text_1? faho_clause EOF? { return [_empty(free), _empty(joik), _empty(t1)] }
+text = intro_null free:free* t1:text_1? faho_clause EOF? { return [_empty(free), _empty(t1)] }
 
 intro_null = expr:(spaces? su_clause* intro_si_clause) 
 
@@ -505,21 +507,23 @@ faho_clause = expr:((FAhO_clause dot_star)?)
 // Please note that the "text_1" item in the text_1 production does
 // *not* match the BNF. This is due to a bug in the BNF.  The change
 // here was made to match grammar.300
-text_1 = expr:(I_clause (!gek joik_ek)? (tag? BO_clause)? free* text_1? / NIhO_clause+ free* su_clause* paragraphs? / paragraphs) 
+text_1 = expr:((NIhO_clause+ free* su_clause*)? paragraphs) 
 
 paragraphs = expr:(paragraph? (NIhO_clause+ free* su_clause* paragraphs)?) 
 
-paragraph = expr:((fragment / statement) (I_clause !(!gek joik_ek) free* (statement / fragment)?)*) 
+paragraph = expr:(lone_jek? (tag BO_clause)? (I_clause lone_jek? (tag BO_clause)?)? (statement / fragment) (I_clause !lone_jek free* (statement / fragment))*) 
 
 statement = expr:(prenex statement / statement_1) 
 
-statement_1 = expr:(statement_2 (I_clause (!gek joik_ek) statement_2?)*) 
+statement_1 = expr:(statement_2 (I_clause lone_jek statement_2?)*) 
 
-statement_2 = expr:(statement_3 (I_clause (!gek joik_ek)? tag? BO_clause free* statement_2)? / statement_3 (I_clause (!gek joik_ek)? tag? BO_clause free*)?) 
+statement_2 = expr:(statement_3 (I_clause lone_jek? tag? BO_clause free* statement_2)?) 
 
 statement_3 = expr:(tag? TUhE_clause free* text_1 TUhU_elidible free* / sentence) 
 
-fragment = expr:((!gek joik_ek) free* / !term !tag quantifier / relative_clauses / links / linkargs) 
+fragment = expr:(lone_jek / !term !tag quantifier / relative_clauses / links / linkargs) 
+
+lone_jek = !gek joik_ek free*
 
 prenex = expr:(terms? ZOhU_clause free*) 
 
@@ -778,7 +782,7 @@ sumti_5 = (quantifier:quantifier? sumti:sumti_6 relative:relative_clauses? {
 
 sumti_6 = simple_sumti
   / (!tag !selbri lerfu_string BOI_elidible free*)
-  / LU_clause text LIhU_elidible free* 
+  / lu:LU_clause text:text lihu:LIhU_elidible lihufree:free* { return {clause: "lu", structure: [lu, text, _fill_free(lihu, lihufree)], } }
   / !tag lahe_nahe relative_clauses? (sumti / term) LUhU_elidible free* 
   / (gadri:LE_clause free:free* tail:sumti_tail ku:KU_elidible kufree:free* {
     return {
@@ -1075,6 +1079,7 @@ free_mai = mex:mex_2 mai:MAI_clause {
 }
 
 free_to = to:TO_clause text:text toi:TOI_elidible {
+  to.clause = "free_to";
   to.text = text;
   to.terminator = toi;
   to.structure = [_shell(to), text, toi];
@@ -1110,7 +1115,10 @@ post:post_clause {
     r.word += bu.bu_tail.string;
   });
   r.subsumed = r.subsumed.concat(tail.subsumed);
-  r.word = "[" + r.word + tail.string + "]";
+  if (options.format == "text")
+    r.word = r.word + tail.string;
+  else
+    r.word = "[" + r.word + tail.string + "]";
   return r;
 }
 // zei_clause_no_SA = pre_zei_bu_no_SA (zei_tail? bu_tail)* zei_tail
@@ -1127,7 +1135,10 @@ bu_clause_no_pre = pre:pre_zei_bu zei:(b:bu_tail? z:zei_tail { return {bu_tail: 
     r.word += zei.zei_tail.string;
   });
   r.subsumed = r.subsumed.concat(tail.subsumed);
-  r.word = "[" + r.word + tail.string + "]";
+  if (options.format == "text")
+    r.word = r.word + tail.string;
+  else
+    r.word = "[" + r.word + tail.string + "]";
   return r;
 }
 // bu_clause_no_SA = pre_zei_bu_no_SA (bu_tail? zei_tail)* bu_tail
@@ -1522,7 +1533,10 @@ LOhU_pre = pre:pre_clause word:LOhU spaces? quoted:(!LEhU w:any_word { return w 
   word.quoted = quoted || [];
   word.subsumed = subsumed;
   word.single_word = word.word;
-  word.word = "[" + word.word + " " + quoted.map(_bracket).join(" ") + " " + subsumed.word + "]";
+  if (options.format == "text")
+    word.word = word.word + " " + quoted.map(_bracket).join(" ") + " " + subsumed.word;
+  else
+    word.word = "[" + word.word + " " + quoted.map(_bracket).join(" ") + " " + subsumed.word + "]";
   return _word_pre(word, pre);
 }
 
@@ -1596,9 +1610,12 @@ MUhOI_clause = pre:MUhOI_pre post:post_clause { return _word_post(pre, post) }
 MUhOI_pre = pre:pre_clause word:MUhOI spaces? open:zoi_open spaces? quoted:zoi_word* close:zoi_close spaces? {
   word.subsumed = [open, close];
   word.quoted = quoted || [];
-  word.quoted.word = _join(word.quoted);
+  word.quoted.word = word.quoted.join(" ");
   word.single_word = word.word;
-  word.word = "[" + word.word + " " + open.word + " " + word.quoted.word + " " + close.word + "]";
+  if (options.format == "text")
+    word.word = word.word + " " + open.word + " " + word.quoted.word + " " + close.word;
+  else
+    word.word = "[" + word.word + " " + open.word + " " + word.quoted.word + " " + close.word + "]";
   return _word_pre(word, pre)
 }
 
@@ -1807,12 +1824,15 @@ ZOI_clause = pre:ZOI_pre post:post_clause { return _word_post(pre, post) }
 ZOI_pre = pre:pre_clause word:ZOI spaces? open:zoi_open spaces? quoted:zoi_word* close:zoi_close dot:(&(post_word &. !nucleus !cmevla) { return "." })? spaces? {
   word.subsumed = [open, close];
   word.quoted = quoted || [];
-  word.quoted.word = _join(word.quoted);
+  word.quoted.word = word.quoted.join(" ");
   word.single_word = word.word;
   var open_word = open.word.match(/\.$/) ? open.word : open.word + ".";
   var close_word = _empty(dot) ? close.word + dot : close.word;
   if (close_word[0] != ".") close_word = "." + close_word;
-  word.word = "[" + word.word + " " + open_word + " " + word.quoted.word + " " + close_word + "]";
+  if (options.format == "text")
+    word.word = word.word + " «" + open_word + " " + word.quoted.word + " " + close_word + "»";
+  else
+    word.word = "[" + word.word + " " + open_word + " " + word.quoted.word + " " + close_word + "]";
   return _word_pre(word, pre)
 }
 // ZOI_no_SA_handling = pre_clause ZOI spaces? zoi_open zoi_word* zoi_close spaces?

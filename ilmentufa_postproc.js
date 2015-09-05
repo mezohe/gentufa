@@ -41,7 +41,7 @@ function camxes_postprocessing(text, mode) {
 	if (mode.format == "rawstructure") return JSON.stringify(text);
 	if (mode.format == "raw") return JSON.stringify(remove_structure(text));
 	if (mode.format == "brackets") return prettify_brackets(bracket(text, mode));
-	if (mode.format == "text") return prettify_brackets(bracket(text, mode)).replace(/[\][(){}<>¹²³⁴⁵⁶⁷⁸⁹]/g, "");
+	if (mode.format == "text") return bracket(text, mode);
 	if (mode.format == "gloss") return prettify_brackets(gloss(text, glossfallback));
 	throw "invalid mode";
 }
@@ -85,20 +85,25 @@ function remove_structure(obj) {
 
 function bracket(array, mode) {
 	function _bracket(array) {
+		var ret = "";
 		if (Array.isArray(array)) {
 			array = array.filter(function (a) { return a && (!Array.isArray(a) || a.length) && (mode.f || !a.elided) });
 			if (array.length == 1) return _bracket(array[0]);
+			else if (mode.format == "text") return array.map(_bracket).join(" ");
 			else return "[" + array.map(_bracket).join(" ") + "]";
 		}
 		
 		if (typeof array == "object" && array.structure) {
 			if (mode.p && array.se_table)
-				return "[" + array.se_table + "]:" + _bracket(array.structure) + _fuhe(array);
-			return _bracket(array.structure) + _fuhe(array);
+				ret += "[" + array.se_table + "]:";
+			ret += _bracket(array.structure);
+			if (mode.f) ret += _fuhe(array);
+			if (mode.format == "text") ret = _punctuate(array, ret);
+			return ret;
 		}
 		
 		if (typeof array == "object" && array.word) {
-			var /*hoisting*/ ret = _bracket(array.elided ? array.word.toUpperCase() : array.word) + _fuhe(array);
+			ret = _bracket(array.elided ? array.word.toUpperCase() : array.word) + _fuhe(array);
 			return mode.s && array.selmaho && !array.elided ? array.selmaho + ":" + ret : ret;
 		}
 		
@@ -109,6 +114,18 @@ function bracket(array, mode) {
 	}
 	function _fuhe(array) {
 		return array.fuhe ? "_" + array.fuhe : "";
+	}
+	function _punctuate(array, text) {
+		if (array.selmaho == "ZOhU") {
+			return text + ":";
+		} else if (array.clause == "free_sei") {
+			return "–" + text + "–";
+		} else if (array.clause == "free_to") {
+			return "(" + text + ")";
+		} else if (array.clause == "lu" || array.selmaho == "LOhU") {
+			return "«" + text + "»";
+		}
+		return text;
 	}
 	return _bracket(array);
 }
