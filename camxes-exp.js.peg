@@ -571,8 +571,8 @@ cu:CU_elidible cufree:free* quant:quantifier? meihi:NUhI_clause meihifree:free* 
     quantifier: quant,
   }
 }
-/ cu:CU_elidible start:bridi_tail_3 repeat:((gihek tag? / GI_clause? tag) BO_clause free* bridi_tail_2 tail_terms)? {
-  start.cu = cu;
+/ cu:CU_elidible cufree:free* start:bridi_tail_3 repeat:((gihek tag? / GI_clause? tag) BO_clause free* bridi_tail_2 tail_terms)? {
+  start.cu = _fill_free(cu, cufree);
   start.structure = [cu, _shell(start)];
   if (repeat) {
     start = _fill_jek(start, repeat[0][0], repeat[3], repeat[0][1], _fill_free(repeat[1], repeat[2]));
@@ -584,10 +584,10 @@ cu:CU_elidible cufree:free* quant:quantifier? meihi:NUhI_clause meihifree:free* 
 
 //// EXP-MODIF: terms before selbri after cu
 bridi_tail_3 = gek_sentence
-  / (preterms:(terms CU_elidible)* selbri:selbri tail_terms:tail_terms {
+  / (preterms:(terms CU_elidible free*)* selbri:selbri tail_terms:tail_terms {
   return {
     structure: [preterms, selbri, tail_terms],
-    preterms: preterms.map(function (a) { return {terms: a[0].terms, cu: a[1]} }),
+    preterms: preterms.map(function (a) { return {terms: a[0].terms, cu: _fill_free(a[1], a[2])} }),
     selbri: selbri, tail_terms: tail_terms,
   }
 }) / ke:KE_clause kefree:free* contents:bridi_tail kehe:KEhE_elidible kehefree:free* {
