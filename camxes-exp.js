@@ -10505,6 +10505,9 @@ var camxes = (function() {
           }
           if (s3 !== peg$FAILED) {
             s4 = peg$parseselbri();
+            if (s4 === peg$FAILED) {
+              s4 = peg$parsegek_sentence();
+            }
             if (s4 !== peg$FAILED) {
               s5 = peg$parseSEhU_elidible();
               if (s5 !== peg$FAILED) {
@@ -23509,6 +23512,9 @@ var camxes = (function() {
         s5 = peg$parsepost_word();
         if (s5 !== peg$FAILED) {
           s6 = peg$parsenucleus();
+          if (s6 === peg$FAILED) {
+            s6 = peg$parsecmevla();
+          }
           if (s6 !== peg$FAILED) {
             s5 = [s5, s6];
             s4 = s5;

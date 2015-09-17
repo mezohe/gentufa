@@ -1054,7 +1054,7 @@ fiho_modal = fiho:FIhO_clause free:free* selbri:selbri fehu:FEhU_elidible { fiho
 // EXP-MODIF: attempt to formalize lo'ai..sa'ai..le'ai replacement expressions
 free = indicators / free_vocative / free_mai / xi_clause
 
-free_sei = sei:SEI_clause free:free* terms:(terms CU_elidible free*)* selbri:selbri end:SEhU_elidible {
+free_sei = sei:SEI_clause free:free* terms:(terms CU_elidible free*)* selbri:(selbri / gek_sentence) end:SEhU_elidible {
   var r = {
     clause: "free_sei",
     bridi: true,
@@ -1954,7 +1954,7 @@ zohoi_word = expr:non_space+ { return _join(expr) }
 //___________________________________________________________________
 
 //cmevla = expr:(jbocme / zifcme) dot:(!(post_word nucleus) {return "."})? { return _join(expr) + (dot || ""); }
-cmevla = expr:zifcme dot:(!(post_word nucleus) {return "."})? { return _join(expr) + (dot || ""); }
+cmevla = expr:zifcme dot:(!(post_word (nucleus / cmevla)) {return "."})? { return _join(expr) + (dot || ""); }
 
 zifcme = (!h (any_syllable / nucleus / glide / h / consonant !pause / digit)* consonant &pause)
 
