@@ -515,9 +515,9 @@ paragraph = expr:(lone_jek? (tag BO_clause)? (I_clause lone_jek? (tag BO_clause)
 
 statement = expr:(prenex statement / statement_1) 
 
-statement_1 = expr:(statement_2 (I_clause lone_jek statement_2?)*) 
+statement_1 = expr:(statement_2 (I_clause lone_jek prenex* statement_2?)*) 
 
-statement_2 = expr:(statement_3 (I_clause lone_jek? tag? BO_clause free* statement_2)?) 
+statement_2 = expr:(statement_3 (I_clause lone_jek? tag? BO_clause free* prenex* statement_2)?) 
 
 statement_3 = expr:(tag? TUhE_clause free* text_1 TUhU_elidible free* / fragment / sentence) 
 
