@@ -511,7 +511,7 @@ text_1 = expr:((NIhO_clause+ free* su_clause*)? paragraphs)
 
 paragraphs = expr:(paragraph? (NIhO_clause+ free* su_clause* paragraphs)?) 
 
-paragraph = expr:(lone_jek? (tag BO_clause)? (I_clause lone_jek? (tag BO_clause)?)? (statement / fragment) (I_clause !lone_jek free* (statement / fragment))*) 
+paragraph = expr:(lone_jek? (tag BO_clause)? (I_clause lone_jek? (tag BO_clause)?)? statement (I_clause !lone_jek free* statement)*) 
 
 statement = expr:(prenex statement / statement_1) 
 
@@ -519,9 +519,9 @@ statement_1 = expr:(statement_2 (I_clause lone_jek statement_2?)*)
 
 statement_2 = expr:(statement_3 (I_clause lone_jek? tag? BO_clause free* statement_2)?) 
 
-statement_3 = expr:(tag? TUhE_clause free* text_1 TUhU_elidible free* / sentence) 
+statement_3 = expr:(tag? TUhE_clause free* text_1 TUhU_elidible free* / fragment / sentence) 
 
-fragment = expr:(lone_jek / !term !tag quantifier / relative_clauses / links / linkargs) 
+fragment = expr:(!term !tag quantifier / relative_clauses / links+ / !selbri linkargs) 
 
 lone_jek = !gek joik_ek free*
 
