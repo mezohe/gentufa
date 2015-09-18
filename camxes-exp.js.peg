@@ -74,7 +74,7 @@
     word = _duplicate_less_evil(word);
     word.quote = quote;
     word.single_word = word.word;
-    if (options.text)
+    if (options.format == "text")
       word.word = word.word + " " + (quote.word || quote);
     else
       word.word = "[" + word.word + " " + (quote.word || quote).replace(/[\][{}()<>]/g, "") + "]";
