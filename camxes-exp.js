@@ -424,10 +424,14 @@ var camxes = (function() {
             r.word += zei.zei_tail.string;
           });
           r.subsumed = r.subsumed.concat(tail.subsumed);
-          if (options.format == "text")
-            r.word = r.word + tail.string;
-          else
+          if (options.format == "text") {
+            if (pre.word.match(/^\.[aeiou]$/) && !(r.word.indexOf(" ") + 1))
+              r.word = r.word + tail.string.slice(1);
+            else
+              r.word = r.word + tail.string;
+          } else {
             r.word = "[" + r.word + tail.string + "]";
+          }
           return r;
         },
         peg$c95 = function(expr) {
@@ -57550,7 +57554,7 @@ var camxes = (function() {
         word = _duplicate_less_evil(word);
         word.quote = quote;
         word.single_word = word.word;
-        if (options.text)
+        if (options.format == "text")
           word.word = word.word + " " + (quote.word || quote);
         else
           word.word = "[" + word.word + " " + (quote.word || quote).replace(/[\][{}()<>]/g, "") + "]";

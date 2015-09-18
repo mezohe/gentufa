@@ -1135,10 +1135,14 @@ bu_clause_no_pre = pre:pre_zei_bu zei:(b:bu_tail? z:zei_tail { return {bu_tail: 
     r.word += zei.zei_tail.string;
   });
   r.subsumed = r.subsumed.concat(tail.subsumed);
-  if (options.format == "text")
-    r.word = r.word + tail.string;
-  else
+  if (options.format == "text") {
+    if (pre.word.match(/^\.[aeiou]$/) && !(r.word.indexOf(" ") + 1))
+      r.word = r.word + tail.string.slice(1);
+    else
+      r.word = r.word + tail.string;
+  } else {
     r.word = "[" + r.word + tail.string + "]";
+  }
   return r;
 }
 // bu_clause_no_SA = pre_zei_bu_no_SA (bu_tail? zei_tail)* bu_tail
