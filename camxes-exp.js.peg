@@ -1089,7 +1089,7 @@ free_to = to:TO_clause text:text toi:TOI_elidible {
 //// EXP-MODIF: MEX simplification
 xi_clause = xi:XI_clause free:free* mex:mex_2 { xi.number = mex; _fill_free(xi, free); xi.structure = [_shell(xi), mex]; return xi }
 
-vocative = (coi:COI_clause+ doi:DOI_elidible { doi.coi = coi; doi.structure = coi.concat(_shell(doi)); return doi }) / DOI_clause
+vocative = (coi:COI_clause+ doi:DOI_elidible { return {coi: coi, doi: doi, structure: coi.concat(doi),}; }) / DOI_clause
 
 indicators = expr:(FUhE_clause / UI_clause / CAI_clause / NAI_clause / FUhO_clause / free_sei / free_to / LOhAI_clause
 )+ !BU_clause { return expr }

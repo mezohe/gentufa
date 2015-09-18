@@ -391,7 +391,7 @@ var camxes = (function() {
           return to;
         },
         peg$c87 = function(xi, free, mex) { xi.number = mex; _fill_free(xi, free); xi.structure = [_shell(xi), mex]; return xi },
-        peg$c88 = function(coi, doi) { doi.coi = coi; doi.structure = coi.concat(_shell(doi)); return doi },
+        peg$c88 = function(coi, doi) { return {coi: coi, doi: doi, structure: coi.concat(doi),}; },
         peg$c89 = function(expr) { return expr },
         peg$c90 = function(pre, post) { post.pre = pre; post.structure = (post.post ? [pre, _shell(post), post.post.indicators] : [pre, _shell(post)]).filter(_empty); return post },
         peg$c91 = function(pre, z, b) { return {zei_tail: z, bu_tail: b} },
@@ -1587,7 +1587,7 @@ var camxes = (function() {
     }
 
     function peg$parsestatement_1() {
-      var s0, s1, s2, s3, s4, s5, s6;
+      var s0, s1, s2, s3, s4, s5, s6, s7;
 
       var key    = peg$currPos * 639 + 8,
           cached = peg$resultsCache[key];
@@ -1607,13 +1607,24 @@ var camxes = (function() {
         if (s4 !== peg$FAILED) {
           s5 = peg$parselone_jek();
           if (s5 !== peg$FAILED) {
-            s6 = peg$parsestatement_2();
-            if (s6 === peg$FAILED) {
-              s6 = null;
+            s6 = [];
+            s7 = peg$parseprenex();
+            while (s7 !== peg$FAILED) {
+              s6.push(s7);
+              s7 = peg$parseprenex();
             }
             if (s6 !== peg$FAILED) {
-              s4 = [s4, s5, s6];
-              s3 = s4;
+              s7 = peg$parsestatement_2();
+              if (s7 === peg$FAILED) {
+                s7 = null;
+              }
+              if (s7 !== peg$FAILED) {
+                s4 = [s4, s5, s6, s7];
+                s3 = s4;
+              } else {
+                peg$currPos = s3;
+                s3 = peg$FAILED;
+              }
             } else {
               peg$currPos = s3;
               s3 = peg$FAILED;
@@ -1633,13 +1644,24 @@ var camxes = (function() {
           if (s4 !== peg$FAILED) {
             s5 = peg$parselone_jek();
             if (s5 !== peg$FAILED) {
-              s6 = peg$parsestatement_2();
-              if (s6 === peg$FAILED) {
-                s6 = null;
+              s6 = [];
+              s7 = peg$parseprenex();
+              while (s7 !== peg$FAILED) {
+                s6.push(s7);
+                s7 = peg$parseprenex();
               }
               if (s6 !== peg$FAILED) {
-                s4 = [s4, s5, s6];
-                s3 = s4;
+                s7 = peg$parsestatement_2();
+                if (s7 === peg$FAILED) {
+                  s7 = null;
+                }
+                if (s7 !== peg$FAILED) {
+                  s4 = [s4, s5, s6, s7];
+                  s3 = s4;
+                } else {
+                  peg$currPos = s3;
+                  s3 = peg$FAILED;
+                }
               } else {
                 peg$currPos = s3;
                 s3 = peg$FAILED;
@@ -1671,7 +1693,7 @@ var camxes = (function() {
     }
 
     function peg$parsestatement_2() {
-      var s0, s1, s2, s3, s4, s5, s6, s7, s8;
+      var s0, s1, s2, s3, s4, s5, s6, s7, s8, s9;
 
       var key    = peg$currPos * 639 + 9,
           cached = peg$resultsCache[key];
@@ -1707,10 +1729,21 @@ var camxes = (function() {
                   s8 = peg$parsefree();
                 }
                 if (s7 !== peg$FAILED) {
-                  s8 = peg$parsestatement_2();
+                  s8 = [];
+                  s9 = peg$parseprenex();
+                  while (s9 !== peg$FAILED) {
+                    s8.push(s9);
+                    s9 = peg$parseprenex();
+                  }
                   if (s8 !== peg$FAILED) {
-                    s3 = [s3, s4, s5, s6, s7, s8];
-                    s2 = s3;
+                    s9 = peg$parsestatement_2();
+                    if (s9 !== peg$FAILED) {
+                      s3 = [s3, s4, s5, s6, s7, s8, s9];
+                      s2 = s3;
+                    } else {
+                      peg$currPos = s2;
+                      s2 = peg$FAILED;
+                    }
                   } else {
                     peg$currPos = s2;
                     s2 = peg$FAILED;
