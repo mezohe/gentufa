@@ -145,7 +145,7 @@ var camxes = (function() {
           });
           return start;
         },
-        peg$c23 = function(sumti, co, tag, free) { return _term(_fill_free(tag, free), sumti, co) },
+        peg$c23 = function(sumti, co, tag, ku, free) { return _term(_fill_free(tag, free), sumti, co, ku) },
         peg$c24 = function(tag) { return true },
         peg$c25 = function(tag, boi, sumti) { return _term({tags: [tag], structure: [tag], implicit_fa: true, elided: true, boi: boi ? "boi" : ""}, sumti) },
         peg$c26 = function(soi, soifree, bridi, sehu, sehufree) { return {tag: _fill_free(soi, soifree), bridi: bridi, terminator: _fill_free(sehu, sehufree), structure: [soi, bridi, sehu]} },
@@ -4403,7 +4403,7 @@ var camxes = (function() {
     }
 
     function peg$parseinverted_term() {
-      var s0, s1, s2, s3, s4, s5, s6;
+      var s0, s1, s2, s3, s4, s5, s6, s7;
 
       var key    = peg$currPos * 639 + 33,
           cached = peg$resultsCache[key];
@@ -4432,16 +4432,22 @@ var camxes = (function() {
           if (s3 !== peg$FAILED) {
             s4 = peg$parsetag();
             if (s4 !== peg$FAILED) {
-              s5 = [];
-              s6 = peg$parsefree();
-              while (s6 !== peg$FAILED) {
-                s5.push(s6);
-                s6 = peg$parsefree();
-              }
+              s5 = peg$parseKU_elidible();
               if (s5 !== peg$FAILED) {
-                peg$savedPos = s0;
-                s1 = peg$c23(s2, s3, s4, s5);
-                s0 = s1;
+                s6 = [];
+                s7 = peg$parsefree();
+                while (s7 !== peg$FAILED) {
+                  s6.push(s7);
+                  s7 = peg$parsefree();
+                }
+                if (s6 !== peg$FAILED) {
+                  peg$savedPos = s0;
+                  s1 = peg$c23(s2, s3, s4, s5, s6);
+                  s0 = s1;
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$FAILED;
+                }
               } else {
                 peg$currPos = s0;
                 s0 = peg$FAILED;
@@ -57670,7 +57676,7 @@ var camxes = (function() {
         return clause;
       }
       
-      function _term(tag, sumti, inverted) {
+      function _term(tag, sumti, inverted, ku) {
         var term = {tag: tag};
         if (sumti) {
           if (sumti.selmaho == "KU")
@@ -57680,7 +57686,7 @@ var camxes = (function() {
         }
         if (inverted) {
           term.inverted = inverted;
-          term.structure = [sumti, inverted, tag];
+          term.structure = [sumti, inverted, tag, ku];
         } else {
           term.structure = [tag, sumti];
         }

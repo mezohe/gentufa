@@ -200,7 +200,7 @@
     return clause;
   }
   
-  function _term(tag, sumti, inverted) {
+  function _term(tag, sumti, inverted, ku) {
     var term = {tag: tag};
     if (sumti) {
       if (sumti.selmaho == "KU")
@@ -210,7 +210,7 @@
     }
     if (inverted) {
       term.inverted = inverted;
-      term.structure = [sumti, inverted, tag];
+      term.structure = [sumti, inverted, tag, ku];
     } else {
       term.structure = [tag, sumti];
     }
@@ -688,7 +688,7 @@ abs_tag_term = start:(termset /
   return start;
 }
 
-inverted_term = !gek sumti:sumti co:CO_clause tag:tag free:free* { return _term(_fill_free(tag, free), sumti, co) }
+inverted_term = !gek sumti:sumti co:CO_clause tag:tag ku:KU_elidible free:free* { return _term(_fill_free(tag, free), sumti, co, ku) }
 
 fa_elided_term = tag:FA_elidible boi:(&(number / lerfu_string) { return true })? sumti:sumti { return _term({tags: [tag], structure: [tag], implicit_fa: true, elided: true, boi: boi ? "boi" : ""}, sumti) }
 
