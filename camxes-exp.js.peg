@@ -511,19 +511,19 @@ text_1 = expr:((NIhO_clause+ free* su_clause*)? paragraphs)
 
 paragraphs = expr:(paragraph? (NIhO_clause+ free* su_clause* paragraphs)?) 
 
-paragraph = expr:(lone_jek? (tag BO_clause)? (I_clause lone_jek? (tag BO_clause)?)? statement (I_clause !lone_jek free* statement)*) 
+paragraph = expr:(lone_jek? (tag BO_clause)? free* (I_clause free* lone_jek? (tag BO_clause free*)?)? statement (I_clause !lone_jek free* statement)*) 
 
 statement = expr:(prenex statement / statement_1) 
 
-statement_1 = expr:(statement_2 (I_clause lone_jek prenex* statement_2?)*) 
+statement_1 = expr:(statement_2 (I_clause free* lone_jek prenex* statement_2?)*) 
 
-statement_2 = expr:(statement_3 (I_clause lone_jek? tag? BO_clause free* prenex* statement_2)?) 
+statement_2 = expr:(statement_3 (I_clause free* lone_jek? tag? BO_clause free* prenex* statement_2)?) 
 
 statement_3 = expr:(tag? TUhE_clause free* text_1 TUhU_elidible free* / fragment / sentence) 
 
 fragment = expr:(!term !tag quantifier / relative_clauses / links+ / !selbri linkargs) 
 
-lone_jek = !gek joik_ek free*
+lone_jek = !gek jek free*
 
 prenex = expr:(terms? ZOhU_clause free*) 
 
@@ -631,7 +631,7 @@ tail_terms = terms:terms? vau:VAU_elidible free:free*  {
 
 terms = expr:terms_1+ { return { terms: expr, structure: expr } }
 
-terms_1 = start:terms_2 repeat:(PEhE_clause free* joik_ek terms_2)* {
+terms_1 = start:terms_2 repeat:(PEhE_clause free* jek terms_2)* {
   repeat.forEach(function(r) {
     start.pehe = _fill_free(r[0], r[1]);
     start = _fill_jek(start, r[2], r[3], null, null, start.pehe);
@@ -655,14 +655,14 @@ term = tag_term / fa_elided_term
 tag_term = start:(termset /
   (!gek tag:tag free:free* sumti:(
     sumti 
-    / &{return options.faje} (jek:joik_ek sumti:sumti_3 { return _fill_jek(null, jek, sumti) })
+    / &{return options.faje} (jek:jek sumti:sumti_3 { return _fill_jek(null, jek, sumti) })
     / &{return options.faje} relative_clauses
     / (ku:KU_elidible free:free* { return _fill_free(ku, free) })
     ) { return _term(_fill_free(tag, free), sumti) })
   / inverted_term / naku_term
-  / (!(!sumti !gek_termset gek) !joik_ek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }) 
+  / (!(!sumti !gek_termset gek) !jek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }) 
   / soi_term
-) repeat:(joik_ek tag_term)* {
+) repeat:(jek tag_term)* {
   repeat.forEach(function (r) {
     start = _fill_jek(start, r[0], r[1]);
   });
@@ -674,14 +674,14 @@ abs_term = abs_tag_term / fa_elided_term
 abs_tag_term = start:(termset /
   (!gek tag:tag free:free* !BO_clause !selbri !gek_sentence sumti:(
     sumti 
-    / &{return options.faje} (jek:joik_ek sumti:sumti_3 { return _fill_jek(null, jek, sumti) })
+    / &{return options.faje} (jek:jek sumti:sumti_3 { return _fill_jek(null, jek, sumti) })
     / &{return options.faje} relative_clauses
     / (ku:KU_elidible free:free* { return _fill_free(ku, free) })
     ) { return _term(_fill_free(tag, free), sumti) })
   / inverted_term / naku_term
-  / (!selbri !(!sumti !gek_termset gek_sentence) !joik_ek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) })
+  / (!selbri !(!sumti !gek_termset gek_sentence) !jek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) })
   / soi_term
-) repeat:(joik_ek abs_tag_term)* {
+) repeat:(jek abs_tag_term)* {
   repeat.forEach(function (r) {
     start = _fill_jek(start, r[0], r[1]);
   });
@@ -744,15 +744,15 @@ sumti = sumti:sumti_1 vuho:(VUhO_clause free* vuho_tail?)? {
   return sumti;
 }
 
-vuho_tail = relative_clauses (joik_ek sumti)?
+vuho_tail = relative_clauses (jek sumti)?
 
 sumti_1 = sumti_2
 
-sumti_2 = start:sumti_3 repeat:(joik_ek sumti_3)* {
+sumti_2 = start:sumti_3 repeat:(jek sumti_3)* {
   return repeat.reduce(function (a, b) { return _fill_jek(a, b[0], b[1]) }, start);
 }
 
-sumti_3 = start:sumti_4 repeat:(joik_ek? tag? BO_clause free* sumti_3)? {
+sumti_3 = start:sumti_4 repeat:(jek? tag? BO_clause free* sumti_3)? {
   if (repeat) {
     return _fill_jek(start, repeat[0], repeat[4], repeat[1], _fill_free(repeat[2], repeat[3]));
   }
@@ -817,15 +817,15 @@ sumti_tail_1 =
   / (quant:quantifier selbri:selbri rel:relative_clauses? { return _relativized_selbri(selbri, rel, null, quant) })
   / (quant:quantifier sumti:sumti { return {quantifier: quant, sumti: sumti, structure: [quant, sumti],} }) 
 
-relative_clauses = expr:(relative_clause (joik_ek free* relative_clause)* / gek relative_clauses gik relative_clauses) 
+relative_clauses = expr:(relative_clause (jek free* relative_clause)* / gek relative_clauses gik relative_clauses) 
 
-relative_clauses_nek = expr:(relative_clause_nek (joik_ek free* relative_clause_nek)* / gek relative_clauses gik relative_clauses) 
+relative_clauses_nek = expr:(relative_clause_nek (jek free* relative_clause_nek)* / gek relative_clauses gik relative_clauses) 
 
 relative_clause = expr:(GOI_clause free* term GEhU_elidible free* / NOI_clause free* subsentence KUhO_elidible free* ) 
 
 relative_clause_nek = relative_clause / GOI_elidible !quantifier &sumti term GEhU_elidible
 
-selbri_relative_clauses = expr:(selbri_relative_clause (joik_ek free* selbri_relative_clause)* / gek selbri_relative_clauses gik selbri_relative_clauses) 
+selbri_relative_clauses = expr:(selbri_relative_clause (jek free* selbri_relative_clause)* / gek selbri_relative_clauses gik selbri_relative_clauses) 
 
 selbri_relative_clause = expr:(NOhOI_clause free* subsentence KUhOI_elidible free* ) 
 
@@ -847,7 +847,7 @@ selbri_2 = start:selbri_3 repeat:(CO_clause free* selbri_3)* {
 
 selbri_3 = expr:(selbri_4+) { return expr.reduce(function(a, b) { return _tanru(a, b) }) }
 
-selbri_4 = start:selbri_5 repeat:(joik_ek (selbri_5 / selbri_4_tag))* { return repeat.reduce(function(a, b) { return _fill_jek(a, b[0], b[1], b[1].internal_tag) }, start) }
+selbri_4 = start:selbri_5 repeat:(jek (selbri_5 / selbri_4_tag))* { return repeat.reduce(function(a, b) { return _fill_jek(a, b[0], b[1], b[1].internal_tag) }, start) }
 
 selbri_4_tag = tag:tag? ke:KE_clause kefree:free* selbri:selbri_3 kehe:KEhE_elidible kehefree:free* {
   var r = _precedence(_fill_free(ke, kefree), selbri, _fill_free(kehe, kehefree));
@@ -855,7 +855,7 @@ selbri_4_tag = tag:tag? ke:KE_clause kefree:free* selbri:selbri_3 kehe:KEhE_elid
   return r;
 }
 
-selbri_5 = start:selbri_6 repeat:(joik_ek? tag? BO_clause free* selbri_5)? {
+selbri_5 = start:selbri_6 repeat:(jek? tag? BO_clause free* selbri_5)? {
   if (repeat) return _fill_jek(start, repeat[0], repeat[4], repeat[1], _fill_free(repeat[2], repeat[3]));
   return start;
 }
@@ -890,11 +890,11 @@ tanru_unit_2 = expr:(
   / (ke:KE_clause kefree:free* selbri:selbri_3 kehe:KEhE_elidible kehefree:free* { return _precedence(_fill_free(ke, kefree), selbri, _fill_free(kehe, kehefree)) }) 
   / (ME_clause free* (sumti / mex) MEhU_elidible free* MOI_clause? free*) 
   / (mex MOI_clause free*) 
-  / (NUhA_clause free* operator) 
+  / (NUhA_clause free* jek) 
   / (se:SE_clause free:free* unit:tanru_unit_2 { return _place_se(_fill_free(se, free), unit) }) 
   / (JAI_clause free* tag? tanru_unit_2) 
   / (NAhE_clause free* tanru_unit_2) 
-  / (NU_clause free* (joik_ek NU_clause free*)* subsentence KEI_elidible free*) 
+  / (NU_clause free* (jek NU_clause free*)* subsentence KEI_elidible free*) 
   / (linkargs:linkargs unit:tanru_unit_1 { if (linkargs) { linkargs.inverted = true; return _linkargs_attach(linkargs, unit) } return unit })
   / MEIhE_clause free* sumti+ MEIhO_elidible
   ) { return expr.structure ? expr : {structure: expr} }
@@ -917,26 +917,38 @@ links =  bei:BEI_clause free:free* term:term? { return {bei: _fill_free(bei, fre
 quantifier = !selbri !sumti_6 mex:mex { return mex }
 
 //// EXP-MODIF: MEX simplification
-mex = expr:(mex_1 (operator mex_1)* ) { return expr[1].reduce(function (a, b) { return _fill_jek(a, b[0], b[1]) }, expr[0]); }
+mex = expr:(mex_1 (jek mex_1)* ) { return expr[1].reduce(function (a, b) { return _fill_jek(a, b[0], b[1]) }, expr[0]); }
 
-mex_1 = expr:( gek_mex (operator? tag? BO_clause free* mex_1)? ) { if (expr[1]) return _fill_jek(expr[0], expr[1][0], expr[1][4], expr[1][1], _fill_free(expr[1][2], expr[1][3])); return expr[0]; }
+mex_1 = expr:( gek_mex (jek? tag? BO_clause free* mex_1)? ) { if (expr[1]) return _fill_jek(expr[0], expr[1][0], expr[1][4], expr[1][1], _fill_free(expr[1][2], expr[1][3])); return expr[0]; }
 
 gek_mex = (gek:gek left:mex gik:gik right:mex_2 { return _fill_gek(gek, left, gik, right) }) / mex_2
 
-mex_2 = expr:( number BOI_elidible free* / lerfu_string BOI_elidible free* / VEI_clause free* mex VEhO_elidible free* / NIhE_clause free* selbri TEhU_elidible free* / MOhE_clause sumti TEhU_elidible free* / lahe_nahe mex LUhU_elidible free* / (PEhO_clause free*)? operator mex+ KUhE_elidible free* / FUhA_clause rp_expression / JOhI_clause free* gek_mex+ TEhU_elidible free* ) 
+mex_2 = expr:( number BOI_elidible free* / lerfu_string BOI_elidible free* / VEI_clause free* mex VEhO_elidible free* / NIhE_clause free* selbri TEhU_elidible free* / MOhE_clause sumti TEhU_elidible free* / lahe_nahe mex LUhU_elidible free* / (PEhO_clause free*)? jek mex+ KUhE_elidible free* / FUhA_clause rp_expression / JOhI_clause free* gek_mex+ TEhU_elidible free* ) 
 
-rp_expression = expr:( mex (rp_expression operator)* ) 
+rp_expression = expr:( mex (rp_expression jek)* ) 
 
-operator = expr:operator_0 { return { structure: expr } } 
+jek = start:operator_1 repeat:(
+  jek operator_1 
+  / jek tag? (ke:KE_clause kefree:free* op:jek kehe:KEhE_elidible kehefree:free* 
+    { return _precedence(_fill_free(ke, kefree), op, _fill_free(kehe, kehefree)) } )
+)* {
+  return repeat.reduce(function (a, b) {
+    if (b.length == 2) b = [b[0], null, b[1]];
+    return _fill_jek(a, b[0], b[2], b[1]);
+  }, start);
+}
 
-operator_0 = expr:(operator_1 (joik_ek operator_1 / joik_ek tag? KE_clause free* operator KEhE_elidible free*)*) 
+operator_1 = 
+  gu:guhek left:jek gi:gik right:operator_2 { return _fill_gek(gu, left, gi, right) }
+  / left:operator_2 &(jek / tag) jek:jek? tag:tag? bo:BO_clause free:free* right:operator_1 
+    { return _fill_jek(left, jek, right, tag, _fill_free(bo, free)) }
+  / operator_2
 
-operator_1 = expr:(operator_2 / guhek operator_1 gik operator_2 / operator_2 joik_ek? tag? BO_clause free* operator_1) 
-
-operator_2 = expr:(mex_operator / KE_clause free* operator KEhE_elidible free*) 
+operator_2 = mex_operator / ke:KE_clause kefree:free* op:jek kehe:KEhE_elidible kehefree:free* 
+  { return _precedence(_fill_free(ke, kefree), op, _fill_free(kehe, kehefree)) }
 
 //// EXP-MODIF: MEX simplification
-mex_operator = expr:(SE_clause free* mex_operator / NAhE_clause free* mex_operator / MAhO_clause free* mex TEhU_elidible free* / NAhU_clause free* selbri TEhU_elidible free* / joik_ek free*) 
+mex_operator = expr:(SE_clause free* mex_operator / NAhE_clause free* mex_operator / MAhO_clause free* mex TEhU_elidible free* / NAhU_clause free* selbri TEhU_elidible free* / joik_free) 
 
 //// EXP-MODIF
 number = number_initial / init:PA_clause fin:(PA_clause / &{return !options.lerfu} lerfu_word)* { return _string([init].concat(fin)) }
@@ -968,7 +980,7 @@ gi_joi = gi:GI_clause joi:JOI_clause {
 }
 
 //// EXP-MODIF: A-JA-JOI merge
-joik = gaho_pre:GAhO_clause* na:NA_clause? se:SE_clause? joi:JOI_clause gaho_post:GAhO_clause* {
+joik = gaho_pre:GAhO_clause* na:NA_clause? se:SE_clause? joi:(JOI_clause / VUhU_clause) gaho_post:GAhO_clause* {
   joi = _duplicate_less_evil(joi);
   var structure = [];
   if (_empty(gaho_pre)) structure.push(joi.gaho_pre = gaho_pre);
@@ -980,24 +992,24 @@ joik = gaho_pre:GAhO_clause* na:NA_clause? se:SE_clause? joi:JOI_clause gaho_pos
   return joi;
 }
 
-joik_ek = expr:(joik / VUhU_clause) free:free* { return _fill_free(expr, free) }
+joik_free = expr:joik free:free* { return _fill_free(expr, free) }
 
 //// EXP-MODIF: Implementation of gaJA
-gek = (gak joik_ek )
-  / ((joik_ek / tag) gik )
+gek = (gak jek )
+  / ((jek / tag) gik )
   / (se:SE_clause? ga:GA_clause free:free* { if (se) { ga.se; ga.structure = [se, _shell(ga)] } return _fill_free(ga, free) }) 
 
 //// EXP-ADD: GAJA
 gak = expr:ga_clause free:free* { return _fill_free(expr, free) }
 
-guhek = guk joik_ek
+guhek = guk jek
   / se:SE_clause? guha:GUhA_clause free:free* { if (_empty(se)) { guha.se = se; guha.structure = [se, _shell(guha)] } return _fill_free(guha, free) }
 
 guk = expr:gu_clause free:free* { return _fill_free(expr, free) }
 
 gik = expr:GI_clause free:free* { return _fill_free(expr, free) }
 
-tag = start:tense_modal repeat:(joik_ek tense_modal)* {
+tag = start:tense_modal repeat:(jek tense_modal)* {
   repeat.forEach(function (r) {
     start = _fill_jek(start, r[0], r[1]);
     start.tagged_fa = [].concat(start.left.tagged_fa).concat(start.right.tagged_fa); // FIXME: treat particular connectives
@@ -2268,12 +2280,12 @@ CEhE = &cmavo expr:( c e h e ) &post_word {return _word("CEhE", expr);}
 CO = &cmavo expr:( c o ) &post_word {return _word("CO", expr);}
 
 //// EXP-ADD: di'ai, co'oi, ki'ai, sa'ei
-COI = &cmavo expr:( d i h ai / a h oi / c o h oi / &{return options.diftogoteha} d i h o / j u h i / c oi / f i h i / t a h a / m u h o / f e h o / c o h o / p e h u / k e h o / n u h e / r e h i / b e h e / j e h e / m i h e / k i h e / v i h o ) &post_word {return _word("COI", expr);}
+COI = &cmavo expr:( d i h ai / a h oi / c o h oi / &{return options.diftogoteha} d i h o / j u h i / c oi / f i h i / t a h a / m u h o / f e h o / c o h o / p e h u / k e h o / n u h e / r e h i / b e h e / j e h e / k i h e / v i h o ) &post_word {return _word("COI", expr);}
 
 CU = &cmavo expr:( c u ) &post_word {return _word("CU", expr);}
 
 //// EXP-ADD: da'oi
-DOI = &cmavo expr:( j o h au / d a h oi / k i h ai / s a h ei / d oi ) &post_word {return _word("DOI", expr);}
+DOI = &cmavo expr:( j o h au / d a h oi / k i h ai / s a h ei / d oi / m i h e ) &post_word {return _word("DOI", expr);}
 
 DOhU = &cmavo expr:( d o h u ) &post_word {return _word("DOhU", expr);}
 
