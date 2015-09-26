@@ -551,7 +551,12 @@ subsentence = expr:(tag? TUhE_clause free* text_1 TUhU_elidible free* / prenex s
 
 bridi_tail = bridi_tail_1 / VAU_elidible free*
 
-bridi_tail_1 = start:bridi_tail_2 repeat:((gihek (tag:tag &KE_clause { return tag })? / GI_clause tag &KE_clause) !(tag? BO_clause) free* bridi_tail_2 tail_terms)* {
+bridi_tail_1 = start:bridi_tail_2 repeat:(
+//    (gihek_strict tag / GI_clause tag) !(tag? BO_clause) free* (ke:KE_clause kefree:free* tail:bridi_tail_2 kehe:KEhE_clause kehefree:free* { return _precedence(_fill_free(ke, kefree), tail, _fill_free(kehe, kehefree)) }) tail_terms
+//    / (gihek (tag:tag &KE_clause { return tag })? !(tag? BO_clause) free* bridi_tail_2 tail_terms
+    (gihek tag / GI_clause tag) !BO_clause free* (ke:KE_clause kefree:free* tail:bridi_tail_2 kehe:KEhE_elidible kehefree:free* { return _precedence(_fill_free(ke, kefree), tail, _fill_free(kehe, kehefree)) }) tail_terms
+    / (gihek (&. { return null })) !(tag? BO_clause) free* bridi_tail_2 tail_terms
+  )* {
   return repeat.reduce(function (a, b) {
     a = _fill_jek(a, _fill_free(b[0][0], b[2]), b[3], b[0][1]);
     a.tail_terms = b[4];
@@ -584,15 +589,15 @@ cu:CU_elidible cufree:free* quant:quantifier? meihi:NUhI_clause meihifree:free* 
 
 //// EXP-MODIF: terms before selbri after cu
 bridi_tail_3 = gek_sentence
-  / (preterms:(terms CU_elidible free*)* selbri:selbri tail_terms:tail_terms {
-  return {
-    structure: [preterms, selbri, tail_terms],
-    preterms: preterms.map(function (a) { return {terms: a[0].terms, cu: _fill_free(a[1], a[2])} }),
-    selbri: selbri, tail_terms: tail_terms,
+  / preterms:(terms CU_elidible free*)* selbri:selbri tail_terms:tail_terms {
+    return {
+      structure: [preterms, selbri, tail_terms],
+      preterms: preterms.map(function (a) { return {terms: a[0].terms, cu: _fill_free(a[1], a[2])} }),
+      selbri: selbri, tail_terms: tail_terms,
+    }
+  } / ke:KE_clause kefree:free* contents:bridi_tail_1 kehe:KEhE_elidible kehefree:free* {
+    return _precedence(_fill_free(ke, kefree), contents, _fill_free(kehe, kehefree));
   }
-}) / ke:KE_clause kefree:free* contents:bridi_tail kehe:KEhE_elidible kehefree:free* {
-  return _precedence(_fill_free(ke, kefree), contents, _fill_free(kehe, kehefree));
-}
 
 gek_sentence = (gek:gek left:subsentence_no_count gik:gik right:subsentence_no_count tail_terms:tail_terms {
     gek = _fill_gek(gek, left, gik, right);
@@ -969,7 +974,8 @@ lerfu_string = init:lerfu_word fin:(&{return !options.lerfu} PA_clause / lerfu_w
 lerfu_word = expr:(BY_clause / LAU_clause lerfu_word / TEI_clause lerfu_string FOI_clause) 
 
 //// EXP-MODIF - A/JA/JOI merge, gijek implementaton, add of JA_clause synonym of GIhA_clause
-gihek = na:NA_clause? se:SE_clause? joi:(JOI_clause / GIhA_clause / gi_joi) {
+gihek = jek / gihek_strict
+gihek_strict = na:NA_clause? se:SE_clause? joi:(GIhA_clause / gi_joi) {
   joi = _duplicate_less_evil(joi);
   var structure = [];
   if (_empty(na)) structure.push(joi.na = na);
@@ -2233,7 +2239,7 @@ h = comma* ['hH] &nucleus {return options.h ? "h" : "'";}
 
 phonotactics = (
   !(a:(voiced unvoiced / unvoiced voiced / n affricate / j z / z j / s c / c s / k x)
-    { var b = _join(a); throw "zo'oi " + b + " zo'u toldra ke zunsna porsi / \"" + b + "\": illegal consonant cluster" })
+    { var b = _join(a); error("zo'oi " + b + " zo'u toldra ke zunsna porsi / \"" + b + "\": illegal consonant cluster") })
   !(c:consonant d:consonant &{return c == d} 
     { throw "zo'oi " + c+d + " zo'u na drani fa lo nu lo re zunsna ge mitsi'u gi lamsi'u / \"" + c+d + "\": double consonants are not permitted" })
   !(!(l/n/r/g/k) c:consonant g:glide n:nucleus 

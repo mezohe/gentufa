@@ -40,6 +40,7 @@ try {
 			"abs_term",
 			"brivla_rafcau",
 			"phonotactics",
+			"ZOI_clause",
 		],
 	});
 } catch (e) {
