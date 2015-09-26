@@ -14,6 +14,7 @@ var docs = {
 			"  .i zo'oi  +f         noi ditfaulte zo'u lo famyma'o poi jai se rivbi cu pagbu\n" +
 			"  .i zo'oi  +p                       zo'u lo tersumpoi pe lo selbrisle cu pagbu\n" +
 			"  .i zo'oi  +k         noi ditfaulte zo'u zo'oi / jbini lo se porsi be ro rafsi relgrama\n" +
+			"  .i zo'oi  +h                       zo'u meho .yhy bu se tarmi tuha dei\n" +
 			"  .i zo'oi  +voi       noi ditfaulte zo'u zo voi cmavo ma'oi nu je nai ma'oi noi\n" +
 			"  .i zo'oi  +ckt                     zo'u ro mei'e  zo ce joi zo ce'u  zo ki joi zo ke'a  zo tau joi zo tu'a\n" +
 			"                                          cu voi lo se gunma be ke'a cu bastysi \n" +
@@ -54,6 +55,7 @@ var docs = {
 			"  +f         (default): elided terminators are shown\n" +
 			"  +p                  : sumti places of all tanru units are shown\n" +
 			"  +k         (default): '/' is inserted between rafsi\n" +
+			"  +h                  : 'h' replaces the apostrophe\n" +
 			"  +voi       (default): {voi} is in NU, not NOI\n" +
 			"  +ckt                : {ce} and {ce'u}, {ki} and {ke'a}, and {tau} and {tu'a} switch places\n" +
 			"  +du                 : {du} and {du'u} switch places\n" +
@@ -98,6 +100,7 @@ var ret = {
 	f: true,
 	p: false,
 	k: true,
+	h: false,
 	voi: true,
 	ckt: false,
 	du: false,

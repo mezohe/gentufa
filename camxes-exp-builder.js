@@ -39,6 +39,7 @@ try {
 			"tense_modal",
 			"abs_term",
 			"brivla_rafcau",
+			"phonotactics",
 		],
 	});
 } catch (e) {
