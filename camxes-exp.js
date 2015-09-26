@@ -32108,7 +32108,10 @@ var camxes = (function() {
                 if (s5 === peg$FAILED) {
                   s5 = peg$parsevowel();
                   if (s5 === peg$FAILED) {
-                    s5 = peg$parseh();
+                    s5 = peg$parsey();
+                    if (s5 === peg$FAILED) {
+                      s5 = peg$parseh();
+                    }
                   }
                 }
               }
@@ -32391,7 +32394,10 @@ var camxes = (function() {
                     if (s5 === peg$FAILED) {
                       s5 = peg$parsevowel();
                       if (s5 === peg$FAILED) {
-                        s5 = peg$parseh();
+                        s5 = peg$parsey();
+                        if (s5 === peg$FAILED) {
+                          s5 = peg$parseh();
+                        }
                       }
                     }
                   }

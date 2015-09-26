@@ -2238,7 +2238,7 @@ phonotactics = (
     { throw "zo'oi " + c+d + " zo'u na drani fa lo nu lo re zunsna ge mitsi'u gi lamsi'u / \"" + c+d + "\": double consonants are not permitted" })
   !(!(l/n/r/g/k) c:consonant g:glide n:nucleus 
     { throw "zo'oi " + c+g+n + " zo'u na drani fa lo nu lo karmlisna cu se lidne lo zunsna / \"" + c+g+n + "\": a glide may not follow a consonant" })
-  (consonant / glide / diphthong / vowel / h))+
+  (consonant / glide / diphthong / vowel / y / h))+
 
 //___________________________________________________________________
 
