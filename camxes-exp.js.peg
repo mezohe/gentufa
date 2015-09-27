@@ -496,13 +496,13 @@
   }
 }
 
-text = intro_null !slinkuhi_crash free:free* t1:text_1? faho_clause EOF? { return [_empty(free), _empty(t1)] }
+text = intro_null free:free* t1:text_1? faho_clause EOF? { return [_empty(free), _empty(t1)] }
 
 intro_null = expr:(spaces? su_clause* intro_si_clause) 
 
 //; intro_sa_clause = SA_clause+ / any_word_SA_handling !(ZEI_clause SA_clause) intro_sa_clause
-intro_si_clause = expr:(si_clause? SI_clause*)  
-faho_clause = expr:((FAhO_clause dot_star)?) 
+intro_si_clause = si_clause? SI_clause*
+faho_clause = (FAhO_clause dot_star)?
 
 // Please note that the "text_1" item in the text_1 production does
 // *not* match the BNF. This is due to a bug in the BNF.  The change
@@ -1285,7 +1285,7 @@ KUhAU_elidible = expr:(KUhAU_clause?) {return expr || _elided(options.po ? "POhE
 // Do *NOT* delete the line above!
 
 BRIVLA_clause = (pre:BRIVLA_pre post:post_clause { return _word_post(pre, post) }) / zei_clause
-BRIVLA_pre = pre:pre_clause word:(BRIVLA / GOhA) spaces? { return _word_pre(word, pre) }
+BRIVLA_pre = pre:pre_clause !slinkuhi_crash word:(BRIVLA / GOhA) spaces? { return _word_pre(word, pre) }
 // BRIVLA_no_SA_handling = pre_clause BRIVLA post_clause / zei_clause_no_SA
 
 CMAVO_clause = pre:CMAVO_pre post:post_clause { return _word_post(pre, post) }
@@ -1979,7 +1979,7 @@ zohoi_word = expr:non_space+ { return _join(expr) }
 //___________________________________________________________________
 
 //cmevla = expr:(jbocme / zifcme) dot:(!(post_word nucleus) {return "."})? { return _join(expr) + (dot || ""); }
-cmevla = &phonotactics expr:zifcme dot:(!(post_word (nucleus / cmevla)) {return "."})? { return _join(expr) + (dot || ""); }
+cmevla = expr:zifcme dot:(!(post_word (nucleus / cmevla)) {return "."})? { return _join(expr) + (dot || ""); }
 
 zifcme = (!h !zifcme_glide_hack (any_syllable / nucleus / glide / h / !zifcme_glide_hack consonant !pause / digit)* consonant &pause)
 zifcme_glide_hack = (consonant !nucleus !glide)* !liquid consonant glide
@@ -2004,9 +2004,9 @@ cmavo_form = expr:(!h !cluster onset (nucleus h)* (!stressed nucleus / nucleus !
 //___________________________________________________________________
 
 //// EXP-MODIF: logbanu lujvo
-brivla = !cmavo &phonotactics !slihykru expr:( (init:(!any_fuhivla_rafsi yless:y_less_rafsi !any_fuhivla_rafsi { return yless })* fin:((extended_rafsi / y_rafsi) (initial_rafsi / logbanu_rafsi)*)? { return fin ? init.concat(fin[0]).concat(fin[1]) : init }) brivla_core) { return expr[0] ? expr[0].concat(expr[1]) : expr[1]; }
+brivla = !cmavo !slihykru expr:( (init:(!any_fuhivla_rafsi yless:y_less_rafsi !any_fuhivla_rafsi { return yless })* fin:((extended_rafsi / y_rafsi) (initial_rafsi / logbanu_rafsi)*)? { return fin ? init.concat(fin[0]).concat(fin[1]) : init }) brivla_core) { return expr[0] ? expr[0].concat(expr[1]) : expr[1]; }
 
-brivla_rafcau = !cmavo &phonotactics !slihykru !slinkuhi !h expr:((!stressed syllable !stress any_unstressed_syllable*)? stressed_syllable medial_syllable* unstressed_syllable) { return _join(expr) }
+brivla_rafcau = !cmavo !slihykru !slinkuhi !h expr:((!stressed syllable !stress any_unstressed_syllable*)? stressed_syllable medial_syllable* unstressed_syllable) { return _join(expr) }
 
 brivla_core = expr:(fuhivla / gismu / CVV_final_rafsi / stressed_initial_rafsi short_final_rafsi) { return [].concat(expr) }
 
@@ -2236,21 +2236,28 @@ t = comma* [tT] !h {return "t";}
 h = comma* ['hH] &nucleus {return options.h ? "h" : "'";}
 
 
+// phonotactics = (
+//   !(a:(voiced unvoiced / unvoiced voiced / n affricate / j z / z j / s c / c s / k x)
+//     { var b = _join(a); error("zo'oi " + b + " zo'u toldra ke zunsna porsi / \"" + b + "\": illegal consonant cluster") })
+//   !(c:consonant d:consonant &{return c == d} 
+//     { throw "zo'oi " + c+d + " zo'u na drani fa lo nu lo re zunsna ge mitsi'u gi lamsi'u / \"" + c+d + "\": double consonants are not permitted" })
+//   !(!(l/n/r/g/k) c:consonant g:glide n:nucleus 
+//     { throw "zo'oi " + c+g+n + " zo'u na drani fa lo nu lo karmlisna cu se lidne lo zunsna / \"" + c+g+n + "\": a glide may not follow a consonant" })
+//   (consonant / glide / diphthong / vowel / y / h))+
 
-phonotactics = (
-  !(a:(voiced unvoiced / unvoiced voiced / n affricate / j z / z j / s c / c s / k x)
-    { var b = _join(a); error("zo'oi " + b + " zo'u toldra ke zunsna porsi / \"" + b + "\": illegal consonant cluster") })
-  !(c:consonant d:consonant &{return c == d} 
-    { throw "zo'oi " + c+d + " zo'u na drani fa lo nu lo re zunsna ge mitsi'u gi lamsi'u / \"" + c+d + "\": double consonants are not permitted" })
-  !(!(l/n/r/g/k) c:consonant g:glide n:nucleus 
-    { throw "zo'oi " + c+g+n + " zo'u na drani fa lo nu lo karmlisna cu se lidne lo zunsna / \"" + c+g+n + "\": a glide may not follow a consonant" })
-  (consonant / glide / diphthong / vowel / y / h))+
+phonotactics = (bad_cluster doublecon bad_glide (consonant / glide / diphthong / vowel / y / h))+
+bad_cluster 'cluster' = 
+  !(a:(voiced unvoiced / unvoiced voiced / n affricate / j z / z j / s c / c s / k x))
+doublecon 'doublecon' = 
+  !(c:consonant d:consonant &{return c == d} )
+bad_glide 'glide' =
+  !(!(l/n/r/g/k) c:consonant g:glide n:nucleus )
 
 //___________________________________________________________________
 
 digit = expr:(comma* [0123456789] !h !nucleus) {return _join(expr);}
 
-post_word = expr:(pause !slinkuhi_crash / !nucleus lojban_word)  {return _join(expr);}
+post_word = expr:(pause / !nucleus lojban_word)  {return _join(expr);}
 
 slinkuhi_crash = !cmevla s:(slinkuhi / slihykru) 
   { var t = _join(s); if (t[t.length - 1].match(/[^aàeèiìoòuù]$/)) t += "-"; throw "zo'oi " + t + " valslinku'i / \"" + t + "\" is a slinku'i" }
