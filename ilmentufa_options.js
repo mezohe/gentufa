@@ -14,7 +14,7 @@ var docs = {
 			"  .i zo'oi  +f         noi ditfaulte zo'u lo famyma'o poi jai se rivbi cu pagbu\n" +
 			"  .i zo'oi  +p                       zo'u lo tersumpoi pe lo selbrisle cu pagbu\n" +
 			"  .i zo'oi  +k         noi ditfaulte zo'u zo'oi / jbini lo se porsi be ro rafsi relgrama\n" +
-			"  .i zo'oi  +h                       zo'u meho .yhy bu se tarmi tuha dei\n" +
+			"  .i zohoi  +h                       zohu meho .yhy se tarmi tuha dei\n" +
 			"  .i zo'oi  +voi       noi ditfaulte zo'u zo voi cmavo ma'oi nu je nai ma'oi noi\n" +
 			"  .i zo'oi  +ckt                     zo'u ro mei'e  zo ce joi zo ce'u  zo ki joi zo ke'a  zo tau joi zo tu'a\n" +
 			"                                          cu voi lo se gunma be ke'a cu bastysi \n" +
