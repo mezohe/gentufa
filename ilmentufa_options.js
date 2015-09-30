@@ -81,7 +81,7 @@ var docs = {
 			,
 };
 
-var minisyntax = config.nick + ": (([+-](brackets|gloss|raw|s|f|p|k|voi|ckt|du|su|buhu|bu|zai|po|koi|lau|faje|lerfu|rafcau|dujoi|diftogoteha|cktj|zaho))+ )? ";
+var minisyntax = config.nick + ": (([+-](brackets|gloss|raw|s|f|p|k|slaka|voi|ckt|du|su|buhu|bu|zai|po|koi|lau|faje|lerfu|rafcau|dujoi|diftogoteha|cktj|zaho))+ )? ";
 
 var minidocs = {
 	"+sidju": "lo sintasa zo'u  " + minisyntax + "LO_SELSKU_POI_SE_GENTUFA\n.i lo ditfaulte zo'u  +brackets+f+k+voi+buhu+faje\n.i lo nu benji lo sivni notci pe zo'oi +sidju cu rinka lo nu viska lo zmadu",
