@@ -103,6 +103,7 @@ var ret = {
 	p: false,
 	k: true,
 	h: false,
+	slaka: false,
 	voi: true,
 	ckt: false,
 	du: false,
