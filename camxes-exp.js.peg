@@ -46,6 +46,7 @@
   var _cktj_names = /cykytyjy|creka(tanru(djacu)?)?bu|cektau(jau)?bu|cetki(tau(jau)?)?bu/;
   var _stressed_vowels = {a: "à", e: "è", i: "ì", o: "ò", u: "ù"};
   var _g_zoi_delim, _g_fuhe = 0;
+  function g_rafcau() { return options.rafcau || options.slaka }
   
   function _join(arg)
   {
@@ -496,7 +497,7 @@
   }
 }
 
-text = intro_null free:free* t1:text_1? faho_clause EOF? { return [_empty(free), _empty(t1)] }
+text = intro_null t1:text_1 faho_clause EOF? { return t1 }
 
 intro_null = expr:(spaces? su_clause* intro_si_clause) 
 
@@ -507,7 +508,7 @@ faho_clause = (FAhO_clause dot_star)?
 // Please note that the "text_1" item in the text_1 production does
 // *not* match the BNF. This is due to a bug in the BNF.  The change
 // here was made to match grammar.300
-text_1 = expr:((NIhO_clause+ free* su_clause*)? paragraphs) 
+text_1 = expr:(free* (NIhO_clause+ free* su_clause*)? paragraphs) 
 
 paragraphs = expr:(paragraph? (NIhO_clause+ free* su_clause* paragraphs)?) 
 
@@ -525,19 +526,19 @@ fragment = expr:(!term !tag quantifier / relative_clauses / links+ / !selbri lin
 
 lone_jek = !gek jek free*
 
-prenex 'prenexe' = expr:(terms? ZOhU_clause free*) 
+prenex 'prenexe' = free:free* terms:terms? zohu:ZOhU_clause { return { free: free, terms: terms, zohu: zohu, structure: [free, terms, zohu], } }
 
-sentence = head:terms? tail:bridi_tail {
+sentence = free:free* head:terms? tail:bridi_tail {
   var fa_after_head = head && _count_fa(head.terms) || {};
   var fa_after_tail = _count_fa_tail(tail, fa_after_head.last || 1, fa_after_head.used || {});
   tail.fa_after_tail = fa_after_tail;
-  var ret = {role: "bridi", structure: [head, tail], head: head, tail: tail, fa_after_head: fa_after_head, fa_after_tail: fa_after_tail};
+  var ret = {role: "bridi", structure: [free, head, tail], head: head, tail: tail, fa_after_head: fa_after_head, fa_after_tail: fa_after_tail};
   //var ret = {role: "bridi", structure: [head, tail], head: head, tail: tail};
   return ret;
 }
 
-sentence_no_count = head:terms? tail:bridi_tail {
-  var ret = {structure: [head, tail], head: head, tail: tail};
+sentence_no_count = free:free* head:terms? tail:bridi_tail {
+  var ret = {structure: [free, head, tail], head: head, tail: tail};
   return ret;
 }
 
@@ -545,11 +546,21 @@ sentence_sa = expr:(sentence_start? (!sentence_start (sa_word / SA_clause !sente
 
 sentence_start = expr:(I_pre / NIhO_pre) 
 
-subsentence_no_count = expr:(prenex subsentence_no_count / sentence_no_count) 
+subsentence_no_count = prenex:prenex subsentence:subsentence_no_count { return {
+   prenex: prenex, subsentence: subsentence, structure: [prenex, subsentence], 
+  } } / sentence_no_count
 
-subsentence = expr:(tag? TUhE_clause free* text_1 TUhU_elidible free* / prenex subsentence / sentence) 
+subsentence = free:free* tag:tag? tuhe:TUhE_clause tuhefree:free* text:text_1 tuhu:TUhU_elidible tuhufree:free* {
+    var ret = _precedence(_fill_free(tuhe, tuhefree), text, _precedence(_fill_free(tuhu, tuhufree)));
+    ret.tag = tag;
+    ret.free = free;
+    if (_empty(tag)) ret.structure.unshift(tag);
+    if (_empty(free)) ret.structure.unshift(free);
+  } / prenex:prenex subsentence:subsentence { return {
+    prenex: prenex, subsentence: subsentence, structure: [prenex, subsentence],
+  } } / sentence
 
-bridi_tail = bridi_tail_1 / VAU_elidible free*
+bridi_tail = bridi_tail_1 / vau:VAU_elidible free:free* { return _fill_free(vau, free) }
 
 bridi_tail_1 = start:bridi_tail_2 repeat:(
 //    (gihek_strict tag / GI_clause tag) !(tag? BO_clause) free* (ke:KE_clause kefree:free* tail:bridi_tail_2 kehe:KEhE_clause kehefree:free* { return _precedence(_fill_free(ke, kefree), tail, _fill_free(kehe, kehefree)) }) tail_terms
@@ -629,7 +640,8 @@ gek_sentence = (gek:gek left:subsentence_no_count gik:gik right:subsentence_no_c
 
 tail_terms = terms:terms? vau:VAU_elidible free:free*  {
   terms = terms || {terms: [], structure: [], elided: true};
-  var ret = { terms: terms, vau: _fill_free(vau, free), structure: terms.elided ? [vau] : [terms, vau]};
+  vau = _fill_free(vau, free);
+  var ret = { terms: terms, vau: vau, structure: terms.elided ? [vau] : [terms, vau]};
   if (!_empty(terms.terms) && vau.elided) ret.elided = true;
   return ret;
 }
@@ -1911,8 +1923,8 @@ gu_word = &cmavo expr:( g u ) &post_word {return _word("gu_word", expr);}
 //// EXP-MODIF: brivla/cmevla merge
 BRIVLA = phonotactics b:BRIVLA_1 { return b }
 
-BRIVLA_1 = &{return !options.rafcau} brivo:(gismu / lujvo / fuhivla / cmevla / b:brivla_rafcau { throw "zo'oi " + _join(b) + " se tarmi lo me lo brivla moi je cu ku'i na zilzba pa porsi be su'o rafsi .i ko troci tu'a zo'oi +rafcau / \"" + _join(b) + "\" is of brivla shape but isn't made of a single sequence of rafsi. Try parsing with +rafcau" }) { return _brivla(brivo) } 
-  / &{return options.rafcau} brivo:(brivla_rafcau / cmevla) { return _brivla(brivo) }
+BRIVLA_1 = &{return !g_rafcau()} brivo:(gismu / lujvo / fuhivla / cmevla / b:brivla_rafcau { throw "zo'oi " + _join(b) + " se tarmi lo me lo brivla moi je cu ku'i na zilzba pa porsi be su'o rafsi .i ko troci tu'a zo'oi +rafcau / \"" + _join(b) + "\" is of brivla shape but isn't made of a single sequence of rafsi. Try parsing with +rafcau" }) { return _brivla(brivo) } 
+  / &{return g_rafcau()} brivo:(brivla_rafcau / cmevla) { return _brivla(brivo) }
 //// EXP-DEL: LA, for brivla/cmevla merge
 // EXP-MODIF: attempt to formalize lo'ai..sa'ai..le'ai replacement expressions
 CMAVO = expr:(BAhE / BE / BEI / BEhO / BO / BOI / BU / BY / CAI / CEI / CEhE / CO / COI / CU / DOI / DOhU / FA / FAhO / FEhE / FEhU / FIhO / FOI / FUhA / FUhE / FUhO / GA / GAhO / GEhU / GI / GIhA / GOI / GOhA / GUhA / I / JAI / JOhI / JOI / KE / KEhE / KEI / KOhA / KU / KUhE / KUhO / LAU / LE / LEhAI / LEhU / LI / LIhU / LOhAI / LOhO / LOhU / LU / LUhU / MAhO / MAI / ME / MEhU / MOhE / MOI / NA / NAI / NAhE / NAhU / NIhO / NOI / NU / NUhA / NUhI / NUhU / PA / PEhE / PEhO / PU / ROI / SA / SE / SEI / SEhU / SI / SOI / SU / TEhU / TEI / TO / TOI / TUhE / TUhU / UI / VAU / VEI / VEhO / VUhU / VUhO / XI / ZEI / ZO / ZOI / ZOhU / (c:cmavo { return _word("?", c) })) {return expr;}
@@ -2008,7 +2020,14 @@ cmavo_form = expr:(!h !cluster onset (nucleus h)* (!stressed nucleus / nucleus !
 //// EXP-MODIF: logbanu lujvo
 brivla = !cmavo !slihykru expr:( (init:(!any_fuhivla_rafsi yless:y_less_rafsi !any_fuhivla_rafsi { return yless })* fin:((extended_rafsi / y_rafsi) (initial_rafsi / logbanu_rafsi)*)? { return fin ? init.concat(fin[0]).concat(fin[1]) : init }) brivla_core) { return expr[0] ? expr[0].concat(expr[1]) : expr[1]; }
 
-brivla_rafcau 'brivla' = !cmavo !slihykru !slinkuhi !h expr:((!stressed syllable !stress any_unstressed_syllable*)? stressed_syllable medial_syllable* unstressed_syllable) { return _join(expr) }
+brivla_rafcau 'brivla' = !cmavo !slihykru !slinkuhi !h expr:((!stressed syllable !stress any_unstressed_syllable*)? stressed_syllable medial_syllable* unstressed_syllable) {
+  if (options.slaka) {
+    var head = expr[0] ? [].concat(expr[0][1]).concat(expr[0][3]) : [];
+    return head.concat(expr[1]).concat(expr[2]).concat(expr[3])
+        .filter(_empty).join(",");
+  }
+  return _join(expr);
+}
 
 brivla_core 'brivla kernelo' = expr:(fuhivla / gismu / CVV_final_rafsi / stressed_initial_rafsi short_final_rafsi) { return [].concat(expr) }
 

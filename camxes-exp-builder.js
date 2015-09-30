@@ -6,6 +6,7 @@ var camxes_peg = fs.readFileSync("\camxes-exp.js.peg").toString();
 try {
 	var camxes = PEG.buildParser(camxes_peg, {
 		cache: true, 
+		trace: false,
 		output: "source",
 		allowedStartRules: [
 			"text",

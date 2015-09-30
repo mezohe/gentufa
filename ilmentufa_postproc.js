@@ -159,7 +159,7 @@ function gloss(array, words) {
 	}
 	function _normalize(string) {
 		if (string == null) return null;
-		return string.replace(/\./g, "")
+		return string.replace(/[,.]/g, "")
 				.replace(/à/g, "a")
 				.replace(/è/g, "e")
 				.replace(/[ìĭ]/g, "i")
