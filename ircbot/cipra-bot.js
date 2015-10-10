@@ -117,7 +117,7 @@ function extract_mode(input) {
 				ret.ckt = bool;
 				ret.du = bool;
 				ret.su = bool;
-				if (!ret.buhu) ret.buhu = bool ? "zai" : null;
+				/* if (!ret.buhu) */ ret.buhu = bool ? "zai" : "buhu"; // lo .ifle co'e pu janli lo brauzero sazycimde
 				ret.lau = bool;
 				ret.po = bool;
 				ret.koi = bool;
