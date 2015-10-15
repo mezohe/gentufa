@@ -679,7 +679,7 @@ tag_term = start:(termset /
   / inverted_term / naku_term
   / (!(!sumti !gek_termset gek) !jek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }) 
   / soi_term
-) repeat:(jek tag_term)* {
+) repeat:(!(gihek tag BO_clause bridi_tail_2) jek tag_term)* {
   repeat.forEach(function (r) {
     start = _fill_jek(start, r[0], r[1]);
   });
@@ -698,7 +698,7 @@ abs_tag_term = start:(termset /
   / inverted_term / naku_term
   / (!selbri !(!sumti !gek_termset gek_sentence) !jek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) })
   / soi_term
-) repeat:(jek abs_tag_term)* {
+) repeat:(!(gihek tag BO_clause bridi_tail_2) jek abs_tag_term)* {
   repeat.forEach(function (r) {
     start = _fill_jek(start, r[0], r[1]);
   });
