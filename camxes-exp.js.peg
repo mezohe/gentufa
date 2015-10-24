@@ -682,7 +682,7 @@ tag_term = start:(termset /
   / soi_term
 ) repeat:(!(gihek tag BO_clause bridi_tail_2) jek tag_term)* {
   repeat.forEach(function (r) {
-    start = _fill_jek(start, r[0], r[1]);
+    start = _fill_jek(start, r[1], r[2]);
   });
   return start;
 }
@@ -701,7 +701,7 @@ abs_tag_term = start:(termset /
   / soi_term
 ) repeat:(!(gihek tag BO_clause bridi_tail_2) jek abs_tag_term)* {
   repeat.forEach(function (r) {
-    start = _fill_jek(start, r[0], r[1]);
+    start = _fill_jek(start, r[1], r[2]);
   });
   return start;
 }
