@@ -2243,10 +2243,10 @@ BOI = &cmavo expr:( b oi ) &post_word {return _word("BOI", expr);}
 
 BU = &cmavo expr:( &{return options.buhu == "bu"} b u h u / &{return options.buhu != "bu"} b u ) &post_word {return _word(options.buhu == "bu" ? "BUhU" : "BU", expr);}
 
-BY = &cmavo dot:(&(lermaho !EOF !cmevla !nucleus !(&onset lermaho)) {return "."})? expr:(ybu / j o h o / r u h o / g e h o / j e h o / l o h a / n a h a / &{return !options.diftogoteha} s e h e / t o h a / g a h e / y h y / a h y / e h y / i h y / o h y / u h y / b y / c y / d y / f y / g y / j y / k y / l y / m y / n y / p y / r y / s y / t y / v y / x y / z y / u y / i y ) &post_word {return _word("BY", _join(expr) + (dot || ""));}
+BY = &cmavo dot:(&(lermaho !EOF !cmevla !nucleus !(&onset lermaho)) {return "."})? expr:((ybu / j o h o / r u h o / g e h o / j e h o / l o h a / n a h a / &{return !options.diftogoteha} s e h e / t o h a / g a h e / y h y / a h y / e h y / i h y / o h y / u h y / b y / c y / d y / f y / g y / j y / k y / l y / m y / n y / p y / r y / s y / t y / v y / x y / z y / u y / i y ) &post_word / (PA_tail h y) &post_word) {return _word("BY", _join(expr[0]) + (dot || ""));}
 lermaho = !ybu &cmavo onset? (nucleus h)* y (pause / &post_word)
 
-CAI = &cmavo expr:( p ei / c ai / c u h i / s ai / r u h e / m a u h i / d a u h i / m e h ai ) &post_word {return _word("CAI", expr);}
+CAI = &cmavo expr:( n a h oi / p ei / c ai / c u h i / s ai / r u h e / m a u h i / d a u h i / m e h ai ) &post_word {return _word("CAI", expr);}
 
 CEI = &cmavo expr:( c ei ) &post_word {return _word("CEI", expr);}
 
@@ -2254,11 +2254,11 @@ CEhE = &cmavo expr:( c e h e ) &post_word {return _word("CEhE", expr);}
 
 CO = &cmavo expr:( c o ) &post_word {return _word("CO", expr);}
 
-COI = &cmavo expr:( d i h ai / a h oi / c o h oi / &{return options.diftogoteha} d i h o / j u h i / c oi / f i h i / t a h a / m u h o / f e h o / c o h o / p e h u / k e h o / n u h e / r e h i / b e h e / j e h e / k i h e / v i h o ) &post_word {return _word("COI", expr);}
+COI = &cmavo expr:( o h ai / a h oi / f a u h u / d i h ai / a h oi / c o h oi / &{return options.diftogoteha} d i h o / j u h i / c oi / f i h i / t a h a / m u h o / f e h o / c o h o / p e h u / k e h o / n u h e / r e h i / b e h e / j e h e / k i h e / v i h o ) &post_word {return _word("COI", expr);}
 
 CU = &cmavo expr:( c u ) &post_word {return _word("CU", expr);}
 
-DOI = &cmavo expr:( j o h au / d a h oi / k i h ai / s a h ei / d oi / m i h e ) &post_word {return _word("DOI", expr);}
+DOI = &cmavo expr:( f i h i h e / j o h au / d a h oi / t a i h i / d a h ei / k i h ai / s a h ei / d oi / m i h e ) &post_word {return _word("DOI", expr);}
 
 DOhU = &cmavo expr:( d o h u ) &post_word {return _word("DOhU", expr);}
 
@@ -2292,19 +2292,19 @@ GIhA = &cmavo expr:( g i h e / g i h i / g i h o / g i h a / g i h u ) &post_wor
 
 GOI = &cmavo expr:( n o h u / n e / g oi / p o h u / p e / &{return !options.po} (p o h e / p o) ) &post_word {return _word("GOI", expr);}
 
-GOhA = &cmavo expr:( &{return options.du && !options.dujoi} d u h u / m o / n ei / g o h u / g o h o / g o h i / n o h a / g o h e / g o h a / &{return !options.du && !options.dujoi} d u / b u h a / b u h e / b u h i / c o h e ) &post_word {return _word("GOhA", expr);} 
+GOhA = &cmavo expr:( x e h u / &{return options.du && !options.dujoi} d u h u / m o / n ei / g o h u / g o h o / g o h i / n o h a / g o h e / g o h a / &{return !options.du && !options.dujoi} d u / b u h a / b u h e / b u h i / c o h e ) &post_word {return _word("GOhA", expr);} 
 
 GUhA = &cmavo expr:( g u h e / g u h i / g u h o / g u h a / g u h u ) &post_word {return _word("GUhA", expr);}
 
 I = &cmavo expr:( i ) &post_word {return _word("I", expr);}
 
-JAI = &cmavo expr:( j ai ) &post_word {return _word("JAI", expr);}
+JAI = &cmavo expr:( j a i h a / j ai ) &post_word {return _word("JAI", expr);}
 
 JOhI = &cmavo expr:( j o h i ) &post_word {return _word("JOhI", expr);}
 
-JOI = &cmavo expr:( b i h e / m i h i / b i h o / b i h i / z i h e / f a h u / p i h u / j oi / c e h o / &{return options.ckt} c e h u / &{return !options.ckt} c e / j o h u / k u h a / j o h e / j u h e / j e h i / &{return options.dujoi && options.du} d u h u / j e / j o / j a / j u / j i / &{return options.dujoi && !options.du} d u / a / e / o / u ) &post_word {return _word("JOI", expr);}
+JOI = &cmavo expr:( f a h u h ai / k a i h a / b i h e / m i h i / b i h o / b i h i / z i h e / f a h u / p i h u / j oi / c e h o / &{return options.ckt} c e h u / &{return !options.ckt} c e / j o h u / k u h a / j o h e / j u h e / j e h i / &{return options.dujoi && options.du} d u h u / y h i / j e / j o / j a / j u / j i / &{return options.dujoi && !options.du} d u / a / e / o / u ) &post_word {return _word("JOI", expr);}
 
-KE = &cmavo expr:( k e / p i h ai ) &post_word {return _word("KE", expr);}
+KE = &cmavo expr:( k e / p i h ai / f e i h u ) &post_word {return _word("KE", expr);}
 
 KEhE = &cmavo expr:( k e h e ) &post_word {return _word("KEhE", expr);}
 
@@ -2320,9 +2320,9 @@ KUhO = &cmavo expr:( k u h o ) &post_word {return _word("KUhO", expr);}
 
 LAU = &cmavo expr:( c e h a / &{return options.ckt} t u h a / &{return !options.lau} l au / &{return options.buhu != "zai"} z ai / &{return !options.ckt} t au ) &post_word {return _word(options.lau ? "CEhA" : "LAU", expr);}
 
-LAhE = &cmavo expr:( z o h ei / &{return !options.ckt} t u h a / l u h a / l u h o / l a h e / v u h i / l u h i / l u h e / &{return options.ckt} t au ) &post_word {return _word("LAhE", expr);}
+LAhE = &cmavo expr:( z o h ei / l u h au / d u h au / &{return !options.ckt} t u h a / l u h a / l u h o / l a h e / v u h i / l u h i / l u h e / &{return options.ckt} t au ) &post_word {return _word("LAhE", expr);}
 
-LE = &cmavo expr:( r i h oi / m e h ei / l ei / l oi / l e h i / l o h i / l e h e / l o h e / l o / l e / l ai / l a h i / l a ) &post_word { return _word("LE", expr);}
+LE = &cmavo expr:( r i h oi / m o h oi / m e h ei / l ei / l oi / l e h i / l o h i / l e h e / l o h e / l o / l e / l ai / l a h i / l a ) &post_word { return _word("LE", expr);}
 
 LEhAI = &cmavo expr:( l e h ai ) &post_word {return _word("LEhAI", expr);}
 
@@ -2346,7 +2346,7 @@ MAhO = &cmavo expr:( m a h o ) &post_word {return _word("MAhO", expr);}
 
 MAI = &cmavo expr:( m o h o / m ai ) &post_word {return _word("MAI", expr);}
 
-ME = &cmavo expr:(m e h au / m e) &post_word {return _word("ME", expr);}
+ME = &cmavo expr:(m e h au / x o h i / m e) &post_word {return _word("ME", expr);}
 
 MEhU = &cmavo expr:( m e h u ) &post_word {return _word("MEhU", expr);}
 
@@ -2360,11 +2360,11 @@ MOI = &cmavo expr:( m o i h o / m ei / m oi / s i h e / c u h o / v a h e ) &pos
 
 MUhOI = &cmavo expr:( m u h oi ) &post_word {return _word("MUhOI", expr);}
 
-NA = &cmavo expr:( j a h a / n a ) &post_word {return _word("NA", expr);}
+NA = &cmavo expr:( c a u h a / j a h a / n a ) &post_word {return _word("NA", expr);}
 
 NAI = &cmavo expr:( n ai / j a h ai ) &post_word {return _word("NAI", expr);}
 
-NAhE = &cmavo expr:( j e h ai / n a h ei / t o h e / j e h a / n a h e / n o h e ) &post_word {return _word("NAhE", expr);}
+NAhE = &cmavo expr:( s a i h e / r e i h e / c a i h e / c a u h e / n o i h e / j e h ai / n a h ei / t o h e / j e h a / n a h e / n o h e ) &post_word {return _word("NAhE", expr);}
 
 NAhU = &cmavo expr:( n a h u ) &post_word {return _word("NAhU", expr);}
 
@@ -2380,13 +2380,15 @@ NUhI = &cmavo expr:( n u h i ) &post_word {return _word("NUhI", expr);}
 
 NUhU = &cmavo expr:( n u h u ) &post_word {return _word("NUhU", expr);}
 
-PA = &cmavo expr:( x o h e / d au / f ei / g ai / j au / x ei / r ei / v ai / p i h e / p i / f i h u / z a h u / m e h i / n i h u / k i h o / c e h i / m a h u / r a h e / d a h a / s o h a / j i h i / &{return !options.su} s u h o / s u h e / r o / r au / s o h u / s o h i / s o h e / s o h o / m o h a / d u h e / t e h o / k a h o / c i h i / t u h o / x o / p ai / n o h o / n o / p a / r e / c i / v o / m u / x a / z e / b i / s o / &{return options.su} s u / digit ) &post_word {return _word("PA", expr);}
+PA = &cmavo expr:PA_tail &post_word {return _word("PA", expr);}
+
+PA_tail = x o h e / d au / f ei / g ai / j au / x ei / r ei / v ai / p i h e / p i / f i h u / z a h u / m e h i / n i h u / k i h o / c e h i / m a h u / r a h e / d a h a / s o h a / j i h i / &{return !options.su} s u h o / s u h e / r o / r au / s o h u / s o h i / s o h e / s o h o / m o h a / d u h e / t e h o / k a h o / c i h i / t u h o / x o / p ai / n o h o / n o / p a / r e / c i / v o / m u / x a / z e / b i / s o / &{return options.su} s u / digit
 
 PEhE = &cmavo expr:( p e h e ) &post_word {return _word("PEhE", expr);}
 
 PEhO = &cmavo expr:( p e h o ) &post_word {return _word("PEhO", expr);}
 
-PU = &cmavo expr:( b i h ai / k a h ai / z e h u / z e h a / z e h i / z e h e / c o h i / p u h o / c o h u / m o h u / c a h o / c o h a / d e h a / b a h o / d i h a / z a h o / x a h o / v e h u / v e h a / v e h i / v e h e / v i h i / v i h a / v i h u / v i h e / r u h i / t a h e / d i h i / n a h o / d u h o / &{return !options.diftogoteha} s i h u / z au / k i h i / d u h i / c u h u / t u h i / t i h u / &{return !options.diftogoteha} d i h o / j i h u / r i h a / n i h i / m u h i / k i h u / v a h u / &{return !options.koi} k oi / c a h i / t a h i / p u h e / j a h i / k ai / b ai / f i h e / d e h i / c i h o / m au / m u h u / r i h i / r a h i / k a h a / p a h u / p a h a / l e h a / k u h u / t ai / b au / m a h i / c i h e / f au / p o h i / c au / m a h e / c i h u / r a h a / p u h a / l i h e / l a h u / b a h i / k a h i / s au / f a h e / b e h i / t i h i / j a h e / g a h a / v a h o / j i h o / m e h a / d o h e / j i h e / p i h o / g au / z u h e / m e h e / r ai / c a h a / p u h i / n u h o / k a h e / c u h e / n au / d u h a / b e h a / n e h u / v u h a / g a h u / t i h a / n i h a / c a h u / z u h a / r i h u / r u h u / r e h o / t e h e / &{return options.buhu != "bu"} b u h u / n e h a / p a h o / n e h i / t o h o / z o h i / z e h o / z o h a / f a h a / x au / &{return options.ckt} k e h a / &{return options.buhu == "zai"} z ai / &{return options.buhu == "bu"} b u / b a / p u / c a / &{return !options.ckt} k i / v i / v a / v u / z i / z a / z u ) &post_word {return _word("PU", expr);}
+PU = &cmavo expr:( z e i h a / z e h ai / d e i h a / b i h ai / k a h ai / z e h u / z e h a / z e h i / z e h e / c o h i / p u h o / c o h u / m o h u / c a h o / c o h a / d e h a / b a h o / d i h a / z a h o / x a h o / v e h u / v e h a / v e h i / v e h e / v i h i / v i h a / v i h u / v i h e / r u h i / t a h e / d i h i / n a h o / d u h o / &{return !options.diftogoteha} s i h u / z au / k i h i / d u h i / c u h u / t u h i / t i h u / &{return !options.diftogoteha} d i h o / j i h u / r i h a / n i h i / m u h i / k i h u / v a h u / &{return !options.koi} k oi / c a h i / t a h i / p u h e / j a h i / k ai / b ai / f i h e / d e h i / c i h o / m au / m u h u / r i h i / r a h i / k a h a / p a h u / p a h a / l e h a / k u h u / t ai / b au / m a h i / c i h e / f au / p o h i / c au / m a h e / c i h u / r a h a / p u h a / l i h e / l a h u / b a h i / k a h i / s au / f a h e / b e h i / t i h i / j a h e / g a h a / v a h o / j i h o / m e h a / d o h e / j i h e / p i h o / g au / z u h e / m e h e / r ai / c a h a / p u h i / n u h o / k a h e / c u h e / n au / d u h a / b e h a / n e h u / v u h a / g a h u / t i h a / n i h a / c a h u / z u h a / r i h u / r u h u / r e h o / t e h e / &{return options.buhu != "bu"} b u h u / n e h a / p a h o / n e h i / t o h o / z o h i / z e h o / z o h a / f a h a / x au / &{return options.ckt} k e h a / &{return options.buhu == "zai"} z ai / &{return options.buhu == "bu"} b u / b a / p u / c a / &{return !options.ckt} k i / v i / v a / v u / z i / z a / z u ) &post_word {return _word("PU", expr);}
 
 ROI = &cmavo expr:( r e h u / r oi / m u h ei ) &post_word {return _word("ROI", expr);}
 
@@ -2416,7 +2418,7 @@ TUhE = &cmavo expr:( t u h e ) &post_word {return _word("TUhE", expr);}
 
 TUhU = &cmavo expr:( t u h u ) &post_word {return _word("TUhU", expr);}
 
-UI = &cmavo expr:( l i h oi / f u h au / a h ei / k o h oi / s i h au / o h ai / &{return options.diftogoteha} s i h u / x e h e / x o h o / i h a / i e / a h e / u h i / i h o / i h e / a h a / i a / o h i / o h e / e h e / oi / u o / e h i / u h o / au / u a / a h i / i h u / i i / u h a / u i / a h o / ai / a h u / i u / ei / o h o / e h a / u u / o h a / o h u / u h u / e h o / i o / e h u / u e / i h i / u h e / b a h a / j a h o / c a h e / s u h a / t i h e / k a h u / s e h o / z a h a / p e h i / r u h a / j u h a / t a h o / r a h u / l i h a / b a h u / m u h a / d o h a / t o h u / v a h i / p a h e / z u h u / s a h e / l a h a / k e h u / s a h u / d a h i / j e h u / s a h a / k au / t a h u / n a h i / j o h a / b i h u / l i h o / p au / m i h u / k u h i / j i h a / s i h a / p o h o / p e h a / r o h i / r o h e / r o h o / r o h u / r o h a / r e h e / l e h o / j u h o / f u h i / d ai / g a h i / z o h o / b e h u / r i h e / s e h i / s e h a / v u h e / k i h a / x u / g e h e / b u h o / d a h o / r a h o / b i h a / z i h a / &{return options.koi} k oi ) &post_word {return _word("UI", expr);}
+UI = &cmavo expr:( k i h a h a u h u h a u h i / c i h a u h u h a u h i / p e i h e / i i (h i)+ / u e h i / l i h oi / f u h au / a h ei / k o h oi / s i h au / o h ai / &{return options.diftogoteha} s i h u / x (e (h e)+ / a (h a)+ / o (h o)+) / i h a / i e / a h e / u (h i)+ / i h o / i h e / a h a / i a / o h i / o h e / e h e / oi / u o / e h i / u h o / au / u a / a h i / i h u / i i / u h a / u i / a h o / ai / a h u / i u / ei / o h o / e h a / u u / o h a / o h u / u h u / e h o / i o / e h u / u e / i h i / u h e / b a h a / j a h o / c a h e / s u h a / t i h e / k a h u / s e h o / z a h a / p e h i / r u h a / j u h a / t a h o / r a h u / l i h a / b a h u / m u h a / d o h a / t o h u / v a h i / p a h e / z u h u / s a h e / l a h a / k e h u / s a h u / d a h i / j e h u / s a h a / k au / t a h u / n a h i / j o h a / b i h u / l i h o / p au / m i h u / k u h i / j i h a / s i h a / p o h o / p e h a / r o h i / r o h e / r o h o / r o h u / r o h a / r e h e / l e h o / j u h o / f u h i / d ai / g a h i / z o (h o)+ / b e h u / r i h e / s e h i / s e h a / v u h e / k i h a / x u / g e h e / b u h o / d a h o / r a h o / b i h a / z i h a / &{return options.koi} k oi ) &post_word {return _word("UI", expr);}
 
 VAU = &cmavo expr:( v au ) &post_word {return _word("VAU", expr);}
 
@@ -2444,7 +2446,7 @@ ZOhU = &cmavo expr:( c e h ai / z o h u ) &post_word {return _word("ZOhU", expr)
 
 ZOhOI = &cmavo expr:( z o h oi / l a h oi / r a h oi ) &post_word {return _word("ZOhOI", expr);}
 MEhOI = &cmavo expr:( m e h oi ) &post_word {return _word("MEhOI", expr);}
-GOhOI = &cmavo expr:( g o h oi ) &post_word {return _word("GOhOI", expr);}
+GOhOI = &cmavo expr:( g o h oi / t a h ai / z e h oi ) &post_word {return _word("GOhOI", expr);}
 IAU = &cmavo expr:( i au / i h au ) &post_word {return _word("IAU", expr);}
 NOhOI = &cmavo expr:( n o h oi / p o h oi ) &post_word {return _word("NOhOI", expr);}
 KUhOI = &cmavo expr:( k u h oi ) &post_word {return _word("KUhOI", expr);}
