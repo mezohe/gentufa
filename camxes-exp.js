@@ -163,7 +163,7 @@ var camxes = (function() {
         peg$c31 = function(na, nafree, ku, kufree) { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) },
         peg$c32 = function(start, repeat) {
           repeat.forEach(function (r) {
-            start = _fill_jek(start, r[0], r[1]);
+            start = _fill_jek(start, r[1], r[2]);
           });
           return start;
         },
