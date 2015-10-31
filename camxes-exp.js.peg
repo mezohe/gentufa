@@ -611,33 +611,34 @@ bridi_tail_3 = gek_sentence
     return _precedence(_fill_free(ke, kefree), contents, _fill_free(kehe, kehefree));
   }
 
-gek_sentence = (gek:gek left:subsentence_no_count gik:gik right:subsentence_no_count tail_terms:tail_terms {
+gek_sentence = gek:gek left:subsentence_no_count gik:gik right:subsentence_no_count tail_terms:tail_terms {
     gek = _fill_gek(gek, left, gik, right);
     gek.tail_terms = tail_terms;
     gek.structure = gek.structure.concat(tail_terms);
     return gek;
-  }) 
-  / (tag:tag* ke:KE_clause kefree:free* gek:gek_sentence kehe:KEhE_elidible kehefree:free* {
+  } 
+//  / peho:PEhO_clause free* gek:gek start:subsentence_no_count repeat:(gik_elidible subsentence_no_count)* 
+  / tag:tag* ke:KE_clause kefree:free* gek:gek_sentence kehe:KEhE_elidible kehefree:free* {
     gek = _duplicate_less_evil(gek);
     gek.ke = _fill_free(ke, kefree);
     gek.kehe = _fill_free(kehe, kehefree);
     gek.structure = [tag, ke, gek.structure, kehe];
     gek.selbri_tags = gek.selbri_tags ? tag.concat(gek.selbri_tags) : tag;
     return gek;
-  }) 
-  / (tag:tag+ &(!si_clause !zei_clause !bu_clause (NA_clause / GA_clause)) gek:gek_sentence {
+  }
+  / tag:tag+ &(!si_clause !zei_clause !bu_clause (NA_clause / GA_clause)) gek:gek_sentence {
     gek = _duplicate_less_evil(gek);
     gek.structure = [tag, gek.structure];
     gek.selbri_tags = gek.selbri_tags ? tag.concat(gek.selbri_tags) : tag;
     return gek;
-  }) 
-  / (na:NA_clause free:free* gek:gek_sentence { 
+  } 
+  / na:NA_clause free:free* gek:gek_sentence { 
     gek = _duplicate_less_evil(gek);
     _fill_free(na, free);
     gek.structure = [na, gek.structure];
     gek.selbri_tags = gek.selbri_tags ? [na].concat(gek.selbri_tags) : [na];
     return gek;
-  })
+  }
 
 tail_terms = terms:terms? vau:VAU_elidible free:free*  {
   terms = terms || {terms: [], structure: [], elided: true};
@@ -1045,6 +1046,7 @@ guhek 'guhek' = guk jek
 guk = expr:gu_clause !gek free:free* { return _fill_free(expr, free) }
 
 gik = expr:GI_clause free:free* { return _fill_free(expr, free) }
+gik_elidible = expr:GI_elidible free:free* { return _fill_free(expr, free) }
 
 tag = start:tense_modal repeat:(jek tense_modal)* {
   repeat.forEach(function (r) {
@@ -1280,6 +1282,7 @@ FA_elidible = expr:(FA_clause?) {return expr || {selmaho: "FA", word: "fi'a", el
 FEhU_elidible = expr:(FEhU_clause?) {return expr || _elided("FEhU");}
 // FOI and FUhO are never elidible
 GEhU_elidible = expr:(GEhU_clause?) {return expr || _elided("GEhU");}
+GI_elidible = expr:(GI_clause?) {return expr || _elided("GI");}
 GOI_elidible = expr:(GEhU_clause?) {return expr || {selmaho: "GOI", word: "ne", elided: true};}
 KEI_elidible = expr:(KEI_clause?)   {return expr || _elided("KEI");}
 KEhE_elidible = expr:(KEhE_clause?) {return expr || _elided("KEhE");}
@@ -2069,7 +2072,7 @@ syllable = expr:(onset !y nucleus coda?) {return _join(expr);}
 
 //// FIX: preventing {bla'ypre} from being a valid lujvo
 //// EXP-MODIF: CyC syllables in fuhivla
-consonantal_syllable = expr:(any_onset y coda_allow_glide / consonant &syllabic coda_allow_glide) //{return _join(expr);}
+consonantal_syllable = !(glide y &coda_allow_glide syllabic) expr:(any_onset y coda_allow_glide / consonant &syllabic coda_allow_glide) //{return _join(expr);}
  {var foo = _join(expr); if (foo.length == 2) return foo[0] + "y" + foo[1]; return foo }
 
 //// EXP-MODIF: CyC syllables in fuhivla
@@ -2092,7 +2095,7 @@ nucleus = expr:(vowel / diphthong / y !nucleus) {return _join(expr);}
 
 glide = expr:(i { return "ĭ" } / u { return "ŭ" }) &nucleus !glide {return expr;}
 
-diphthong = expr:(a u !u (&(pause !cmevla u nucleus) {return "."})? / (a i / e i / o i) !i (&(pause !cmevla i nucleus) {return "."})?) !nucleus {return _join(expr);}
+diphthong = expr:(a u !u (&(pause !cmevla u nucleus) {return "."})? / (a i / e i / o i) !i (&(pause !cmevla i nucleus) {return "."})?) (y &(&coda_allow_glide (l / m / n / r)) / !nucleus) {return _join(expr).replace("ĭ", "i").replace("ŭ", "u");}
 
 vowel = expr:(a / e / i / o / u) !nucleus {return expr;}
 
