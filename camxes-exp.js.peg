@@ -907,7 +907,7 @@ tanru_unit_1 = (unit:tanru_unit_2 linkargs:linkargs? { return linkargs ? _linkar
 tanru_unit_2 = expr:(
   (brivla:(BRIVLA_clause / MUhOI_clause / MEhOI_clause / GOhOI_clause) free:free* { return _place_shell(_fill_free(brivla, free)) }) 
   / (ke:KE_clause kefree:free* selbri:selbri_3 kehe:KEhE_elidible kehefree:free* { return _precedence(_fill_free(ke, kefree), selbri, _fill_free(kehe, kehefree)) }) 
-  / (ME_clause free* (sumti / tag_term) MEhU_elidible free* MOI_clause? free*) 
+  / (ME_clause free* (sumti / mex / tag_term) MEhU_elidible free* MOI_clause? free*) 
   / (mex MOI_clause free*) 
   / (NUhA_clause free* jek) 
   / (se:SE_clause free:free* unit:tanru_unit_2 { return _place_se(_fill_free(se, free), unit) }) 
@@ -1633,7 +1633,7 @@ NAhU_pre = pre:pre_clause word:NAhU spaces? { return _word_pre(word, pre) }
 //         new paragraph; change of subject 
 NIhO_clause 'cmavrniho' = sa:sentence_sa* pre:NIhO_pre post:NIhO_post { return _word_post(pre, post, sa) }
 NIhO_pre = pre:pre_clause word:NIhO spaces? { return _word_pre(word, pre) }
-NIhO_post = su:su_clause* post:post_clause { if (su && su.length) post.su = su; return post }
+NIhO_post = su:su_clause* post:post_clause { if (su && su.length) { if (!post) post = {}; post.su = su; } return post }
 
 //         attaches a subordinate clause to a sumti 
 NOI_clause 'cmavrnoi' = pre:NOI_pre post:post_clause { return _word_post(pre, post) }
@@ -2072,7 +2072,7 @@ syllable = expr:(onset !y nucleus coda?) {return _join(expr);}
 
 //// FIX: preventing {bla'ypre} from being a valid lujvo
 //// EXP-MODIF: CyC syllables in fuhivla
-consonantal_syllable = !(glide y &coda_allow_glide syllabic) expr:(any_onset y coda_allow_glide / consonant &syllabic coda_allow_glide) //{return _join(expr);}
+consonantal_syllable = expr:(any_onset y coda_allow_glide / consonant &syllabic coda_allow_glide) //{return _join(expr);}
  {var foo = _join(expr); if (foo.length == 2) return foo[0] + "y" + foo[1]; return foo }
 
 //// EXP-MODIF: CyC syllables in fuhivla
@@ -2089,7 +2089,7 @@ coda_allow_glide = expr:(!any_syllable consonant &any_syllable) {return _join(ex
 any_onset = expr:(h / glide / initial) {return _join(expr);}
 onset = !consonantal_syllable expr:(any_onset) {return expr;}
 
-nucleus = expr:(vowel / diphthong / y !nucleus) {return _join(expr);}
+nucleus = expr:(diphthong / vowel / y !nucleus) {return _join(expr);}
 
 //_________________________________________________________________
 

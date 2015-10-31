@@ -665,7 +665,7 @@ var camxes = (function() {
         peg$c250 = { type: "other", description: "cmavrnahe" },
         peg$c251 = { type: "other", description: "cmavrnahu" },
         peg$c252 = { type: "other", description: "cmavrniho" },
-        peg$c253 = function(su, post) { if (su && su.length) post.su = su; return post },
+        peg$c253 = function(su, post) { if (su && su.length) { if (!post) post = {}; post.su = su; } return post },
         peg$c254 = { type: "other", description: "cmavrnoi" },
         peg$c255 = { type: "other", description: "cmavrnu" },
         peg$c256 = { type: "other", description: "cmavrnuha" },
@@ -8251,7 +8251,10 @@ var camxes = (function() {
             if (s3 !== peg$FAILED) {
               s4 = peg$parsesumti();
               if (s4 === peg$FAILED) {
-                s4 = peg$parsetag_term();
+                s4 = peg$parsemex();
+                if (s4 === peg$FAILED) {
+                  s4 = peg$parsetag_term();
+                }
               }
               if (s4 !== peg$FAILED) {
                 s5 = peg$parseMEhU_elidible();
@@ -30438,7 +30441,7 @@ var camxes = (function() {
     }
 
     function peg$parseconsonantal_syllable() {
-      var s0, s1, s2, s3, s4, s5, s6;
+      var s0, s1, s2, s3, s4;
 
       var key    = peg$currPos * 652 + 472,
           cached = peg$resultsCache[key];
@@ -30451,116 +30454,63 @@ var camxes = (function() {
 
       s0 = peg$currPos;
       s1 = peg$currPos;
-      peg$silentFails++;
-      s2 = peg$currPos;
-      s3 = peg$parseglide();
-      if (s3 !== peg$FAILED) {
-        s4 = peg$parsey();
-        if (s4 !== peg$FAILED) {
-          s5 = peg$currPos;
-          peg$silentFails++;
-          s6 = peg$parsecoda_allow_glide();
-          peg$silentFails--;
-          if (s6 !== peg$FAILED) {
-            peg$currPos = s5;
-            s5 = void 0;
+      s2 = peg$parseany_onset();
+      if (s2 !== peg$FAILED) {
+        s3 = peg$parsey();
+        if (s3 !== peg$FAILED) {
+          s4 = peg$parsecoda_allow_glide();
+          if (s4 !== peg$FAILED) {
+            s2 = [s2, s3, s4];
+            s1 = s2;
           } else {
-            s5 = peg$FAILED;
-          }
-          if (s5 !== peg$FAILED) {
-            s6 = peg$parsesyllabic();
-            if (s6 !== peg$FAILED) {
-              s3 = [s3, s4, s5, s6];
-              s2 = s3;
-            } else {
-              peg$currPos = s2;
-              s2 = peg$FAILED;
-            }
-          } else {
-            peg$currPos = s2;
-            s2 = peg$FAILED;
+            peg$currPos = s1;
+            s1 = peg$FAILED;
           }
         } else {
-          peg$currPos = s2;
-          s2 = peg$FAILED;
+          peg$currPos = s1;
+          s1 = peg$FAILED;
         }
-      } else {
-        peg$currPos = s2;
-        s2 = peg$FAILED;
-      }
-      peg$silentFails--;
-      if (s2 === peg$FAILED) {
-        s1 = void 0;
       } else {
         peg$currPos = s1;
         s1 = peg$FAILED;
       }
-      if (s1 !== peg$FAILED) {
-        s2 = peg$currPos;
-        s3 = peg$parseany_onset();
-        if (s3 !== peg$FAILED) {
-          s4 = peg$parsey();
-          if (s4 !== peg$FAILED) {
-            s5 = peg$parsecoda_allow_glide();
-            if (s5 !== peg$FAILED) {
-              s3 = [s3, s4, s5];
-              s2 = s3;
-            } else {
-              peg$currPos = s2;
-              s2 = peg$FAILED;
-            }
-          } else {
-            peg$currPos = s2;
-            s2 = peg$FAILED;
-          }
-        } else {
-          peg$currPos = s2;
-          s2 = peg$FAILED;
-        }
-        if (s2 === peg$FAILED) {
-          s2 = peg$currPos;
-          s3 = peg$parseconsonant();
-          if (s3 !== peg$FAILED) {
-            s4 = peg$currPos;
-            peg$silentFails++;
-            s5 = peg$parsesyllabic();
-            peg$silentFails--;
-            if (s5 !== peg$FAILED) {
-              peg$currPos = s4;
-              s4 = void 0;
-            } else {
-              s4 = peg$FAILED;
-            }
-            if (s4 !== peg$FAILED) {
-              s5 = peg$parsecoda_allow_glide();
-              if (s5 !== peg$FAILED) {
-                s3 = [s3, s4, s5];
-                s2 = s3;
-              } else {
-                peg$currPos = s2;
-                s2 = peg$FAILED;
-              }
-            } else {
-              peg$currPos = s2;
-              s2 = peg$FAILED;
-            }
-          } else {
-            peg$currPos = s2;
-            s2 = peg$FAILED;
-          }
-        }
+      if (s1 === peg$FAILED) {
+        s1 = peg$currPos;
+        s2 = peg$parseconsonant();
         if (s2 !== peg$FAILED) {
-          peg$savedPos = s0;
-          s1 = peg$c338(s2);
-          s0 = s1;
+          s3 = peg$currPos;
+          peg$silentFails++;
+          s4 = peg$parsesyllabic();
+          peg$silentFails--;
+          if (s4 !== peg$FAILED) {
+            peg$currPos = s3;
+            s3 = void 0;
+          } else {
+            s3 = peg$FAILED;
+          }
+          if (s3 !== peg$FAILED) {
+            s4 = peg$parsecoda_allow_glide();
+            if (s4 !== peg$FAILED) {
+              s2 = [s2, s3, s4];
+              s1 = s2;
+            } else {
+              peg$currPos = s1;
+              s1 = peg$FAILED;
+            }
+          } else {
+            peg$currPos = s1;
+            s1 = peg$FAILED;
+          }
         } else {
-          peg$currPos = s0;
-          s0 = peg$FAILED;
+          peg$currPos = s1;
+          s1 = peg$FAILED;
         }
-      } else {
-        peg$currPos = s0;
-        s0 = peg$FAILED;
       }
+      if (s1 !== peg$FAILED) {
+        peg$savedPos = s0;
+        s1 = peg$c338(s1);
+      }
+      s0 = s1;
 
       peg$resultsCache[key] = { nextPos: peg$currPos, result: s0 };
 
@@ -30833,9 +30783,9 @@ var camxes = (function() {
       }
 
       s0 = peg$currPos;
-      s1 = peg$parsevowel();
+      s1 = peg$parsediphthong();
       if (s1 === peg$FAILED) {
-        s1 = peg$parsediphthong();
+        s1 = peg$parsevowel();
         if (s1 === peg$FAILED) {
           s1 = peg$currPos;
           s2 = peg$parsey();
