@@ -512,7 +512,7 @@ text_1 = expr:(free* (NIhO_clause+ free* su_clause*)? paragraphs)
 
 paragraphs = expr:(paragraph? (NIhO_clause+ free* su_clause* paragraphs)?) 
 
-paragraph = expr:(lone_jek? (tag BO_clause)? free* (I_clause free* lone_jek? (tag BO_clause free*)?)? statement (I_clause !lone_jek free* statement)*) 
+paragraph = expr:(lone_jek? (tag BO_clause)? free* (I_clause free* lone_jek? (tag? BO_clause free*)?)? statement (I_clause !lone_jek free* statement)*) 
 
 statement = (prenex statement / statement_1) (IAU_clause free* terms?)?
 

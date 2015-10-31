@@ -1603,6 +1603,9 @@ var camxes = (function() {
                 if (s7 !== peg$FAILED) {
                   s8 = peg$currPos;
                   s9 = peg$parsetag();
+                  if (s9 === peg$FAILED) {
+                    s9 = null;
+                  }
                   if (s9 !== peg$FAILED) {
                     s10 = peg$parseBO_clause();
                     if (s10 !== peg$FAILED) {
