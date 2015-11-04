@@ -119,10 +119,10 @@
   function _word_pre(word, pre) {
     word = _duplicate_less_evil(word);
     if (pre) {
-      if (pre[0] && pre[0].length)
-        word.pre = pre[0];
-      if (_empty(pre[1]))
-        word.word = pre[1] + word.word;
+      if (pre[0] || pre[1] && pre[1].length)
+        word.pre = [pre[0]].concat(pre[1]).filter(_empty);
+      if (_empty(pre[2]))
+        word.word = pre[2] + word.word;
     }
     return word;
   }
@@ -1142,8 +1142,7 @@ xi_clause = xi:XI_clause free:free* mex:mex_2 { xi.number = mex; _fill_free(xi, 
 
 vocative = (coi:COI_clause+ doi:DOI_elidible { return {coi: coi, doi: doi, structure: coi.concat(doi),}; }) / DOI_clause
 
-indicators = expr:(FUhE_clause / UI_clause / CAI_clause / NAI_clause / FUhO_clause / free_sei / free_to / LOhAI_clause
-)+ !BU_clause { return expr }
+indicators = fuho:FUhO_clause { return [fuho] } / fuho:FUhO_clause? expr:(UI_clause / CAI_clause / NAI_clause / free_sei / free_to / LOhAI_clause)+ !BU_clause { return [fuho].concat(expr).filter(_empty) }
 
 // ****************
 // Magic Words
@@ -1236,13 +1235,18 @@ post_clause = spaces? si:si_clause? !ZEI_clause !BU_clause indicators:indicators
   if (indicators) r.indicators = indicators;
   return (r.si || r.indicators) && r;
 }
-indicator_post_clause = !BU_clause spaces? si:si_clause? !ZEI_clause !BU_clause {
-  return si && {si: si};
+indicator_post_clause = !BU_clause spaces? si:si_clause? !ZEI_clause !BU_clause indicators:FUhO_clause* !BU_clause {
+  var r = {};
+  if (si) r.si = si;
+  if (indicators) r.indicators = indicators;
+  return (r.si || r.indicators) && r;
 }
 
-pre_clause = BAhE_clause* pre_dot
+pre_clause = fuhe_free* BAhE_clause* pre_dot
 pre_dot = (&(nucleus / cmevla) {return "."})?
-pre_clause_no_dot = a:BAhE_clause* { return _empty(a) && [a, null] }
+pre_clause_no_dot = a:fuhe_free? b:BAhE_clause* { return [_empty(a), _empty(b), null] }
+fuhe_free = FUhE_clause free*
+pre_clause_no_fuhe = a:BAhE_clause* b:pre_dot { return [null, _empty(a), _empty(b)] }
 
 //// EXP-DELETION: brivla/cmevla merge
 //any_word_SA_handling = BRIVLA_pre / known_cmavo_SA / !known_cmavo_pre CMAVO_pre / CMEVLA_pre
@@ -1416,7 +1420,7 @@ FUhA_pre = pre:pre_clause word:FUhA spaces? { return _word_pre(word, pre) }
 
 //         open long scope for indicator 
 FUhE_clause 'cmavrfuhe' = pre:FUhE_pre post:indicator_post_clause { var ret = _word_post(pre, post); ret.fuhe = ++_g_fuhe; return ret }
-FUhE_pre = pre:pre_clause word:FUhE spaces? { return _word_pre(word, pre) }
+FUhE_pre = pre:pre_clause_no_fuhe word:FUhE spaces? { return _word_pre(word, pre) }
 
 //         close long scope for indicator 
 FUhO_clause 'cmavrfuho' = pre:FUhO_pre post:indicator_post_clause { if (_g_fuhe < 1) throw "FUhO requires FUhE to its left"; var ret = _word_post(pre, post); ret.fuhe = _g_fuhe--; return ret }
@@ -1511,7 +1515,7 @@ LAhE_clause 'cmavrlahe' = pre:LAhE_pre post:post_clause { return _word_post(pre,
 LAhE_pre = pre:pre_clause word:LAhE spaces? { return _word_pre(word, pre) }
 
 //         sumti descriptors 
-LE_clause 'cmavrle' = pre:LE_pre post:post_clause { return _word_post(pre, post) }
+LE_clause 'cmavrle' = pre:LE_pre post:indicator_post_clause { return _word_post(pre, post) }
 LE_pre = pre:pre_clause word:LE spaces? { return _word_pre(word, pre) }
 
 //         possibly ungrammatical text right quote 
