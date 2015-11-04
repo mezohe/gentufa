@@ -713,7 +713,7 @@ fa_elided_term = tag:FA_elidible boi:(&(number / lerfu_string) { return true })?
 
 naku_term = na:NA_clause nafree:free* ku:KU_clause kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }
 
-soi_term = soi:SOI_clause soifree:free* bridi:subsentence sehu:SEhU_elidible sehufree:free* { return {tag: _fill_free(soi, soifree), bridi: bridi, terminator: _fill_free(sehu, sehufree), structure: [soi, bridi, sehu]} }
+soi_term = soi:SOI_clause bridi:subsentence sehu:SEhU_elidible sehufree:free* { return {tag: soi, bridi: bridi, terminator: _fill_free(sehu, sehufree), structure: [soi, bridi, sehu]} }
 
 termset = gek_termset 
   / NUhI_clause free* gek terms NUhU_elidible free* gik terms NUhU_elidible free*
@@ -812,7 +812,7 @@ sumti_6 = simple_sumti
     };
   })
   / li_clause 
-  / (LOhOI_clause free* subsentence KUhAU_elidible free*) 
+  / (LOhOI_clause subsentence KUhAU_elidible free*) 
   
 lahe_nahe = (LAhE_clause / NAhE_clause) BO_clause? free*
 
@@ -840,13 +840,13 @@ relative_clauses = expr:(relative_clause (jek free* relative_clause)* / gek rela
 
 relative_clauses_nek = expr:(relative_clause_nek (jek free* relative_clause_nek)* / gek relative_clauses gik relative_clauses) 
 
-relative_clause 'rahabri' = expr:(GOI_clause free* term GEhU_elidible free* / NOI_clause free* subsentence KUhO_elidible free* ) 
+relative_clause 'rahabri' = expr:(GOI_clause free* term GEhU_elidible free* / NOI_clause subsentence KUhO_elidible free* ) 
 
 relative_clause_nek = relative_clause / GOI_elidible !quantifier &sumti term GEhU_elidible
 
 selbri_relative_clauses = expr:(selbri_relative_clause (jek free* selbri_relative_clause)* / gek selbri_relative_clauses gik selbri_relative_clauses) 
 
-selbri_relative_clause 'selbri rahabri' = expr:(NOhOI_clause free* subsentence KUhOI_elidible free* ) 
+selbri_relative_clause 'selbri rahabri' = expr:(NOhOI_clause subsentence KUhOI_elidible free* ) 
 
 
 selbri 'selbri' = tag:(tag / na:NA_clause free:free* { return _fill_free(na, free) })* selbri:selbri_1 { 
@@ -913,7 +913,7 @@ tanru_unit_2 = expr:(
   / (se:SE_clause free:free* unit:tanru_unit_2 { return _place_se(_fill_free(se, free), unit) }) 
   / (JAI_clause free* (tag / !tanru_unit_2 lahe_nahe)? tanru_unit_2) 
   / (NAhE_clause free* tanru_unit_2) 
-  / (NU_clause free* (jek NU_clause free*)* subsentence KEI_elidible free*) 
+  / (NU_clause (free* jek NU_clause)* subsentence KEI_elidible free*) 
   / (linkargs:linkargs unit:tanru_unit_1 { if (linkargs) { linkargs.inverted = true; return _linkargs_attach(linkargs, unit) } return unit })
   / MEIhE_clause free* sumti+ MEIhO_elidible
   ) { return expr.structure ? expr : {structure: expr} }
@@ -1636,11 +1636,11 @@ NIhO_pre = pre:pre_clause word:NIhO spaces? { return _word_pre(word, pre) }
 NIhO_post = su:su_clause* post:post_clause { if (su && su.length) { if (!post) post = {}; post.su = su; } return post }
 
 //         attaches a subordinate clause to a sumti 
-NOI_clause 'cmavrnoi' = pre:NOI_pre post:post_clause { return _word_post(pre, post) }
+NOI_clause 'cmavrnoi' = pre:NOI_pre post:indicator_post_clause { return _word_post(pre, post) }
 NOI_pre = pre:pre_clause word:NOI spaces? { return _word_pre(word, pre) }
 
 //         abstraction  
-NU_clause 'cmavrnu' = pre:NU_pre post:post_clause { return _word_post(pre, post) }
+NU_clause 'cmavrnu' = pre:NU_pre post:indicator_post_clause { return _word_post(pre, post) }
 NU_pre = pre:pre_clause word:NU spaces? { return _word_pre(word, pre) }
 
 //         change operator to selbri; inverse of MOhE 
@@ -1817,13 +1817,13 @@ GOhOI_pre = pre:pre_clause word:GOhOI spaces? quoted:any_word spaces? {
 IAU_clause 'cmavrvau' = pre:IAU_pre post:indicator_post_clause { return _word_post(pre, post) }
 IAU_pre = pre:pre_clause word:IAU spaces? { return _word_pre(word, pre) }
 
-NOhOI_clause 'cmavrnohoi' = pre:NOhOI_pre post:post_clause { return _word_post(pre, post) }
+NOhOI_clause 'cmavrnohoi' = pre:NOhOI_pre post:indicator_post_clause { return _word_post(pre, post) }
 NOhOI_pre = pre:pre_clause word:NOhOI spaces? { return _word_pre(word, pre) }
 
 KUhOI_clause 'cmavrkuhoi' = pre:KUhOI_pre post:indicator_post_clause { return _word_post(pre, post) }
 KUhOI_pre = pre:pre_clause word:KUhOI spaces? { return _word_pre(word, pre) }
 
-LOhOI_clause 'cmavrlohoi' = pre:LOhOI_pre post:post_clause { return _word_post(pre, post) }
+LOhOI_clause 'cmavrlohoi' = pre:LOhOI_pre post:indicator_post_clause { return _word_post(pre, post) }
 LOhOI_pre = pre:pre_clause word:LOhOI spaces? { return _word_pre(word, pre) }
 
 KUhAU_clause 'cmavrkuhau' = pre:KUhAU_pre post:indicator_post_clause { return _word_post(pre, post) }
