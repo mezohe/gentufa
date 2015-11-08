@@ -546,20 +546,24 @@ sentence_sa = expr:(sentence_start? (!sentence_start (sa_word / SA_clause !sente
 
 sentence_start = expr:(I_pre / NIhO_pre) 
 
-subsentence_no_count = prenex:prenex subsentence:subsentence_no_count { return {
+subsentence_no_count = subsentence_tuhe
+  / prenex:prenex subsentence:subsentence_no_count { return {
    prenex: prenex, subsentence: subsentence, structure: [prenex, subsentence], 
   } } / sentence_no_count
 
-subsentence = free:free* tag:tag? tuhe:TUhE_clause tuhefree:free* text:text_1 tuhu:TUhU_elidible tuhufree:free* {
-    var ret = _precedence(_fill_free(tuhe, tuhefree), text, _fill_free(tuhu, tuhufree));
-    ret.tag = tag;
-    ret.free = free;
-    if (_empty(tag)) ret.structure.unshift(tag);
-    if (_empty(free)) ret.structure.unshift(free);
-    return ret;
-  } / prenex:prenex subsentence:subsentence { return {
+subsentence = subsentence_tuhe
+  / prenex:prenex subsentence:subsentence { return {
     prenex: prenex, subsentence: subsentence, structure: [prenex, subsentence],
   } } / sentence
+
+subsentence_tuhe = free:free* tag:tag? tuhe:TUhE_clause tuhefree:free* text:text_1 tuhu:TUhU_elidible tuhufree:free* {
+  var ret = _precedence(_fill_free(tuhe, tuhefree), text, _fill_free(tuhu, tuhufree));
+  ret.tag = tag;
+  ret.free = free;
+  if (_empty(tag)) ret.structure.unshift(tag);
+  if (_empty(free)) ret.structure.unshift(free);
+  return ret;
+}
 
 bridi_tail = bridi_tail_1 / vau:VAU_elidible free:free* { return _fill_free(vau, free) }
 
@@ -2063,7 +2067,7 @@ unstressed_vowel = expr:(!stressed vowel !stress) {return _join(expr);}
 
 //// FIX: Xorxes' fix for fu'ivla rafsi stress
 //// EXP-MODIF: CyC syllables in fuhivla
-stress = expr:((any_onset y coda_allow_glide / consonant / glide)* h? y? syllable pause) {return _join(expr);}
+stress = expr:((any_onset y coda_allow_glide? / consonant)* syllable pause) {return _join(expr);}
 
 stressed = expr:(onset comma* [AEIOU]) {return _join(expr);}
 
