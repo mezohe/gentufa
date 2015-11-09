@@ -568,9 +568,9 @@ subsentence_tuhe = free:free* tag:tag? tuhe:TUhE_clause tuhefree:free* text:text
 bridi_tail = bridi_tail_1 / vau:VAU_elidible free:free* { return _fill_free(vau, free) }
 
 bridi_tail_1 = start:bridi_tail_2 repeat:(
-//    (gihek_strict tag / GI_clause tag) !(tag? BO_clause) free* (ke:KE_clause kefree:free* tail:bridi_tail_2 kehe:KEhE_clause kehefree:free* { return _precedence(_fill_free(ke, kefree), tail, _fill_free(kehe, kehefree)) }) tail_terms
+//    (gihek_strict tag) !(tag? BO_clause) free* (ke:KE_clause kefree:free* tail:bridi_tail_2 kehe:KEhE_clause kehefree:free* { return _precedence(_fill_free(ke, kefree), tail, _fill_free(kehe, kehefree)) }) tail_terms
 //    / (gihek (tag:tag &KE_clause { return tag })? !(tag? BO_clause) free* bridi_tail_2 tail_terms
-    (gihek tag / GI_clause tag) !BO_clause free* (ke:KE_clause kefree:free* tail:bridi_tail_2 kehe:KEhE_elidible kehefree:free* { return _precedence(_fill_free(ke, kefree), tail, _fill_free(kehe, kehefree)) }) tail_terms
+    (gihek tag) !BO_clause free* (ke:KE_clause kefree:free* tail:bridi_tail_2 kehe:KEhE_elidible kehefree:free* { return _precedence(_fill_free(ke, kefree), tail, _fill_free(kehe, kehefree)) }) tail_terms
     / (gihek (&. { return null })) !(tag? BO_clause) free* bridi_tail_2 tail_terms
   )* {
   return repeat.reduce(function (a, b) {
@@ -592,7 +592,7 @@ cu:CU_elidible cufree:free* quant:quantifier? meihi:NUhI_clause meihifree:free* 
     quantifier: quant,
   }
 }
-/ cu:CU_elidible cufree:free* start:bridi_tail_3 repeat:((gihek tag? / GI_clause? tag) BO_clause free* bridi_tail_2 tail_terms)? {
+/ cu:CU_elidible cufree:free* start:bridi_tail_3 repeat:((gihek tag? / tag) BO_clause free* bridi_tail_2 tail_terms)? {
   start.cu = _fill_free(cu, cufree);
   start.structure = [cu, _shell(start)];
   if (repeat) {
@@ -1037,19 +1037,26 @@ joik = gaho_pre:GAhO_clause* na:NA_clause? se:SE_clause? joi:(JOI_clause / VUhU_
 joik_free = expr:joik free:free* { return _fill_free(expr, free) }
 
 //// EXP-MODIF: Implementation of gaJA
-gek 'gek' = (gak jek )
-  / ((jek / tag) gik )
-  / (se:SE_clause? ga:GA_clause free:free* { if (se) { ga.se; ga.structure = [se, _shell(ga)] } return _fill_free(ga, free) }) 
+gek 'gek' = gak jek
+  / gak tag BO_clause
+  / (jek / tag) gik
+  / se:SE_clause? ga:GA_clause free:free* { if (se) { ga.se; ga.structure = [se, _shell(ga)] } return _fill_free(ga, free) }
 
 //// EXP-ADD: GAJA
 gak = expr:ga_clause !gek free:free* { return _fill_free(expr, free) }
 
 guhek 'guhek' = guk jek
+  / guk tag BO_clause
   / se:SE_clause? guha:GUhA_clause free:free* { if (_empty(se)) { guha.se = se; guha.structure = [se, _shell(guha)] } return _fill_free(guha, free) }
 
 guk = expr:gu_clause !gek free:free* { return _fill_free(expr, free) }
 
-gik = expr:GI_clause free:free* { return _fill_free(expr, free) }
+gik = expr:GI_clause tagbo:(tag bo:BO_clause)? free:free* { 
+  var gik = 
+    tagbo ? { gi: expr, tag: tagbo[0], bo: tagbo[1], structure: [expr, tagbo[0], tagbo[1]] }
+    : { gi: expr, structure: [expr] };
+  return _fill_free(gik, free);
+}
 gik_elidible = expr:GI_elidible free:free* { return _fill_free(expr, free) }
 
 tag = start:tense_modal repeat:(jek tense_modal)* {
