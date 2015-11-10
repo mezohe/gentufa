@@ -592,7 +592,7 @@ cu:CU_elidible cufree:free* quant:quantifier? meihi:NUhI_clause meihifree:free* 
     quantifier: quant,
   }
 }
-/ cu:CU_elidible cufree:free* start:bridi_tail_3 repeat:((gihek tag? / tag) BO_clause free* bridi_tail_2 tail_terms)? {
+/ cu:CU_elidible cufree:free* start:bridi_tail_3 repeat:((gihek tag? / (&. {return null}) tag) BO_clause free* bridi_tail_2 tail_terms)? {
   start.cu = _fill_free(cu, cufree);
   start.structure = [cu, _shell(start)];
   if (repeat) {
@@ -771,8 +771,8 @@ vuho_tail = relative_clauses (jek sumti)?
 
 sumti_1 = sumti_2
 
-sumti_2 = start:sumti_3 repeat:(jek sumti_3)* {
-  return repeat.reduce(function (a, b) { return _fill_jek(a, b[0], b[1]) }, start);
+sumti_2 = start:sumti_3 repeat:(jek (tag:tag &KE_clause { return tag })? sumti_3)* {
+  return repeat.reduce(function (a, b) { return _fill_jek(a, b[0], b[2], b[1]) }, start);
 }
 
 sumti_3 = start:sumti_4 repeat:(jek? tag? BO_clause free* sumti_3)? {
