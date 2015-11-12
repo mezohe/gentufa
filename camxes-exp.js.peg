@@ -2244,6 +2244,7 @@ initial_spaces = expr:((comma* space_char / !ybu Y)+ EOF? / EOF)  {return _join(
 ybu = expr:(Y space_char* BU)  {return "ybu";}
 
 lujvo = !gismu !fuhivla expr:brivla  {return expr;}
+lujvo_brivla = phonotactics l:lujvo { return l }
 
 //___________________________________________________________________
 
