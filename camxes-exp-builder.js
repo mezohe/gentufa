@@ -23,6 +23,7 @@ try {
 			"BRIVLA",
 			"gismu",
 			"lujvo",
+			"lujvo_brivla",
 			"fuhivla",
 			"fuhivla_head",
 			"brivla_head",
