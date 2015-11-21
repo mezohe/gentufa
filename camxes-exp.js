@@ -4554,13 +4554,9 @@ var camxes = (function() {
       if (s1 !== peg$FAILED) {
         s2 = [];
         s3 = peg$parsetag_je_tail();
-        if (s3 !== peg$FAILED) {
-          while (s3 !== peg$FAILED) {
-            s2.push(s3);
-            s3 = peg$parsetag_je_tail();
-          }
-        } else {
-          s2 = peg$FAILED;
+        while (s3 !== peg$FAILED) {
+          s2.push(s3);
+          s3 = peg$parsetag_je_tail();
         }
         if (s2 !== peg$FAILED) {
           peg$savedPos = s0;

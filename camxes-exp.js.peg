@@ -685,7 +685,7 @@ terms_2 = start:abs_term repeat:(CEhE_clause free* abs_term)* {
 term 'sumsmi' = tag_term / fa_elided_term
 
 tag_term = start:(termset /
-  (!gek !tag_je_tail tag:tag free:free* sumti:(
+  (!gek tag:tag free:free* sumti:(
     sumti 
     / &{return options.faje} (jek:jek sumti:sumti_3 { return _fill_jek(null, jek, sumti) })
     / &{return options.faje} relative_clauses
@@ -694,14 +694,12 @@ tag_term = start:(termset /
   / inverted_term / naku_term
   / (!(!sumti !gek_termset gek) !jek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }) 
   / soi_term
-) repeat:tag_je_tail+ {
+) repeat:(!(gihek tag BO_clause bridi_tail_2) jek tag_term)* {
   repeat.forEach(function (r) {
     start = _fill_jek(start, r[1], r[2]);
   });
   return start;
 }
-
-tag_je_tail = (!(gihek tag BO_clause bridi_tail_2) jek tag_term)
 
 abs_term 'sumsmi' = abs_tag_term / fa_elided_term
 
