@@ -27,6 +27,7 @@ try {
 			"fuhivla",
 			"fuhivla_head",
 			"brivla_head",
+			"any_syllable_ignore",
 			"stressed_syllable",
 			"consonantal_syllable",
 			"unstressed_syllable",
