@@ -1,0 +1,200 @@
+// This is a Parsing Expression Grammar for Gua\spi
+// See http://bford.info/packrat/
+// 
+// All rules have the form:
+// 
+// 	name = peg_expression
+// 
+// which means that the grammatical construct "name" is parsed using
+// "peg_expression".  
+// 
+// 1)  Names in lower case are grammatical constructs.
+// 2)  Names in UPPER CASE are selma'o (lexeme) names, and are terminals.
+// 3)  Concatenation is expressed by juxtaposition with no operator symbol.
+// 4)  / represents *ORDERED* alternation (choice).  If the first
+//     option succeeds, the others will never be checked.
+// 5)  ? indicates that the element to the left is optional.
+// 6)  * represents optional repetition of the construct to the left.
+// 7)  + represents one_or_more repetition of the construct to the left.
+// 8)  () serves to indicate the grouping of the other operators.
+//
+// Longest match wins.
+
+// ___ GRAMMAR ___
+
+{
+  function _join(arg)
+  {
+    if (typeof(arg) == "string")
+      return arg;
+    else
+    {
+      ret = "";
+      for (v in arg) { ret += _join(arg[v]); }
+      return ret;
+    }
+  }
+
+  function _node(label, arg)
+  {
+    var ret = [];
+    if (label != undefined) ret.push( label );
+    if (typeof( arg ) == "object" && typeof( arg[0] ) == "string" && arg[0] != "")
+    {
+      ret.push( arg );
+      return ret;
+    }
+    return _node_int(label, arg);
+  } 
+
+  function _node_int(label, arg)
+  {
+    if (typeof( arg ) == "string")
+      return arg;
+    var ret = [];
+    if (label != undefined) ret.push( label );
+    for (v in arg)
+    {
+      if (arg[v].length != 0)
+        ret.push( _node_int( undefined, arg[v] ) );
+    }
+    return ret;
+  }
+ 
+  function _node2(label, arg1, arg2)
+  {
+    return [label].concat(_node(arg1)).concat(_node(arg2));
+  }
+
+  function _node_nonempty(label, arg)
+  {
+    var _n = _node(label, arg);
+    return (_n.length == 1 && _n[0] == label) ? [] : _n;
+  }
+  
+  // === ZOI functions === //
+
+  function _zoi_assign_delim(word) {
+	var a = word.toString().split(",");
+	if (a.length > 0) _g_zoi_delim = a[a.length - 1];
+	else _g_zoi_delim = "";
+	return word;
+  }
+
+  function _zoi_check_quote(word) {
+	if (typeof(word) == "object") word = word.toString();
+    if (!is_string(word)) {
+	  alert("ZOI word is not a string");
+	  return false;
+	} else {
+      return (word.replace(/,/gm,"") === _g_zoi_delim);
+	}
+  }
+  
+  function _zoi_check_delim(word) {
+	if (typeof(word) == "object") word = word.toString();
+    if (!is_string(word)) {
+	  alert("ZOI word is not a string");
+	  return false;
+	} else {
+	  word = word.split(",");
+	  if (word.length > 0) word = word[word.length - 1];
+	  else word = "";
+      return (word === _g_zoi_delim);
+	}
+  }
+  
+  function is_string(v) {
+    return typeof v.valueOf() === 'string';
+  }
+  
+  function _concat(a, b) { return a && a.concat(b) }
+}
+
+text = sentence+
+
+sentence = 
+start:start 
+terms_begin:(
+	terms_begin_repeat:terms_top*
+	{ return terms_begin_repeat.reduce(_concat, []) }
+)
+propo_tail:(
+	(fi0 compound)? 
+	predicate:predicate 
+	terms_end:(
+		terms_end_repeat:terms_top*
+		{ return terms_end_repeat.reduce(_concat, []) }
+	)
+	{ return {predicate:predicate, terms_end:terms_end} }
+)?
+{
+	var r = {predicate: "_", terms: terms_begin || []};
+	if (propo_tail) {
+		r.predicate = propo_tail.predicate;
+		if (propo_tail.terms_end) 
+			r.terms = r.terms.concat(propo_tail.terms_end);
+	}
+	return r;
+}
+
+start = a:same b:I { return a + b }
+
+terms = down a:term+ endphrase { return a }
+
+terms_top = fi0? down a:((fi1 (compound !same)?)? b:term_top { return b })+ endphrase { return a }
+
+term = same? a:predicate b:terms? { return b && {predicate: a, terms: b} || {predicate: a} }
+
+term_top = (fi2 compound / same?) a:predicate b:terms? { return b && {predicate: a, terms: b} || {predicate: a} }
+
+predicate = a:brivla b:(c:compound d:brivla { return c ? c+d : d })* { return [a].concat(b) }
+
+
+word = magic / prefix / brivla
+
+brivla = !magic a:consonant+ b:vowel+ space* { return a.join("") + b.join("") }
+
+prefix = !magic a:( "f" [aeilnoruy] / "qo" / "z" [aeilmoruy] / "s" [aeioru] / "fw" / "v" [aeiou] / "qu" / "v" [ylrn] / "x" [aeinoruwy] / "b" [inu] / "q" [aeilry]) !vowel space* { return a.reduce(_concat).join("") }
+
+magic = I / fi
+
+consonant = [:bcdfgjkpqstvxz]
+
+vowel = [aeiouyrmnlw]
+
+space = " "
+
+
+I = ":"? a:[aeiou] !vowel space* { return ":" + a }
+
+fi = fi0 / fi2 / fi1
+
+fi0 = up "fi" !vowel space* { return "/fi" }
+
+fi1 = compound_je "fi" !vowel space* { return "-fi" }
+
+fi2 = down "fi" !vowel space* { return "\fi" }
+
+
+tone = up / down / same / compound
+
+tonechar = up / down / same / compound_be
+
+endphrase = &start / (!word (up / same)?) / &fi
+
+up = "/" !tonechar
+
+down = down_1 / subordinate
+
+compound = compound_be / compound_je
+
+same = "^" !tonechar
+
+down_1 = [\\!] !tonechar
+
+subordinate = "|" !tonechar
+
+compound_be = "=" !tonechar
+
+compound_je = "-"? !tonechar { return "-" }
