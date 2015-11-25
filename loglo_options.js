@@ -64,7 +64,7 @@ var ret = {
 	slaka: false,
 	lerfu: false,
 	rafcau: false,
-	startRule: "text",
+	startRule: "utterance",
 };
 var flag_pattern = "[+-]\\w+"
 
