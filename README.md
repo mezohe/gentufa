@@ -1,20 +1,16 @@
-ilmentufa
+spagetufa
 =========
 
-'la ilmentufa' is a syntactical and not yet semantical parser for the Lojban language.
-
-Read more about it at http://lojban.org/papri/La_Bangu:_ilmentufa
+spagetufa is a parser for Lojban incorporating many experimental changes. There is no documentation yet; the only way to find out what has changed is to read the commit log or to use it.
 
 
 === Requirements ===
 
 For generating a PEGJS grammar engine from its PEG grammar file, as well as for running the IRC bot interfaces, you need to have Node.js installed on your machine.
 
-For generating PEGJS engine, you may need to get the Node.js module 'pegjs'.
 For running the IRC bots, you may need to get the Node.js module 'irc'.
 
-However, as the necessary node_modules are already included in this project, I think you'll probably not have to download any of the aforementioned modules. ;)
-
+PEGJS itself (slightly modified to work around our own bugs) is already included in this repo.
 
 === Building a PEGJS engine ===
 
@@ -24,14 +20,15 @@ $ node [builder-filename]
 
 For example, "node camxes-builder" for building the standard grammar engine or "node camxes-exp-builder" for experimental grammar.
 
-Now, the grammar engine should have been created/updated, and be ready for use. :)
+Now, the grammar engine should have been created/updated. Run "node camxes-exp.js 'ti mo'" or load "camxes-exp.html" to try it out. 
 
 
 === Running the IRC bots ===
 
-Nothing easier; after having entered the ilmentufa directory, run the command "node ircbot/camxes-bot" or "node ircbot/cipra-bot" (the latter is for the experimental grammar).
+Nothing easier; after having entered the ilmentufa directory, run the command "node ircbot/cipra-bot" (this is the main Lojban parser - other bots also exist).
 The list of the channels joined by the bot can be found and edited within the bot script.
 
-=== Gua\spi parser ===
+=== Other parsers ===
 
-If you can't find the Gua\spi parser in your tree, switch to the guaspi branch: "git checkout guaspi"
+There are two separate attempts at parsing gua\spi here, neither complete; see guaspi.js.peg and guaspi-bnf.js.peg. There is also a copy of Randall Holmes's Loglan parser (loglan.js.peg), unmodified apart from the output format.
+
