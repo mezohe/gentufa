@@ -23,7 +23,7 @@ var buffer = new Buffer('var camxes = ');
 fs.writeSync(fd, buffer, 0, buffer.length);
 buffer = new Buffer(camxes);
 fs.writeSync(fd, buffer, 0, buffer.length);
-buffer = new Buffer("\n\nmodule.exports = camxes;\n\nterm = process.argv[2];\nif (term !== undefined && typeof term.valueOf() === 'string')\n  console.log(JSON.stringify(require('./ilmentufa_postproc.js').postprocessing(camxes.parse(term), {format:'brackets', f:true})));\n\n");
+buffer = new Buffer("\n\nmodule.exports = camxes;\n\nterm = process.argv[2];\nif (term !== undefined && typeof term.valueOf() === 'string')\n  console.log(JSON.stringify(require('./ilmentufa_postproc.js').postprocessing(camxes.parse(term), {format:'brackets', f:true, s:true})));\n\n");
 fs.writeSync(fd, buffer, 0, buffer.length);
 fs.close(fd);
 

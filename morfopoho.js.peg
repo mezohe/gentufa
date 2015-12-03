@@ -14,18 +14,21 @@
 
 text = space? w:word* { return w }
 
-word = cmevo / cmavo / brivo
+word = cmevo / cmavo / brivo_classifier
 
-cmevo = !h head:(h / consonant !glide !pause !h / glide / nucleus)* tail:consonant pause { return {selmaho: "cmevla", structure: join(head) + tail} }
+brivo_classifier = clbutt:(&gismu { return "gismu" } / &(rafsi_prefix* rafsi_whole) { return "pure-lujvo" } / &kinda_lujvo { return "kinda-lujvo" } / &. { return "zihevla" }) brivo:brivo { return {selmaho: clbutt, word: brivo.word} }
+kinda_lujvo = stressed_syllable (&(onset !(y syllable)) medial_syllable)* onset y syllable / (&(onset? !(y syllable) nucleus) unstressed_syllable)+ onset y unstressed_syllable* stressed_syllable
 
-cmavo = !CVCy_lujvo head:cmavo_head tail:cmavo_tail* word_break { return {selmaho: "cmavo", structure: [head].concat(tail)} }
+cmevo = !h head:(h / consonant !glide !pause !h / glide / nucleus)* tail:consonant pause { return {selmaho: "cmevla", word: join(head) + tail} }
+
+cmavo = !CVCy_lujvo head:cmavo_head tail:cmavo_tail* word_break { return {selmaho: "cmavo", word: [head].concat(tail)} }
 cmavo_head = &(!h !cluster onset? cmavo_nucleus syllable_break) s:syllable &cmavo_continuation { return s }
 cmavo_tail = &(h cmavo_nucleus syllable_break) s:syllable &cmavo_continuation { return s }
 cmavo_continuation = cmavo_tail / word_break
 cmavo_nucleus = !stressed_vowel nucleus / nucleus !cluster
 CVCy_lujvo = onset? nucleus medial_syllable (brivo / rafsi_string) // (brivo / medial_syllable* brivo_tail_syllable)
 
-brivo = !h !slinkuhi head:brivo_head? tail:brivo_tail word_break { return {selmaho: "brivla", structure: head ? head.concat(tail) : tail} }
+brivo = !h !slinkuhi head:brivo_head? tail:brivo_tail word_break { return {selmaho: "brivla", word: head ? head.concat(tail) : tail} }
 brivo_head = a:brivo_head_syllable b:unstressed_syllable* { return [a].concat(b) }
 brivo_tail = a:stressed_syllable b:medial_syllable* c:brivo_tail_syllable { return [a].concat(b).concat([c]) }
 
@@ -35,7 +38,9 @@ medial_syllable = &(onset !vowel) s:syllable { return s }
 brivo_tail_syllable = &(onset nucleus syllable_break) s:syllable { return s }
 
 slinkuhi = &(cluster vowel) syllable h y syllable / !rafsi_string consonant rafsi_string
-rafsi_string = y_less_rafsi* (y_rafsi / (consonant consonant?)? y syllable) / unstressed_y_less_rafsi* (final_rafsi / gismu) word_break
+rafsi_string = rafsi_prefix / rafsi_whole
+rafsi_prefix = y_less_rafsi* (y_rafsi / (consonant consonant?)? y &syllable)
+rafsi_whole = unstressed_y_less_rafsi* (final_rafsi / gismu) word_break
 vowel_final_rafsi_tail = consonant pure_vowel / diphthong / pure_vowel h pure_vowel
 y_less_rafsi = &syllable consonant (vowel_final_rafsi_tail / pure_vowel consonant)
 y_rafsi = &syllable consonant (vowel_final_rafsi_tail h y / pure_vowel consonant y) syllable
