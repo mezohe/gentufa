@@ -16,8 +16,10 @@ text = space? w:word* { return w }
 
 word = cmevo / cmavo / brivo_classifier
 
-brivo_classifier = clbutt:(&gismu { return "gismu" } / &(rafsi_prefix* rafsi_whole) { return "pure-lujvo" } / &kinda_lujvo { return "kinda-lujvo" } / &. { return "zihevla" }) brivo:brivo { return {selmaho: clbutt, word: brivo.word} }
-kinda_lujvo = stressed_syllable (&(onset !(y syllable)) medial_syllable)* onset y syllable / (&(onset? !(y syllable) nucleus) unstressed_syllable)+ onset y unstressed_syllable* stressed_syllable
+brivo_classifier = clbutt:(&gismu { return "gismu" } / &pure_lujvo { return "pure-lujvo" } / &kinda_lujvo { return "kinda-lujvo" } / &. { return "zihevla" }) brivo:brivo { return {selmaho: clbutt, word: brivo.word} }
+pure_lujvo = rafsi_prefix* rafsi_whole / rafsi_prefix+ final_CVV_CCV word_break
+kinda_lujvo = non_y_unstressed* stressed_syllable (!(onset y syllable) medial_syllable)* onset y syllable / non_y_unstressed+ onset y unstressed_syllable* stressed_syllable
+non_y_unstressed = !(onset? y syllable) unstressed_syllable
 
 cmevo = !h head:(h / consonant !glide !pause !h / glide / nucleus)* tail:consonant pause { return {selmaho: "cmevla", word: join(head) + tail} }
 
@@ -26,29 +28,33 @@ cmavo_head = &(!h !cluster onset? cmavo_nucleus syllable_break) s:syllable &cmav
 cmavo_tail = &(h cmavo_nucleus syllable_break) s:syllable &cmavo_continuation { return s }
 cmavo_continuation = cmavo_tail / word_break
 cmavo_nucleus = !stressed_vowel nucleus / nucleus !cluster
-CVCy_lujvo = onset? nucleus medial_syllable (brivo / rafsi_string) // (brivo / medial_syllable* brivo_tail_syllable)
+CVCy_lujvo = onset? nucleus medial_syllable (brivo / rafsi_string / &cmavo consonant diphthong) // (brivo / medial_syllable* brivo_tail_syllable)
 
 brivo = !h !slinkuhi head:brivo_head? tail:brivo_tail word_break { return {selmaho: "brivla", word: head ? head.concat(tail) : tail} }
 brivo_head = a:brivo_head_syllable b:unstressed_syllable* { return [a].concat(b) }
 brivo_tail = a:stressed_syllable b:medial_syllable* c:brivo_tail_syllable { return [a].concat(b).concat([c]) }
 
 brivo_head_syllable = &(onset? unstressed_vowel) s:syllable { return s }
-unstressed_syllable = &(onset !stressed_vowel) s:syllable { return s }
+unstressed_syllable = &(onset? !stressed_vowel) s:syllable { return s }
 medial_syllable = &(onset !vowel) s:syllable { return s }
 brivo_tail_syllable = &(onset nucleus syllable_break) s:syllable { return s }
 
 slinkuhi = &(cluster vowel) syllable h y syllable / !rafsi_string consonant rafsi_string
-rafsi_string = rafsi_prefix / rafsi_whole
-rafsi_prefix = y_less_rafsi* (y_rafsi / (consonant consonant?)? y &syllable)
-rafsi_whole = unstressed_y_less_rafsi* (final_rafsi / gismu) word_break
-vowel_final_rafsi_tail = consonant pure_vowel / diphthong / pure_vowel h pure_vowel
+//rafsi_string = consonant &stressed_vowel pure_vowel h pure_vowel word_break / y_rafsi
+ rafsi_string = rafsi_prefix / rafsi_whole
+rafsi_prefix = y_rafsi / y_less_rafsi rafsi_prefix
+rafsi_whole = (final_rafsi / gismu) word_break / unstressed_y_less_rafsi rafsi_whole
+vowel_final_rafsi_tail = consonant pure_vowel !coda / diphthong hyphen? !coda / pure_vowel h pure_vowel hyphen? !coda
+hyphen = r &consonant / n &r
 y_less_rafsi = &syllable consonant (vowel_final_rafsi_tail / pure_vowel consonant)
-y_rafsi = &syllable consonant (vowel_final_rafsi_tail h y / pure_vowel consonant y) syllable
+y_rafsi = &syllable consonant (gismu_form_tail (pure_vowel h)? y / vowel_final_rafsi_tail h y / pure_vowel consonant y) &syllable
 
 unstressed_y_less_rafsi = !rafsi_stress y_less_rafsi
-final_rafsi = &rafsi_stress consonant pure_vowel h pure_vowel &word_break / &rafsi_stress y_less_rafsi y_less_rafsi &word_break
-rafsi_stress = initial (stressed_vowel / unstressed_vowel h stressed_vowel)
-gismu = (consonant consonant &stressed_vowel pure_vowel / consonant &stressed_vowel pure_vowel consonant) consonant pure_vowel
+final_rafsi = consonant &stressed_vowel pure_vowel h pure_vowel &word_break / &rafsi_stress y_less_rafsi !rafsi_stress y_less_rafsi &word_break
+rafsi_stress = initial (stressed_vowel / vowel h stressed_vowel)
+gismu = &syllable (consonant consonant &stressed_vowel pure_vowel / consonant &stressed_vowel pure_vowel consonant) consonant pure_vowel
+gismu_form_tail = (consonant pure_vowel / pure_vowel consonant) consonant
+final_CVV_CCV = consonant &unstressed_vowel diphthong / &initial consonant consonant &unstressed_vowel pure_vowel
 
 syllable = onset_consonantal nucleus_consonantal coda / onset? nucleus coda?
 onset = h / glide / initial
