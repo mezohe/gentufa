@@ -6318,20 +6318,20 @@ var camxes = (function() {
           s1 = peg$FAILED;
         }
         if (s1 !== peg$FAILED) {
-          s2 = peg$parselerfu_string();
+          s2 = peg$currPos;
+          peg$silentFails++;
+          s3 = peg$parseselbri();
+          peg$silentFails--;
+          if (s3 === peg$FAILED) {
+            s2 = void 0;
+          } else {
+            peg$currPos = s2;
+            s2 = peg$FAILED;
+          }
           if (s2 !== peg$FAILED) {
-            s3 = peg$parseBOI_elidible();
+            s3 = peg$parselerfu_string();
             if (s3 !== peg$FAILED) {
-              s4 = peg$currPos;
-              peg$silentFails++;
-              s5 = peg$parseMOI_clause();
-              peg$silentFails--;
-              if (s5 === peg$FAILED) {
-                s4 = void 0;
-              } else {
-                peg$currPos = s4;
-                s4 = peg$FAILED;
-              }
+              s4 = peg$parseBOI_elidible();
               if (s4 !== peg$FAILED) {
                 s5 = [];
                 s6 = peg$parsefree();
