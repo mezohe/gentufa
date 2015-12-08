@@ -1,4 +1,5 @@
-[
+{
+	"specs":[
 	{
 		"txt": "li fu'a biboi ciboi panoboi ge'a gei",
 		"out": "([FA {li <fu'a (¹[bi boi] [{ci boi} {<pa no> boi} ge'a] gei¹)> LO'O}] VAU)"
@@ -90583,4 +90584,4 @@
 		"txt": "do ka'e roroi tavla",
 		"out": "([FA do] [CU {<(¹ka'e [{ro BOI} roi]¹) tàvla> VAU}])"
 	}
-]
+]}

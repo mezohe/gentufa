@@ -32,5 +32,5 @@ fs.readFile("camxes_ilmen_js.json", "utf8", function(err, data) {
         }
 		new_out.push(updated);
     });
-	console.log(JSON.stringify(new_out, null, "	"));
+	console.log(JSON.stringify({specs: new_out}, null, "	"));
 });

@@ -14,12 +14,14 @@
 
 text = space? w:word* { return w }
 
-word = cmevo / cmavo / brivo_classifier
+word = cmevo / cmavo / brivo_classifier / slinkuhi_catch
 
-brivo_classifier = clbutt:(&gismu { return "gismu" } / &pure_lujvo { return "pure-lujvo" } / &kinda_lujvo { return "kinda-lujvo" } / &. { return "zihevla" }) brivo:brivo { return {selmaho: clbutt, word: brivo.word} }
+brivo_classifier = clbutt:(&gismu { return "gismu" } / &pure_lujvo { return "jinsa-lujvo" } / &kinda_lujvo { return "kinda-lujvo" } / &. { return "zihevla" }) brivo:brivo { return {selmaho: clbutt, word: brivo.word} }
 pure_lujvo = rafsi_prefix* rafsi_whole / rafsi_prefix+ final_CVV_CCV word_break
 kinda_lujvo = non_y_unstressed* stressed_syllable (!(onset y syllable) medial_syllable)* onset y syllable / non_y_unstressed+ onset y unstressed_syllable* stressed_syllable
 non_y_unstressed = !(onset? y syllable) unstressed_syllable
+
+slinkuhi_catch = s:slinkuhi .* { return {selmaho: "valslinkuhi", word: join(s)} }
 
 cmevo = !h head:(h / consonant !glide !pause !h / glide / nucleus)* tail:consonant pause { return {selmaho: "cmevla", word: join(head) + tail} }
 
@@ -40,8 +42,9 @@ medial_syllable = &(onset !vowel) s:syllable { return s }
 brivo_tail_syllable = &(onset nucleus syllable_break) s:syllable { return s }
 
 slinkuhi = &(cluster vowel) syllable h y syllable / !rafsi_string consonant rafsi_string
-//rafsi_string = consonant &stressed_vowel pure_vowel h pure_vowel word_break / y_rafsi
- rafsi_string = rafsi_prefix / rafsi_whole
+rafsi_string = &{options.slinku} rafsi_string_official / &{!options.slinku} rafsi_string_lean
+rafsi_string_lean = consonant (diphthong / pure_vowel h pure_vowel) h y &syllable / consonant &stressed_vowel pure_vowel h pure_vowel word_break
+rafsi_string_official = rafsi_prefix / rafsi_whole
 rafsi_prefix = y_rafsi / y_less_rafsi rafsi_prefix
 rafsi_whole = (final_rafsi / gismu) word_break / unstressed_y_less_rafsi rafsi_whole
 vowel_final_rafsi_tail = consonant pure_vowel !coda / diphthong hyphen? !coda / pure_vowel h pure_vowel hyphen? !coda
@@ -56,11 +59,11 @@ gismu = &syllable (consonant consonant &stressed_vowel pure_vowel / consonant &s
 gismu_form_tail = (consonant pure_vowel / pure_vowel consonant) consonant
 final_CVV_CCV = consonant &unstressed_vowel diphthong / &initial consonant consonant &unstressed_vowel pure_vowel
 
-syllable = onset_consonantal nucleus_consonantal coda / onset? nucleus coda?
+syllable = expr:(onset_consonantal nucleus_consonantal coda / onset? nucleus coda?) { return join(expr) }
 onset = h / glide / initial
 nucleus = vowel / y
 coda = !syllable c:consonant !glide &syllable_break { return c }
-stressed_syllable = onset? stressed_vowel coda?
+stressed_syllable = expr:(onset? stressed_vowel coda?) { return join(expr) }
 
 onset_consonantal = expr:(affricate / liquid / other (liquid &coda / &coda) / sibilant (other liquid &coda / liquid &coda / other &coda)?) { return join(expr) }
 nucleus_consonantal = &syllabic &coda { return "y" }
