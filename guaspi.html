@@ -78,8 +78,10 @@ document.querySelector('#input_textarea').onkeyup = function () {
   run_camxes();
 };
 
-if (location.href.match(/\?fill/))
+if (location.href.match(/\?fill/)) {
   document.querySelector("#input_textarea").value = "|zu bem \\kau =xdry ^vo \\brni /tul /fi \\dvyr ^vu \\xdry /zu jiw ^fe vu \\xdry /psm ^vu go xou \\xdro ^zdmo ^vn xdry /fi qma qtu \\brni ^vu zia \\juy \\xdro ^can tai \\xdru ^dowu"
+  run_camxes();
+}
 
 function elem(tag, text, clbutt, attribs) {
   var foo = document.createElement(tag);
