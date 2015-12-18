@@ -1,23 +1,27 @@
 {
+  var jinsa_lujvo_hack;
   var stressed_vowels = {
     a: "à", e: "è", i: "ì", o: "ò", u: "ù",
     ai: "ài", ei: "èi", oi: "òi", au: "àu",
   }
   function truthy(val) {
-    return val;
+    return val && (!Array.isArray(val) || val.length);
   }
   function join(array) {
     if (!Array.isArray(array)) return array;
     return array.filter(truthy).map(join).join("");
   }
+  function concat(left, right) {
+    return left.concat(right);
+  }
 }
 
-text = space? w:word* { return w }
+text = space? w:word* s:slinkuhi_catch? { return s ? w.concat(s) : w }
 
-word = cmevo / cmavo / brivo_classifier / slinkuhi_catch
+word = cmevo / cmavo / brivo_classifier
 
-brivo_classifier = clbutt:(&gismu { return "gismu" } / &pure_lujvo { return "jinsa-lujvo" } / &kinda_lujvo { return "kinda-lujvo" } / &. { return "zihevla" }) brivo:brivo { return {selmaho: clbutt, word: brivo.word} }
-pure_lujvo = rafsi_prefix* rafsi_whole / rafsi_prefix+ final_CVV_CCV word_break
+brivo_classifier = clbutt:(&gismu { return "gismu" } / &(l:pure_lujvo { jinsa_lujvo_hack = l }) { return ["jinsa-lujvo", jinsa_lujvo_hack] } / &kinda_lujvo { return "kinda-lujvo" } / &. { return "zihevla" }) brivo:brivo { return clbutt.length == 2 ? { selmaho: clbutt[0], word: [brivo.word, clbutt[1]] } : {selmaho: clbutt, word: brivo.word} }
+pure_lujvo = pre:rafsi_prefix* who:rafsi_whole { return pre.reduce(concat, []).concat(who) } / pre:rafsi_prefix+ fin:final_CVV_CCV word_break { return pre.reduce(concat, []).concat(join(fin)) }
 kinda_lujvo = non_y_unstressed* stressed_syllable (!(onset y syllable) medial_syllable)* onset y syllable / non_y_unstressed+ onset y unstressed_syllable* stressed_syllable
 non_y_unstressed = !(onset? y syllable) unstressed_syllable
 
@@ -42,10 +46,10 @@ medial_syllable = &(onset !vowel) s:syllable { return s }
 brivo_tail_syllable = &(onset nucleus syllable_break) s:syllable { return s }
 
 slinkuhi = &(cluster vowel) syllable h y syllable / !rafsi_string consonant rafsi_string
-rafsi_string = &{options.slinku} rafsi_string_official / &{!options.slinku} rafsi_string_lean
+rafsi_string = &{return options.slinku} rafsi_string_official / &{return !options.slinku} rafsi_string_lean
 rafsi_string_lean = consonant (diphthong / pure_vowel h pure_vowel) h y &syllable / consonant &stressed_vowel pure_vowel h pure_vowel word_break
 rafsi_string_official = rafsi_prefix / rafsi_whole
-rafsi_prefix = y_rafsi / y_less_rafsi rafsi_prefix
+rafsi_prefix = raf:y_rafsi { return [join(raf)] } / raf:y_less_rafsi rest:rafsi_prefix { return [join(raf)].concat(rest) }
 rafsi_whole = (final_rafsi / gismu) word_break / unstressed_y_less_rafsi rafsi_whole
 vowel_final_rafsi_tail = consonant pure_vowel !coda / diphthong hyphen? !coda / pure_vowel h pure_vowel hyphen? !coda
 hyphen = r &consonant / n &r
@@ -69,7 +73,8 @@ onset_consonantal = expr:(affricate / liquid / other (liquid &coda / &coda) / si
 nucleus_consonantal = &syllabic &coda { return "y" }
 
 syllable_break = &onset &syllable / &space / !.
-word_break = syllable_break (space? &word / space? !.) { return null }
+//word_break = syllable_break (space? &word / space? !.) { return null }
+word_break = syllable_break (space / &word / !.) { return null }
 space = (!letter .)+ { return null }
 pause = space / !.
 letter = [A-Za-z'àèìòùỳáéíóúýÀÈÌÒÙỲÁÉÍÓÚÝĭŭĬŬ]

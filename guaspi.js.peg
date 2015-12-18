@@ -23,54 +23,6 @@
 // ___ GRAMMAR ___
 
 {
-  function _join(arg)
-  {
-    if (typeof(arg) == "string")
-      return arg;
-    else
-    {
-      ret = "";
-      for (v in arg) { ret += _join(arg[v]); }
-      return ret;
-    }
-  }
-
-  function _node(label, arg)
-  {
-    var ret = [];
-    if (label != undefined) ret.push( label );
-    if (typeof( arg ) == "object" && typeof( arg[0] ) == "string" && arg[0] != "")
-    {
-      ret.push( arg );
-      return ret;
-    }
-    return _node_int(label, arg);
-  } 
-
-  function _node_int(label, arg)
-  {
-    if (typeof( arg ) == "string")
-      return arg;
-    var ret = [];
-    if (label != undefined) ret.push( label );
-    for (v in arg)
-    {
-      if (arg[v].length != 0)
-        ret.push( _node_int( undefined, arg[v] ) );
-    }
-    return ret;
-  }
- 
-  function _node2(label, arg1, arg2)
-  {
-    return [label].concat(_node(arg1)).concat(_node(arg2));
-  }
-
-  function _node_nonempty(label, arg)
-  {
-    var _n = _node(label, arg);
-    return (_n.length == 1 && _n[0] == label) ? [] : _n;
-  }
   
   // === ZOI functions === //
 
@@ -109,12 +61,24 @@
   }
   
   function _concat(a, b) { return a && a.concat(b) }
+  function arrayifnot(a) { return Array.isArray(a) ? a : [a] }
+  function truthy(val) {
+    return val;
+  }
+  function join(array) {
+    if (!Array.isArray(array)) return array;
+    return array.filter(truthy).map(join).join("");
+  }
+  function subord_hack(down, terms) {
+    if (down == "|") terms[0].predicate.unshift("|");
+    return terms;
+  }
 }
 
-text = sentence+
+text = first:sentence rest:(&start sentence)* { return [first].concat(rest) }
 
 sentence = 
-start:start 
+start:start?
 terms_begin:(
 	terms_begin_repeat:terms_top*
 	{ return terms_begin_repeat.reduce(_concat, []) }
@@ -140,22 +104,34 @@ propo_tail:(
 
 start = a:same b:I { return a + b }
 
-terms = down a:term+ endphrase { return a }
+terms = d:down a:term+ endphrase { return subord_hack(d, a) }
 
-terms_top = fi0? down a:((fi1 (compound !same)?)? b:term_top { return b })+ endphrase { return a }
+terms_top = fi0? d:down a:((fi1 (compound !same)?)? b:term_top { return b })+ endphrase { return subord_hack(d, a) }
 
-term = same? a:predicate b:terms? { return b && {predicate: a, terms: b} || {predicate: a} }
+term = same? prefix:(compound_je prefix)* pre_terms:terms? a:predicate b:terms? {
+  var terms = []; 
+  if (pre_terms)
+    terms = terms.concat(pre_terms);
+  if (prefix.length)
+    a[0] = "-" + a[0];
+  a = prefix.map(function (a, i) { return (i ? "-" : "") + a[1] }).concat(a);
+  if (b) terms = terms.concat(b);
+  return terms.length && {predicate: a, terms: terms} || {predicate: a};
+}
 
-term_top = (fi2 compound / same?) a:predicate b:terms? { return b && {predicate: a, terms: b} || {predicate: a} }
+term_top = (fi2 compound)? t:term { return t }
 
-predicate = a:brivla b:(c:compound d:brivla { return c ? c+d : d })* { return [a].concat(b) }
+predicate = compound_je a:brivla b:(c:compound d:brivla { return c ? c+d : d })* { return [a].concat(b) }
 
 
 word = magic / prefix / brivla
 
-brivla = !magic a:consonant+ b:vowel+ space* { return a.join("") + b.join("") }
+brivla = !magic !prefix a:(consonant+ / "" { return [] }) b:vowel+ space* { return a.join("") + b.join("") }
 
-prefix = !magic a:( "f" [aeilnoruy] / "qo" / "z" [aeilmoruy] / "s" [aeioru] / "fw" / "v" [aeiou] / "qu" / "v" [ylrn] / "x" [aeinoruwy] / "b" [inu] / "q" [aeilry]) !vowel space* { return a.reduce(_concat).join("") }
+prefix = !magic a:( "f" [aeilnoruy] / "qo" // /"z" [aeilmoruy] 
+/ "s" [aeioru] // / "fw" 
+/ "v" [aeiou] // / "qu" 
+/ "v" [ylrn] / "x" [aeinoruwy] / "b" [inu] / "q" [aeilry]) !vowel space* { return join(a) }
 
 magic = I / fi
 
@@ -174,27 +150,27 @@ fi0 = up "fi" !vowel space* { return "/fi" }
 
 fi1 = compound_je "fi" !vowel space* { return "-fi" }
 
-fi2 = down "fi" !vowel space* { return "\fi" }
+fi2 = down "fi" !vowel space* { return "\\fi" }
 
 
 tone = up / down / same / compound
 
-tonechar = up / down / same / compound_be
+tonechar = [/\\!^|=\-]
 
 endphrase = &start / (!word (up / same)?) / &fi
 
-up = "/" !tonechar
+up = "/" !tonechar { return "/" }
 
 down = down_1 / subordinate
 
 compound = compound_be / compound_je
 
-same = "^" !tonechar
+same = "^" !tonechar { return "^" }
 
-down_1 = [\\!] !tonechar
+down_1 = [\\!] !tonechar { return "\\" }
 
-subordinate = "|" !tonechar
+subordinate = "|" !tonechar { return "|" }
 
-compound_be = "=" !tonechar
+compound_be = "=" !tonechar { return "=" }
 
 compound_je = "-"? !tonechar { return "-" }

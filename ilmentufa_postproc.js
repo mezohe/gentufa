@@ -133,6 +133,16 @@ function bracket(array, mode) {
 function _empty(array) {
 	return array && (!Array.isArray(array) || array.length) && array;
 }
+function _normalize(string) {
+	if (string == null) return null;
+	return string.replace(/[,.]/g, "")
+			.replace(/à/g, "a")
+			.replace(/è/g, "e")
+			.replace(/[ìĭ]/g, "i")
+			.replace(/ò/g, "o")
+			.replace(/[ùŭ]/g, "u")
+			;
+}
 
 function gloss(array, words) {
 	var remove = {
@@ -156,16 +166,6 @@ function gloss(array, words) {
 
 	function _(string) { // translation shield
 		return string && {translated: string};
-	}
-	function _normalize(string) {
-		if (string == null) return null;
-		return string.replace(/[,.]/g, "")
-				.replace(/à/g, "a")
-				.replace(/è/g, "e")
-				.replace(/[ìĭ]/g, "i")
-				.replace(/ò/g, "o")
-				.replace(/[ùŭ]/g, "u")
-				;
 	}
 	function _bridi_tail(tail, upper_tail_terms_pre) {
 		if (tail.left && tail.right) {
@@ -354,4 +354,5 @@ module.exports.postprocessing = camxes_postprocessing;
 module.exports.prettify = prettify_brackets;
 module.exports.remove_structure = remove_structure;
 module.exports.loadgloss = function (a, b) { glossfallback = a; xmlDoc = b; };
+module.exports.normalize = _normalize;
 
