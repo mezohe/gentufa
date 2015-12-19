@@ -75,7 +75,7 @@
   }
 }
 
-text = first:sentence rest:(&start sentence)* { return [first].concat(rest) }
+text = first:sentence rest:(&start s:sentence { return s })* { return [first].concat(rest) }
 
 sentence = 
 start:start?
@@ -100,6 +100,12 @@ propo_tail:(
 			r.terms = r.terms.concat(propo_tail.terms_end);
 	}
 	return r;
+}
+/ prefix:(compound_je prefix)+ sent:sentence {
+  if (prefix.length)
+    sent.predicate[0] = "-" + sent.predicate[0];
+  sent.predicate = prefix.map(function (a, i) { return (i ? "-" : "") + a[1] }).concat(a);
+  return sent;
 }
 
 start = a:same b:I { return a + b }
@@ -126,7 +132,9 @@ predicate = compound_je a:brivla b:(c:compound d:brivla { return c ? c+d : d })*
 
 word = magic / prefix / brivla
 
-brivla = !magic !prefix a:(consonant+ / "" { return [] }) b:vowel+ space* { return a.join("") + b.join("") }
+brivla = !magic 
+// !prefix
+a:(consonant+ / "" { return [] }) b:vowel+ space* { return a.join("") + b.join("") }
 
 prefix = !magic a:( "f" [aeilnoruy] / "qo" // /"z" [aeilmoruy] 
 / "s" [aeioru] // / "fw" 

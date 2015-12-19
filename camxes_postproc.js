@@ -263,4 +263,5 @@ function dbg_bracket_count(str) {
 }
 
 module.exports.postprocessing = camxes_postprocessing;
+module.exports.prettify_brackets = prettify_brackets;
 

@@ -1756,3 +1756,4 @@ var xankua_gloss = {
 "kei":{"g":"crime","s":"(vo) X1+ is a crime"},
 "!Word":{"g":"Engl","s":"Definition (*=obj cpd, +n=1st case merge, -n=2nd case merge, Sn=set members, Pn=pairwise, @=merge but no cpd, ?=special merge, = =as needed)"},
 }
+module.exports = xankua_gloss;
