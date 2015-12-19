@@ -50,16 +50,16 @@ rafsi_string = &{return options.slinku} rafsi_string_official / &{return !option
 rafsi_string_lean = consonant (diphthong / pure_vowel h pure_vowel) h y &syllable / consonant &stressed_vowel pure_vowel h pure_vowel word_break
 rafsi_string_official = rafsi_prefix / rafsi_whole
 rafsi_prefix = raf:y_rafsi { return [join(raf)] } / raf:y_less_rafsi rest:rafsi_prefix { return [join(raf)].concat(rest) }
-rafsi_whole = (final_rafsi / gismu) word_break / unstressed_y_less_rafsi rafsi_whole
+rafsi_whole = raf:(final_rafsi / gismu) word_break { return raf } / raf:unstressed_y_less_rafsi rest:rafsi_whole { return [join(raf)].concat(rest) }
 vowel_final_rafsi_tail = consonant pure_vowel !coda / diphthong hyphen? !coda / pure_vowel h pure_vowel hyphen? !coda
 hyphen = r &consonant / n &r
 y_less_rafsi = &syllable consonant (vowel_final_rafsi_tail / pure_vowel consonant)
 y_rafsi = &syllable consonant (gismu_form_tail (pure_vowel h)? y / vowel_final_rafsi_tail h y / pure_vowel consonant y) &syllable
 
 unstressed_y_less_rafsi = !rafsi_stress y_less_rafsi
-final_rafsi = consonant &stressed_vowel pure_vowel h pure_vowel &word_break / &rafsi_stress y_less_rafsi !rafsi_stress y_less_rafsi &word_break
+final_rafsi = a:(consonant &stressed_vowel pure_vowel h pure_vowel &word_break) { return [join(a)] } / &rafsi_stress a:y_less_rafsi !rafsi_stress b:y_less_rafsi &word_break { return [join(a), join(b)] }
 rafsi_stress = initial (stressed_vowel / vowel h stressed_vowel)
-gismu = &syllable (consonant consonant &stressed_vowel pure_vowel / consonant &stressed_vowel pure_vowel consonant) consonant pure_vowel
+gismu = a:(&syllable (consonant consonant &stressed_vowel pure_vowel / consonant &stressed_vowel pure_vowel consonant) consonant pure_vowel) { return join(a) }
 gismu_form_tail = (consonant pure_vowel / pure_vowel consonant) consonant
 final_CVV_CCV = consonant &unstressed_vowel diphthong / &initial consonant consonant &unstressed_vowel pure_vowel
 

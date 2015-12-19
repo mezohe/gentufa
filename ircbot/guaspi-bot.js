@@ -2,7 +2,7 @@ var config = {
   server: 'irc.freenode.net',
   nick: 'gua',
   options: {
-    channels: ['#guaspi', '#gua\\spi'],
+    channels: ['#lojban', '#ckule', '#jbosnu', '#guaspi', '#gua\\spi', '#balningau', '##jboselbau'],
     debug: false
   }
 };
