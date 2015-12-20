@@ -74,13 +74,14 @@ var options = require("../ilmentufa_options.js");
 
 var processor = function(client, from, to, text, message) {
 	if (!text) return;
+	text = text.replace(/^<[^>]+>: /, "");
 	if (from.match(config.nick + ".*")) return;
 	var sendTo = from; // send privately
 	if (to.indexOf('#') > -1) {
 		sendTo = to; // send publicly
 	}
 	if (from in {
-		mensi: 1, zantufa: 1, spagetufa: 1, camxes: 1, cipra: 1, fenki: 1, phenny: 1, sidju: 1, ithkuil: 1
+		mensi: 1, zantufa: 1, spagetufa: 1, camxes: 1, cipra: 1, fenki: 1, phenny: 1, sidju: 1, ithkuil: 1, vlaste: 1
 	}) return;
 	if (text.search(regexps.coi) >= 0) {
 		client.say(sendTo, "coi");
@@ -88,7 +89,8 @@ var processor = function(client, from, to, text, message) {
 		client.say(sendTo, "re'i");
 	} else if (text.search(regexps.kihe) >= 0) {
 		client.say(sendTo, "je'e fi'i");
-	} else {
+	} else if (text.match(/^mankunaku/)) {
+		text = text.replace(/^[^ ]* /, "");
 		var ret = extract_mode(text);
 		var texts = ret[0].split(/ /g);
 		ret[1].startRule = "eternal_lohu";
@@ -123,7 +125,7 @@ var processor = function(client, from, to, text, message) {
 
 function testjvo(pre, score, post) {
 	if (!post.length)
-		return [score, run_camxes(pre, {startRule: "lujvo"}, true)];
+		return [score, run_camxes(pre, {startRule: "lujvo_brivla"}, true)];
 	var mid = post[0];
 	var newpost = post.slice(1);
 	var results = mid.map(function (a, i) {

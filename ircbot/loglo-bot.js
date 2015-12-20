@@ -61,6 +61,7 @@ var options = require("../loglo_options.js");
 
 var processor = function(client, from, to, text, message) {
 	if (!text) return;
+	text = text.replace(/^<[^>]+>: /, "");
 	var sendTo = from; // send privately
 	if (to.indexOf('#') > -1) {
 		sendTo = to; // send publicly
