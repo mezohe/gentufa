@@ -1249,7 +1249,7 @@ bu_tail = expr:BU_clause+ {
   }
 }
 
-pre_zei_bu = !BU_clause !ZEI_clause !SI_clause !SA_clause !FAhO_clause word:any_word_SA_handling si:si_clause? {
+pre_zei_bu = !ZOI_start !BU_clause !ZEI_clause !SI_clause !SA_clause !FAhO_clause word:any_word_SA_handling si:si_clause? {
   if (si) word.si = si;
   return word;
 }
@@ -1309,7 +1309,7 @@ sa_word = pre_zei_bu
 
 si_word = pre_zei_bu
 
-su_word = !NIhO_clause !LU_clause !TUhE_clause !TO_clause !SU_clause !FAhO_clause any_word_SA_handling
+su_word = !ZOI_start !NIhO_clause !LU_clause !TUhE_clause !TO_clause !SU_clause !FAhO_clause any_word_SA_handling
 
 
 // ___ ELIDIBLE TERMINATORS ___  (EXPERIMENTAL)
@@ -1824,6 +1824,7 @@ ZOI_pre = pre:pre_clause word:ZOI spaces? open:zoi_open spaces? quoted:zoi_word*
     word.word = "[" + word.word + " " + open_word + " " + word.quoted.word + " " + close_word + "]";
   return _word_pre(word, pre)
 }
+ZOI_start = !ZOI_pre ZOI
 
 //         prenex terminator (not elidable) 
 ZOhU_clause 'cmavrzohu' = pre:ZOhU_pre post:indicator_post_clause { return _word_post(pre, post) }
