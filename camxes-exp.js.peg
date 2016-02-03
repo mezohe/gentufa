@@ -1297,19 +1297,21 @@ known_cmavo_SA = BAhE_pre / BE_pre / BEI_pre / BEhO_pre / BO_pre / BOI_pre / BU_
 // Do *NOT* delete the line above!
 
 // SU clauses
-su_clause = (erasable_clause / su_word)* SU_clause !SI_clause
+su_clause = !SI_clause su_clause_1
+su_clause_1 = (erasable_clause / su_word)* SU_clause
 
 // Handling of SI and interactions with zo and lo'u...le'u
 
-si_clause = ((erasable_clause / si_word / SA_clause) si_clause? SI_clause)+
+si_clause = ((erasable_clause / !SU_clause si_word / SA_clause) si_clause? SI_clause)+
 
-erasable_clause = expr:(bu_clause_no_pre !ZEI_clause !BU_clause / zei_clause_no_pre !ZEI_clause !BU_clause) {return {erasable: expr} }
+erasable_clause = expr:(su_barrier su_clause_1 !ZEI_clause !BU_clause / bu_clause_no_pre !ZEI_clause !BU_clause / zei_clause_no_pre !ZEI_clause !BU_clause) {return {erasable: expr} }
 
 sa_word = pre_zei_bu
 
 si_word = pre_zei_bu
 
-su_word = !ZOI_start !NIhO_clause !LU_clause !TUhE_clause !TO_clause !SU_clause !FAhO_clause any_word_SA_handling
+su_word = !ZOI_start !su_barrier !SU_clause !FAhO_clause any_word_SA_handling
+su_barrier = NIhO_clause / LU_clause / TUhE_clause / TO_clause
 
 
 // ___ ELIDIBLE TERMINATORS ___  (EXPERIMENTAL)
