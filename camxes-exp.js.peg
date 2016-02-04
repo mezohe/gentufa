@@ -512,7 +512,7 @@
 
 text = intro_null t1:text_1 faho_clause EOF? { return t1 }
 
-intro_null = expr:(spaces? su_clause* intro_si_clause) 
+intro_null = spaces? su_clause* intro_si_clause
 
 //; intro_sa_clause = SA_clause+ / any_word_SA_handling !(ZEI_clause SA_clause) intro_sa_clause
 intro_si_clause = si_clause? SI_clause*
@@ -521,9 +521,9 @@ faho_clause = (FAhO_clause dot_star)?
 // Please note that the "text_1" item in the text_1 production does
 // *not* match the BNF. This is due to a bug in the BNF.  The change
 // here was made to match grammar.300
-text_1 = expr:(free* (NIhO_clause+ free* su_clause*)? paragraphs) 
+text_1 = free:free* niho:(niho:NIhO_clause+ free:free* su_clause* { return [niho, free] })? paragraphs:paragraphs
 
-paragraphs = expr:(paragraph? (NIhO_clause+ free* su_clause* paragraphs)?) 
+paragraphs = expr:(paragraph? (NIhO_clause+ free* su_clause? paragraphs)?) 
 
 paragraph = expr:(lone_jek? (tag BO_clause)? free* (I_clause free* lone_jek? (tag? BO_clause free*)?)? statement (I_clause !lone_jek free* statement)*) 
 
@@ -533,7 +533,7 @@ statement_1 = expr:(statement_2 (I_clause free* lone_jek prenex* statement_2?)*)
 
 statement_2 = expr:(statement_3 (I_clause free* lone_jek? tag? BO_clause free* prenex* statement_2)?) 
 
-statement_3 = expr:(tag? TUhE_clause free* text_1 TUhU_elidible free* / fragment / sentence) 
+statement_3 = expr:(tag? TUhE_clause text TUhU_elidible free* / fragment / sentence) 
 
 fragment = expr:(!term !tag quantifier / relative_clauses / links+ / !selbri linkargs) 
 
@@ -557,7 +557,7 @@ sentence_no_count = free:free* head:terms? tail:bridi_tail {
 
 sentence_sa = expr:(sentence_start? (!sentence_start (sa_word / SA_clause !sentence_start ) )* SA_clause &text_1) 
 
-sentence_start = expr:(I_pre / NIhO_pre) 
+sentence_start = expr:(I_pre / NIhO_pre / LU_pre / TUhE_pre / TO_pre) 
 
 subsentence_no_count = subsentence_tuhe
   / prenex:prenex subsentence:subsentence_no_count { return {
@@ -569,8 +569,8 @@ subsentence = subsentence_tuhe
     prenex: prenex, subsentence: subsentence, structure: [prenex, subsentence],
   } } / sentence
 
-subsentence_tuhe = free:free* tag:tag? tuhe:TUhE_clause tuhefree:free* text:text_1 tuhu:TUhU_elidible tuhufree:free* {
-  var ret = _precedence(_fill_free(tuhe, tuhefree), text, _fill_free(tuhu, tuhufree));
+subsentence_tuhe = free:free* tag:tag? tuhe:TUhE_clause text:text tuhu:TUhU_elidible tuhufree:free* {
+  var ret = _precedence(tuhe, text, _fill_free(tuhu, tuhufree));
   ret.tag = tag;
   ret.free = free;
   if (_empty(tag)) ret.structure.unshift(tag);
@@ -1666,9 +1666,8 @@ NAhU_clause 'cmavrnahu' = pre:NAhU_pre post:post_clause { return _word_post(pre,
 NAhU_pre = pre:pre_clause word:NAhU spaces? { return _word_pre(word, pre) }
 
 //         new paragraph; change of subject 
-NIhO_clause 'cmavrniho' = sa:sentence_sa* pre:NIhO_pre post:NIhO_post { return _word_post(pre, post, sa) }
+NIhO_clause 'cmavrniho' = sa:sentence_sa* pre:NIhO_pre post:post_clause { return _word_post(pre, post, sa) }
 NIhO_pre = pre:pre_clause word:NIhO spaces? { return _word_pre(word, pre) }
-NIhO_post = su:su_clause* post:post_clause { if (su && su.length) { if (!post) post = {}; post.su = su; } return post }
 
 //         attaches a subordinate clause to a sumti 
 NOI_clause 'cmavrnoi' = pre:NOI_pre post:indicator_post_clause { return _word_post(pre, post) }
@@ -1754,9 +1753,8 @@ TOI_clause 'cmavrtoi' = pre:TOI_pre post:indicator_post_clause { return _word_po
 TOI_pre = pre:pre_clause word:TOI spaces? { return _word_pre(word, pre) }
 
 //         multiple utterance scope mark 
-TUhE_clause 'cmavrtuhe' = pre:TUhE_pre post:TUhE_post { if (post && post.length) pre.su = post; return _word_post(pre, post) }
+TUhE_clause 'cmavrtuhe' = pre:TUhE_pre post:indicator_post_clause { return _word_post(pre, post) }
 TUhE_pre = pre:pre_clause word:TUhE spaces? { return _word_pre(word, pre) }
-TUhE_post = su:su_clause* spaces? { return su }
 
 //         multiple utterance end scope mark 
 TUhU_clause 'cmavrtuhu' = pre:TUhU_pre post:indicator_post_clause { return _word_post(pre, post) }
