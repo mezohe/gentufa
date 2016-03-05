@@ -535,7 +535,7 @@ statement_2 = expr:(statement_3 (I_clause free* lone_jek? tag? BO_clause free* p
 
 statement_3 = expr:(tag? TUhE_clause text TUhU_elidible free* / fragment / sentence) 
 
-fragment = expr:(!term !tag quantifier / relative_clauses / links+ / !selbri linkargs) 
+fragment = expr:(!term !tag quantifier / relative_clauses / links+ / !selbri linkargs / !selbri !term !tag nahe_guhe) 
 
 lone_jek = !gek (jek / gihek) free*
 
