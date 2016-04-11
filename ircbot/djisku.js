@@ -141,8 +141,11 @@ var quit = function(channel, who) {
     remove(who);
     console.log("co'u jorne fa la'o " + quote(who));
 }
+var quit_reorder = function(who, reason, channels) {
+	channels.forEach(function (channel) { quit(channel, who) });
+}
 client.addListener('part', quit);
-client.addListener('quit', quit);
+client.addListener('quit', quit_reorder);
 
 
 
