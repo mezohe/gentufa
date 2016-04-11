@@ -137,7 +137,7 @@ client.addListener('join', function(channel, who) {
     });
 });
 
-var quit = function(who) {
+var quit = function(channel, who) {
     remove(who);
     console.log("co'u jorne fa la'o " + quote(who));
 }
