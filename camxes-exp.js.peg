@@ -643,13 +643,13 @@ gek_sentence = gek:gek left:subsentence_no_count gik:gik right:subsentence_no_co
     gek.selbri_tags = gek.selbri_tags ? tag.concat(gek.selbri_tags) : tag;
     return gek;
   }
-  / tag:tag+ &(!si_clause !zei_clause !bu_clause (NA_clause / GA_clause)) gek:gek_sentence {
+  / tag:tag+ &(!si_clause !zei_clause !bu_clause (adverbial / GA_clause)) gek:gek_sentence {
     gek = _duplicate_less_evil(gek);
     gek.structure = [tag, gek.structure];
     gek.selbri_tags = gek.selbri_tags ? tag.concat(gek.selbri_tags) : tag;
     return gek;
   } 
-  / na:NA_clause free:free* gek:gek_sentence { 
+  / na:adverbial free:free* gek:gek_sentence { 
     gek = _duplicate_less_evil(gek);
     _fill_free(na, free);
     gek.structure = [na, gek.structure];
@@ -696,7 +696,7 @@ tag_term = start:(termset /
     / (ku:KU_elidible free:free* { return _fill_free(ku, free) })
     ) { return _term(_fill_free(tag, free), sumti) })
   / inverted_term / naku_term
-  / (!(!sumti !gek_termset gek) !jek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }) 
+  / (!(!sumti !gek_termset gek) !jek !gihek na:adverbial nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }) 
   / soi_term
 ) repeat:(!(gihek tag BO_clause bridi_tail_2) jek tag_term)* {
   repeat.forEach(function (r) {
@@ -715,7 +715,7 @@ abs_tag_term = start:(termset /
     / (ku:KU_elidible free:free* { return _fill_free(ku, free) })
     ) { return _term(_fill_free(tag, free), sumti) })
   / inverted_term / naku_term
-  / (!selbri !(!sumti !gek_termset gek_sentence) !jek !gihek na:NA_clause nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) })
+  / (!selbri !(!sumti !gek_termset gek_sentence) !jek !gihek na:adverbial nafree:free* ku:KU_elidible kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) })
   / soi_term
 ) repeat:(!(gihek tag BO_clause bridi_tail_2) jek abs_tag_term)* {
   repeat.forEach(function (r) {
@@ -728,7 +728,23 @@ inverted_term = !gek sumti:sumti co:CO_clause tag:tag ku:KU_elidible free:free* 
 
 fa_elided_term = tag:FA_elidible boi:(&(number / lerfu_string) { return true })? sumti:sumti { return _term({tags: [tag], structure: [tag], implicit_fa: true, elided: true, boi: boi ? "boi" : ""}, sumti) }
 
-naku_term = na:NA_clause nafree:free* ku:KU_clause kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }
+naku_term = na:adverbial nafree:free* ku:KU_clause kufree:free* { return _term(_fill_free(na, nafree), _fill_free(ku, kufree)) }
+
+adverbial = NA_clause / noiha:NOIhA_clause free:free* terms:(terms CU_elidible free*)* selbri:(selbri / gek_sentence) end:FEhU_elidible {
+  var r = {
+    clause: "noiha",
+    bridi: true,
+    subsumed: [noiha, free, terms, selbri, end], 
+    selbri: selbri,
+    terms: []
+  };
+  r.structure = [_fill_free(noiha, free), terms, selbri, end];
+  terms.forEach(function (head) {
+    r.terms = r.terms.concat(head[0]);
+    // FIXME don't throw away cu!
+  });
+  return r;
+}
 
 soi_term = soi:SOI_clause bridi:subsentence sehu:SEhU_elidible sehufree:free* { return {tag: soi, bridi: bridi, terminator: _fill_free(sehu, sehufree), structure: [soi, bridi, sehu]} }
 
@@ -873,7 +889,7 @@ selbri_relative_clauses = expr:(selbri_relative_clause (jek free* selbri_relativ
 selbri_relative_clause 'selbri rahabri' = expr:(NOhOI_clause subsentence KUhOI_elidible free* ) 
 
 
-selbri 'selbri' = tag:(tag / na:NA_clause free:free* { return _fill_free(na, free) })* selbri:selbri_1 { 
+selbri 'selbri' = tag:(tag / na:adverbial free:free* { return _fill_free(na, free) })* selbri:selbri_1 { 
   if (_empty(tag)) {
     selbri = _duplicate_less_evil(selbri);
     selbri.structure = [tag, _shell(selbri)]; 
@@ -1848,7 +1864,10 @@ GOhOI_pre = pre:pre_clause word:GOhOI spaces? quoted:any_word spaces? {
   return _word_pre(_quote(word, quoted), pre)
 }
 
-IAU_clause 'cmavrvau' = pre:IAU_pre post:indicator_post_clause { return _word_post(pre, post) }
+NOIhA_clause 'cmavrnoiha' = pre:NOIhA_pre post:indicator_post_clause { return _word_post(pre, post) }
+NOIhA_pre = pre:pre_clause word:NOIhA spaces? { return _word_pre(word, pre) }
+
+IAU_clause 'cmavriau' = pre:IAU_pre post:indicator_post_clause { return _word_post(pre, post) }
 IAU_pre = pre:pre_clause word:IAU spaces? { return _word_pre(word, pre) }
 
 NOhOI_clause 'cmavrnohoi' = pre:NOhOI_pre post:indicator_post_clause { return _word_post(pre, post) }
@@ -2491,6 +2510,7 @@ ZOhU = &cmavo expr:( c e h ai / z o h u ) &post_word {return _word("ZOhU", expr)
 ZOhOI = &cmavo expr:( z o h oi / l a h oi / r a h oi ) &post_word {return _word("ZOhOI", expr);}
 MEhOI = &cmavo expr:( m e h oi ) &post_word {return _word("MEhOI", expr);}
 GOhOI = &cmavo expr:( g o h oi / t a h ai / z e h oi ) &post_word {return _word("GOhOI", expr);}
+NOIhA = &cmavo expr:( n o i h a / p o i h a / s o i h a ) &post_word {return _word("NOIhA", expr);}
 IAU = &cmavo expr:( i au / i h au ) &post_word {return _word("IAU", expr);}
 NOhOI = &cmavo expr:( n o h oi / p o h oi ) &post_word {return _word("NOhOI", expr);}
 KUhOI = &cmavo expr:( k u h oi ) &post_word {return _word("KUhOI", expr);}
