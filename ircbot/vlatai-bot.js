@@ -3,7 +3,8 @@ var config = {
   server: 'irc.freenode.net',
   nick: 'vlatai',
   options: {
-	channels: ['#lojban', '#ckule', '#jbosnu', '#guaspi', '#balningau', '##jboselbau'],
+	//channels: ['#lojban', '#ckule', '#jbosnu', '#guaspi', '#balningau', '##jboselbau'],
+	channels: ['#guaspi'],
 	debug: false,
 	floodProtection: true,
 	floodProtectionDelay: 750

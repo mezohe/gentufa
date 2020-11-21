@@ -1,5 +1,4 @@
 {
-  var jinsa_lujvo_hack;
   var stressed_vowels = {
     a: "à", e: "è", i: "ì", o: "ò", u: "ù",
     ai: "ài", ei: "èi", oi: "òi", au: "àu",
@@ -16,32 +15,43 @@
   }
 }
 
-text = space? w:word* s:slinkuhi_catch? { return s ? w.concat(s) : w }
-simple_text = space? w:simple_word* { return w }
+// LOhU LEhU
+// ZOI
+// MUhOI
+// LOhAI SAhAI LEhAI
+// ZOhOI
+// MEhOI
+// GOhOI
+// FAhO
+// Y
 
-word = cmevo / cmavo / brivo_classifier
-simple_word = cmevo / cmavo / brivo
+text = space? w:clause* s:slinkuhi_catch? { return s ? w.concat(s) : w }
 
-brivo_classifier = clbutt:(&gismu { return "gismu" } / &(l:pure_lujvo { jinsa_lujvo_hack = l }) { return ["jinsa-lujvo", jinsa_lujvo_hack] } / &kinda_lujvo { return "kinda-lujvo" } / &. { return "zihevla" }) brivo:brivo { return clbutt.length == 2 ? { selmaho: clbutt[0], word: [brivo.word, clbutt[1]] } : {selmaho: clbutt, word: brivo.word} }
-pure_lujvo = pre:rafsi_prefix* who:rafsi_whole { return pre.reduce(concat, []).concat(who) } / pre:rafsi_prefix+ fin:final_CVV_CCV word_break { return pre.reduce(concat, []).concat(join(fin)) }
-kinda_lujvo = non_y_unstressed* stressed_syllable (!(onset y syllable) medial_syllable)* onset y syllable / non_y_unstressed+ onset y unstressed_syllable* stressed_syllable
-non_y_unstressed = !(onset? y syllable) unstressed_syllable
+clause = w:word t:(zei_tail / bu_tail)* { return truthy(t) ? {selmaho: t[t.length-1].selmaho, word: w.word + " " + t.map(t => t.word).join(" ")} : w}
+
+zei_tail = &(z e i word_break) z:cmavo w:word { return {selmaho: "GOhA", word: z.word + " " + w.word} }
+bu_tail = &(b u word_break) b:cmavo { return {selmaho: "BY", word: b.word} }
+
+word = cmevo / quote / cmavo / brivo
+
+quote = zo_clause
+
+zo_clause = &(z o word_break) z:cmavo w:word { return {selmaho: "KOhA", word: z.word + " " + w.word} }
 
 slinkuhi_catch = s:slinkuhi .* { return {selmaho: "valslinkuhi", word: join(s)} }
 
 cmevo = !h head:(h / consonant !glide !pause !h / glide / nucleus)* tail:consonant pause { return {selmaho: "cmevla", word: join(head) + tail} }
 
-cmavo = !CVCy_lujvo head:cmavo_head tail:cmavo_tail* word_break { return {selmaho: "cmavo", word: [head].concat(tail)} }
+cmavo = !CVCy_lujvo head:cmavo_head tail:cmavo_tail* word_break { return {selmaho: "cmavo", word: head + join(tail)} }
 cmavo_head = &(!h !cluster onset? cmavo_nucleus syllable_break) s:syllable &cmavo_continuation { return s }
 cmavo_tail = &(h cmavo_nucleus syllable_break) s:syllable &cmavo_continuation { return s }
 cmavo_continuation = cmavo_tail / word_break
 cmavo_nucleus = !stressed_vowel nucleus / nucleus !cluster
 CVCy_lujvo = onset? nucleus medial_syllable (brivo / medial_syllable* brivo_tail_syllable)
-//CVCy_lujvo = onset? nucleus medial_syllable (brivo / rafsi_string / &cmavo consonant diphthong)
 
-brivo = !h !slinkuhi head:brivo_head? tail:brivo_tail word_break { return {selmaho: "brivla", word: head ? head.concat(tail) : tail} }
-brivo_head = a:brivo_head_syllable b:unstressed_syllable* { return [a].concat(b) }
-brivo_tail = a:stressed_syllable b:medial_syllable* c:brivo_tail_syllable { return [a].concat(b).concat([c]) }
+brivo = !h !slinkuhi head:brivo_head? tail:brivo_tail word_break { return {selmaho: "brivla", word: head ? head + tail : tail} }
+brivo_head = a:brivo_head_syllable b:unstressed_syllable* { return a + join(b) }
+brivo_tail = a:stressed_syllable b:medial_syllable* c:brivo_tail_syllable { return a + join(b) + c }
 
 brivo_head_syllable = &(onset? unstressed_vowel) s:syllable { return s }
 unstressed_syllable = &(onset? !stressed_vowel) s:syllable { return s }
@@ -49,9 +59,7 @@ medial_syllable = &(onset !vowel) s:syllable { return s }
 brivo_tail_syllable = &(onset nucleus syllable_break) s:syllable { return s }
 
 slinkuhi = &(cluster vowel) syllable h y syllable / !rafsi_string consonant rafsi_string
-rafsi_string = &{return !options.slinkucau} rafsi_string_official / &{return options.slinkucau} rafsi_string_lean
-rafsi_string_lean = consonant (diphthong / pure_vowel h pure_vowel) h y &syllable / consonant &stressed_vowel pure_vowel h pure_vowel word_break
-rafsi_string_official = rafsi_prefix / rafsi_whole
+rafsi_string = rafsi_prefix / rafsi_whole
 rafsi_prefix = raf:y_rafsi { return [join(raf)] } / raf:y_less_rafsi rest:rafsi_prefix { return [join(raf)].concat(rest) }
 rafsi_whole = raf:(final_rafsi / gismu) word_break { return raf } / raf:unstressed_y_less_rafsi rest:rafsi_whole { return [join(raf)].concat(rest) }
 vowel_final_rafsi_tail = consonant pure_vowel !coda / diphthong hyphen? !coda / pure_vowel h pure_vowel hyphen? !coda
@@ -76,17 +84,13 @@ onset_consonantal = expr:(affricate / liquid / other (liquid &coda / &coda) / si
 nucleus_consonantal = &syllabic &coda { return "y" }
 
 syllable_break = &onset &syllable / &space / !.
-//word_break = syllable_break (space? &word / space? !.) { return null }
 word_break = syllable_break (space / &word / !.) { return null }
 space = (!letter .)+ { return null }
 pause = space / !.
 letter = [A-Za-z'àèìòùỳáéíóúýÀÈÌÒÙỲÁÉÍÓÚÝĭŭĬŬ]
 
 cluster = consonant consonant+
-initial = normal_initial / damage_control_initial
-normal_initial = &{return !options.slinkubandu} expr:(affricate !h / !nucleus sibilant? other? liquid? !h) { return join(expr) }
-damage_control_initial = &{return options.slinkubandu} expr:(affricate !h / damage_control_initial_1 !h) { return join(expr) }
-damage_control_initial_1 = !nucleus !(m (!coda liquid)) (sibilant other / other liquid / sibilant liquid / sibilant / other / liquid)
+initial = expr:(affricate !h / !nucleus sibilant? other? liquid? !h) { return join(expr) }
 
 affricate = expr:(t c / t s / d j / d z) { return join(expr) }
 sibilant = expr:(c / s !x / (j / z) !(!coda (n / liquid))) { return join(expr) }
@@ -125,7 +129,7 @@ nucleus = vowel / y
 vowel = diphthong / pure_vowel
 diphthong = d:(a i / e i / o i) !nucleus !iy { return join(d) } / a u !nucleus !uy { return "au" }
 pure_vowel = v:(a / e / i / o / u) !nucleus { return v }
-stressed_vowel = ![aeiou] v:vowel { return stressed_vowels[v] } / v:vowel &stress { return stressed_vowels[v] }
+stressed_vowel = ![aeiou] v:vowel { return v } / v:vowel &stress { return v }
 unstressed_vowel = &[aeiou] v:vowel !stress { return v }
 stress = coda? medial_syllable* brivo_tail_syllable pause
 

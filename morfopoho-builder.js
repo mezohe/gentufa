@@ -2,14 +2,18 @@
 var fs = require("fs")
 var PEG = require("pegjs")
 // // read peg and build a parser
-var camxes_peg = fs.readFileSync("morfopoho.js.peg").toString();
+var camxes_peg = fs.readFileSync("fanzatufa-morfo.js.peg").toString();
 try {
 	var camxes = PEG.buildParser(camxes_peg, {
 		cache: true, 
 		trace: false,
 		output: "source",
 		allowedStartRules: [
-			"text"
+			"text",
+			"slinkuhi_catch",
+			"clause",
+			"word",
+			"brivo"
 		],
 	});
 } catch (e) {
@@ -18,12 +22,12 @@ try {
 }
 // // write to a file
 // fs.writeFileSync("\camxes.js", camxes.toSource());
-var fd = fs.openSync("morfopoho.js", 'w+');
+var fd = fs.openSync("fanzatufa-morfo.js", 'w+');
 var buffer = new Buffer('var camxes = ');
 fs.writeSync(fd, buffer, 0, buffer.length);
 buffer = new Buffer(camxes);
 fs.writeSync(fd, buffer, 0, buffer.length);
 buffer = new Buffer("\n\nmodule.exports = camxes;\n\nterm = process.argv[2];\nif (term !== undefined && typeof term.valueOf() === 'string')\n  console.log(JSON.stringify(require('./ilmentufa_postproc.js').postprocessing(camxes.parse(term), {format:'brackets', f:true, s:true})));\n\n");
 fs.writeSync(fd, buffer, 0, buffer.length);
-fs.close(fd);
+fs.closeSync(fd);
 

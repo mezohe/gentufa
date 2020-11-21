@@ -1,0 +1,653 @@
+text <- text_1 FAhO_clause? space EOF?
+
+text_1 <- free* (NIhO_clause+ free*)? paragraphs
+
+paragraphs <- paragraph? (NIhO_clause+ free* paragraphs)?
+
+paragraph <- lone_jek? (tag BO_clause)? free* (I_clause free* lone_jek? (tag? BO_clause free*)?)? statement (I_clause !lone_jek free* statement)*
+
+statement <- (prenex statement / statement_1) (IAU_clause free* terms?)?
+
+statement_1 <- statement_2 (I_clause free* lone_jek prenex* statement_2?)*
+
+statement_2 <- statement_3 (I_clause free* lone_jek? tag? BO_clause free* prenex* statement_2)?
+
+statement_3 <- tag? TUhE_clause text TUhU_elidible free* / fragment / sentence
+
+fragment <- !term !tag quantifier / relative_clauses / links+ / !selbri linkargs / !selbri !term !tag nahe_guhe
+
+lone_jek <- !gek gihek free*
+
+prenex 'prenexe' <- free* terms? ZOhU_clause
+
+sentence <- free* terms? bridi_tail
+
+subsentence <- subsentence_tuhe / prenex subsentence / sentence
+
+subsentence_tuhe <- free* tag? TUhE_clause text TUhU_elidible free*
+
+bridi_tail <- bridi_tail_1 / VAU_elidible free*
+
+bridi_tail_1 <- bridi_tail_2 (
+    gihek tag? !BO_clause free* ke_bridi_tail tail_terms
+    / gihek !(tag? BO_clause) free* bridi_tail_2 tail_terms
+  )* # !LR2
+
+bridi_tail_2 <- CU_elidible free* bridi_tail_3 (gihek tag? BO_clause free* bridi_tail_2 tail_terms)?
+
+bridi_tail_3 <- gek_sentence
+  / selbri tail_terms
+  / ke_bridi_tail
+
+ke_bridi_tail <- KE_clause free* bridi_tail_1 KEhE_elidible free*
+
+gek_sentence <- gek subsentence gik subsentence tail_terms
+  / tag* KE_clause free* gek_sentence KEhE_elidible free*
+  / tag+ &(NA_clause / GA_clause) gek_sentence
+  / NA_clause free* gek_sentence
+
+#  / PEhO_clause free* gek subsentence (gik_elidible subsentence)* 
+
+tail_terms <- terms? VAU_elidible free*
+
+terms 'sumturpoi' <- terms_1+
+
+# FIXME FIX JECU
+terms_1 <- terms_2 (jek !tag_bo_ke_bridi_tail terms_2)* # LR2
+
+tag_bo_ke_bridi_tail <- tag (BO_clause / KE_clause) CU_elidible free* (selbri / gek_sentence)
+
+terms_2 <- term (CEhE_clause free* term)* # FIX JECU
+
+terms_3 <- term (jek tag? BO_clause !bridi_tail_2 terms_3)?
+
+term 'sumsuha' <- sumti / tag_term / termset / naku_term / soi_term
+
+tag_term <- !gek tag free* !BO_clause !selbri !gek_sentence (sumti / KU_elidible)
+
+naku_term <- !gek !jek NA_clause free* KU_elidible free*
+
+soi_term <- SOI_clause subsentence SEhU_elidible free*
+
+termset <- gek_termset 
+  / NUhI_clause free* gek terms NUhU_elidible free* gik terms NUhU_elidible free*
+  / NUhI_clause free* terms NUhU_elidible free*
+
+gek_termset <- gek terms_gik_terms
+
+terms_gik_terms <- term (gik / terms_gik_terms) term
+
+sumti 'sumti' <- sumti_1 (VUhO_clause free* vuho_tail?)?
+
+vuho_tail <- relative_clauses (jek sumti)?
+
+sumti_1 <- sumti_2 (jek (tag &KE_clause)? sumti_2)* # !LR2
+
+sumti_2 <- sumti_3 (jek? tag? BO_clause free* sumti_2)?
+
+sumti_3 <- KE_clause free* sumti KEhE_elidible free*
+  / sumti_4 / gek sumti gik sumti_4
+
+sumti_4 <- quantifier? sumti_5 relative_clauses? / quantifier relative_clauses? selbri
+  KU_elidible free* relative_clauses?
+
+sumti_5 <- KOhA_clause
+  / !tag !selbri lerfu_string BOI_elidible free*
+  / LU_clause text LIhU_elidible free*
+  / !tag lahe_nahe relative_clauses? term LUhU_elidible free* 
+  / LE_clause free* sumti_tail KU_elidible free*
+  / li_clause 
+  / LOhOI_clause subsentence KUhAU_elidible free* 
+  
+lahe_nahe <- (LAhE_clause / nahe_guhe) BO_clause? free*
+nahe_guhe <- guhek (nahe_guhe / nahe_ke)+ gik (nahe_ke / nahe_free) / nahe_free
+nahe_ke <- KE_clause free* nahe_guhe+ KEhE_elidible free*
+nahe_free <- NAhE_clause free*
+
+se_guhe <- guhek (se_guhe / se_ke)+ gik (se_ke / se_free) / se_free
+se_ke <- KE_clause free* se_guhe+ KEhE_elidible free*
+se_free <- SE_clause free*
+
+li_clause <- LI_clause free* mex LOhO_elidible free*
+
+sumti_tail 'sumyrebla' <- relative_clauses? sumti_tail_1
+
+sumti_tail_1 <- selbri relative_clauses?
+  / quantifier selbri relative_clauses?
+  / quantifier? sumti
+
+relative_clauses <- relative_clauses_1
+  / gek relative_clauses gik relative_clauses
+
+relative_clauses_1 <- relative_clause (jek free* relative_clause)* # !LR2
+
+relative_clause 'rahabri' <- GOI_clause free* term GEhU_elidible free*
+  / NOI_clause subsentence KUhO_elidible free*
+
+selbri 'selbri' <- (tag / NA_clause free*)* selbri_1
+
+selbri_1 <- selbri_2 (KEhE_clause linkargs)? (CEI_clause selbri)*
+
+selbri_2 <- selbri_3 (CO_clause free* selbri_2)?
+
+selbri_3 <- selbri_4+ # !LR
+
+selbri_4 <- selbri_5 (jek (tag &KE_clause)? selbri_5)* # !LR2
+
+selbri_5 <- selbri_6 (jek tag? BO_clause free* selbri_5)?
+
+selbri_6 <- tanru_bo / tanru_guhe
+
+tanru_bo <- tanru_unit (BO_clause free* selbri_6)?
+
+tanru_guhe <- nahe_guhe? free* guhek selbri gik selbri_6
+
+tanru_unit 'tausle' <- tanru_unit_1 linkargs?
+
+tanru_unit_1 <- BRIVLA_clause
+  / KE_clause free* selbri_3 KEhE_elidible free*
+  / ME_clause free* (term / mex / relative_clauses) MEhU_elidible free* MOI_clause? free*
+  / mex MOI_clause free*
+  / NUhA_clause free* jek
+  / se_guhe tanru_unit_1
+  / JAI_clause free* (tag / !tanru_unit_1 lahe_nahe)? tanru_unit_1
+  / nahe_guhe tanru_unit_1
+  / NU_clause (free* jek NU_clause)* subsentence KEI_elidible free*
+  / MEIhE_clause free* sumti+ MEIhO_elidible
+
+linkargs 'inkorpora' <- BE_clause free* term? links* BEhO_elidible free*
+
+links <-  BEI_clause free* term?
+
+quantifier 'kuhantora' <- !selbri !sumti_5 mex
+
+mex 'mekso' <- mex_1 (jek mex_1)* # !LR2
+
+mex_1 <- gek_mex (mex_1_bihe_hack mex_1)?
+
+mex_1_bihe_hack <- BO_clause jek / jek tag? BO_clause free*
+
+gek_mex <- gek mex gik mex_2 / mex_2
+
+mex_2 'sampu mekso' <- mex_3 / (PEhO_clause free*)? jek mex_1+ KUhE_elidible free* 
+
+mex_3 'cmavrfuha mapti mekso' <- 
+  VEI_clause free* mex VEhO_elidible free* 
+  / mohe_operand 
+  / lahe_nahe mex LUhU_elidible free* 
+  / PEhO_clause free* jek mex_1+ KUhE_elidible free* 
+  / FUhA_clause rp_expression
+  / number BOI_elidible free* 
+  / lerfu_string BOI_elidible free*
+  
+mohe_operand <- MOhE_clause free* (sumti / &(selbri / relative_clauses) sumti_tail) TEhU_elidible free* 
+
+rp_expression <- mex_3 (rp_expression operator_1)*
+
+jek 'jek' <- operator_1 (jek (tag &KE_clause)? operator_1)* # !LR2
+
+operator_1 <- 
+  guhek jek gik operator_2
+  / operator_2 jek tag? BO_clause free* operator_1 
+  / operator_2
+
+operator_2 <- mex_operator / KE_clause free* jek KEhE_elidible free* 
+
+mex_operator <- se_guhe mex_operator / nahe_guhe mex_operator
+  / MAhO_clause free* mex TEhU_elidible free*
+  / NAhU_clause free* selbri TEhU_elidible free*
+  / joik free*
+
+number <- PA_clause (PA_clause / lerfu_word)*
+
+lerfu_string <- lerfu_word (PA_clause / lerfu_word)*
+
+lerfu_word <- BY_clause / LAU_clause lerfu_word / TEI_clause lerfu_string FOI_clause
+
+gihek 'gihek' <- jek / gihek_strict
+gihek_strict <- NA_clause? se_guhe? (GIhA_clause / GI_clause (JOI_clause / JA_clause))
+
+joik <- GAhO_clause* NA_clause? se_guhe? (JOI_clause / JA_clause) GAhO_clause*
+
+gek 'gek' <- gak jek
+  / (jek / tag) gik
+  / se_guhe? !guhek GA_clause free*
+
+gak <- ga_clause !gek
+
+guhek 'guhek' <- guk jek
+  / SE_clause? GUhA_clause free*
+
+guk <- gu_clause !gek
+
+gik <- GI_clause (tag BO_clause)? free*
+
+gik_elidible <- GI_elidible free*
+
+
+tag <- tag_1 (jek (tag_ke / tag_2))* # !LR2
+
+tag_1 <- 
+  guhek tag gik (tag_ke / tag_1)
+  / tag_2+
+
+tag_ke <- KE_clause free* tag KEhE_elidible? free*
+
+tag_2 <- (nahe_guhe / se_guhe) (tag_ke / tag_3) / tag_3
+
+tag_3 <- (BAI_clause / PU_clause / mex_2 ROI_clause / fiho_clause / FA_clause) free*
+
+fiho_clause <- FIhO_clause free* fiho_sei_tail FEhU_elidible
+
+fiho_sei_tail <- terms CU_elidible free* (selbri / gek_sentence)
+
+
+free 'zifyjufpau' <- indicators / free_vocative / mex_2 MAI_clause / XI_clause free* mex_2
+
+free_sei <- SEI_clause free* fiho_sei_tail SEhU_elidible
+
+free_vocative <- DOI_clause+ (relative_clauses? selbri relative_clauses? / sumti)? DOhU_elidible
+
+free_to <- TO_clause text TOI_elidible
+
+indicators <- FUhO_clause* (UI_clause / CAI_clause / NAI_clause / free_sei / free_to)+ / FUhO_clause+
+
+post_clause <- indicators?
+indicator_post_clause <- FUhO_clause*
+# fuho_post_clause removed
+
+pre_clause <- dot fuhe_free* BAhE_clause*
+fuhe_free <- FUhE_clause free*
+pre_clause_no_fuhe <- BAhE_clause*
+
+# ___ ELIDIBLE TERMINATORS ___  (EXPERIMENTAL)
+
+BEhO_elidible <- BEhO_clause?
+BOI_elidible <- BOI_clause?
+CU_elidible <- CU_clause?
+DOhU_elidible <- DOhU_clause?
+FEhU_elidible <- FEhU_clause?
+# FOI and FUhO are never elidible
+GEhU_elidible <- GEhU_clause?
+GI_elidible <- GI_clause?
+KEI_elidible <- KEI_clause?
+KEhE_elidible <- KEhE_clause?
+KU_elidible <- KU_clause?
+KUhAU_elidible <- KUhAU_clause?
+KUhE_elidible <- KUhE_clause?
+KUhO_elidible <- KUhO_clause?
+# LEhU is never elidible
+LIhU_elidible <- LIhU_clause?
+LOhO_elidible <- LOhO_clause?
+LUhU_elidible <- LUhU_clause?
+MEhU_elidible <- MEhU_clause?
+MEIhO_elidible <- MEIhO_clause?
+NUhU_elidible <- NUhU_clause?
+SEhU_elidible <- SEhU_clause?
+TEhU_elidible <- TEhU_clause?
+TOI_elidible <- TOI_clause?
+TUhU_elidible <- TUhU_clause?
+VAU_elidible <- VAU_clause?
+VEhO_elidible <- VEhO_clause?
+
+
+# ___ SELMAHO ___
+
+BRIVLA_clause 'cmavrbrivla' <- pre_clause GOhA post_clause
+BAhE_clause 'cmavrbahe' <- dot BAhE
+BAI_clause 'cmavrbai' <- pre_clause BAI post_clause
+BE_clause 'cmavrbe' <- pre_clause BE post_clause
+BEI_clause 'cmavrbei' <- pre_clause BEI post_clause
+BEhO_clause 'cmavrbeho' <- pre_clause BEhO indicator_post_clause
+BO_clause 'cmavrbo' <- pre_clause BO post_clause
+BOI_clause 'cmavrboi' <- pre_clause BOI indicator_post_clause
+BY_clause 'cmavrby' <- pre_clause BY post_clause
+CAI_clause 'cmavrcai' <- pre_clause CAI indicator_post_clause
+CEI_clause 'cmavrcei' <- pre_clause CEI post_clause
+CEhE_clause 'cmavrcehe' <- pre_clause CEhE post_clause
+CO_clause 'cmavrco' <- pre_clause CO post_clause
+CU_clause 'cmavrcu' <- pre_clause CU post_clause
+DOI_clause 'cmavrdoi' <- pre_clause DOI post_clause
+DOhU_clause 'cmavrdohu' <- pre_clause DOhU indicator_post_clause
+FA_clause 'cmavrfa' <- pre_clause FA post_clause
+FAhO_clause 'cmavrfaho' <- pre_clause FAhO
+FEhU_clause 'cmavrfehu' <- pre_clause FEhU indicator_post_clause
+FIhO_clause 'cmavrfiho' <- pre_clause FIhO post_clause
+FOI_clause 'cmavrfoi' <- pre_clause FOI post_clause
+FUhA_clause 'cmavrfuha' <- pre_clause FUhA post_clause
+FUhE_clause 'cmavrfuhe' <- pre_clause_no_fuhe FUhE indicator_post_clause
+FUhO_clause 'cmavrfuho' <- pre_clause FUhO
+GA_clause 'cmavrga' <- pre_clause GA post_clause
+GAhO_clause 'cmavrgaho' <- pre_clause GAhO post_clause
+GEhU_clause 'cmavrgehu' <- pre_clause GEhU indicator_post_clause
+GI_clause 'cmavrgi' <- pre_clause GI post_clause
+GIhA_clause 'cmavrgiha' <- pre_clause GIhA post_clause
+GOI_clause 'cmavrgoi' <- pre_clause GOI post_clause
+GUhA_clause 'cmavrguha' <- pre_clause GUhA post_clause
+I_clause 'cmavrcmavri' <- pre_clause I indicator_post_clause
+IAU_clause 'cmavriau' <- pre_clause IAU indicator_post_clause
+JA_clause 'cmavrjoi' <- pre_clause JA post_clause
+JAI_clause 'cmavrjai' <- pre_clause JAI post_clause
+JOI_clause 'cmavrjoi' <- pre_clause JOI post_clause
+KE_clause 'cmavrke' <- pre_clause KE post_clause
+KEhE_clause 'cmavrkehe' <- pre_clause KEhE indicator_post_clause
+KEI_clause 'cmavrkei' <- pre_clause KEI indicator_post_clause
+KOhA_clause 'cmavrkoha' <- pre_clause KOhA post_clause
+KU_clause 'cmavrku' <- pre_clause KU indicator_post_clause
+KUhAU_clause 'cmavrkuhau' <- pre_clause KUhAU indicator_post_clause
+KUhE_clause 'cmavrkuhe' <- pre_clause KUhE indicator_post_clause
+KUhO_clause 'cmavrkuho' <- pre_clause KUhO indicator_post_clause
+LAU_clause 'cmavrlau' <- pre_clause LAU post_clause
+LAhE_clause 'cmavrlahe' <- pre_clause LAhE post_clause
+LE_clause 'cmavrle' <- pre_clause LE indicator_post_clause
+LI_clause 'cmavrli' <- pre_clause LI post_clause
+LIhU_clause 'cmavrlihu' <- pre_clause LIhU indicator_post_clause
+LOhO_clause 'cmavrloho' <- pre_clause LOhO indicator_post_clause
+LOhOI_clause 'cmavrlohoi' <- pre_clause LOhOI indicator_post_clause
+LU_clause 'cmavrlu' <- pre_clause LU indicator_post_clause
+LUhU_clause 'cmavrluhu' <- pre_clause LUhU indicator_post_clause
+MAhO_clause 'cmavrmaho' <- pre_clause MAhO post_clause
+MAI_clause 'cmavrmai' <- pre_clause MAI indicator_post_clause
+ME_clause 'cmavrme' <- pre_clause ME post_clause
+MEhU_clause 'cmavrmehu' <- pre_clause MEhU indicator_post_clause
+MOhE_clause 'cmavrmohe' <- pre_clause MOhE post_clause
+MEIhE_clause 'cmavrmeihe' <- pre_clause MEIhE post_clause
+MEIhO_clause 'cmavrmeiho' <- pre_clause MEIhO indicator_post_clause
+MOI_clause 'cmavrmoi' <- pre_clause MOI indicator_post_clause
+NA_clause 'cmavrna' <- pre_clause NA post_clause
+NAI_clause 'cmavrnai' <- pre_clause NAI indicator_post_clause
+NAhE_clause 'cmavrnahe' <- pre_clause NAhE post_clause
+NAhU_clause 'cmavrnahu' <- pre_clause NAhU post_clause
+NIhO_clause 'cmavrniho' <- pre_clause NIhO post_clause
+NOI_clause 'cmavrnoi' <- pre_clause NOI indicator_post_clause
+NU_clause 'cmavrnu' <- pre_clause NU indicator_post_clause
+NUhA_clause 'cmavrnuha' <- pre_clause NUhA post_clause
+NUhI_clause 'cmavrnuhi' <- pre_clause NUhI indicator_post_clause
+NUhU_clause 'cmavrnuhu' <- pre_clause NUhU indicator_post_clause
+PA_clause 'cmavrpa' <- pre_clause PA post_clause
+PEhE_clause 'cmavrpehe' <- pre_clause PEhE post_clause
+PEhO_clause 'cmavrpeho' <- pre_clause PEhO post_clause
+PU_clause 'cmavrpu' <- pre_clause PU post_clause
+ROI_clause 'cmavnroi' <- pre_clause ROI indicator_post_clause
+SE_clause 'cmavrse' <- pre_clause SE post_clause
+SEI_clause 'cmavrsei' <- pre_clause SEI indicator_post_clause
+SEhU_clause 'cmavrsehu' <- pre_clause SEhU indicator_post_clause
+SOI_clause 'cmavrsoi' <- pre_clause SOI indicator_post_clause
+TEhU_clause 'cmavrtehu' <- pre_clause TEhU indicator_post_clause
+TEI_clause 'cmavrtei' <- pre_clause TEI post_clause
+TO_clause 'cmavrto' <- pre_clause TO indicator_post_clause
+TOI_clause 'cmavrtoi' <- pre_clause TOI indicator_post_clause
+TUhE_clause 'cmavrtuhe' <- pre_clause TUhE indicator_post_clause
+TUhU_clause 'cmavrtuhu' <- pre_clause TUhU post_clause
+UI_clause 'cmavrui' <- pre_clause UI indicator_post_clause
+VAU_clause 'cmavrvau' <- pre_clause VAU indicator_post_clause
+VEI_clause 'cmavrvei' <- pre_clause VEI post_clause
+VEhO_clause 'cmavrveho' <- pre_clause VEhO indicator_post_clause
+VUhO_clause 'cmavrvuho' <- pre_clause VUhO indicator_post_clause
+XI_clause 'cmavrxi' <- pre_clause XI indicator_post_clause
+ZOhU_clause 'cmavrzohu' <- pre_clause ZOhU indicator_post_clause
+ga_clause 'cmavrgavla' <- pre_clause GA_W post_clause
+gu_clause 'cmavrguvla' <- pre_clause GU_W post_clause
+
+dot <- a:"."? { return null }
+quote <- "<" w:([^>] / ">>")+ "> " { return w.join("") + " " }
+
+BAhE <- "ba'ei "/"ba'e "/"za'e "/"ci'a "/"pe'ei "/"zai'e "/"zei'e "
+BE <- "be "
+BEI <- "bei "
+BEhO <- "be'o "
+BO <- "bi'e "/"bo "
+BOI <- "boi "
+
+BY <- by_quote
+  / [aeiouy] "'y" dot " "
+  / [bcdfgĭjklmnprstŭvxz] "y" dot " "
+  / &{return !options.ckt} ("ru'o "/"se'e ")
+  / "jo'o "/"ru'o "/"ge'o "/"je'o "/"lo'a "/"na'a "/"to'a "/"ga'e "
+  / "bu'o'e "/"ĭy'y "/"ai'y "/"au'y "/"jo'au'o "/"ro'au'o "/"ŭi'y "
+  / "pa'y "/"re'y "/"ci'y "/"vo'y "/"mu'y "/"xa'y "/"ze'y "/"bi'y "/"so'y "
+  / "dau'y "/"fei'y "/"gai'y "/"jau'y "/"rei'y "/"xei'y "/"vai'y "/"no'y "
+by_quote <- "BY:" w:quote { return w }
+  
+CAI <- "na'oi "/"pei "/"cai "/"cu'i "/"sai "/"ru'e "/"mau'i "/"dau'i "/"me'ai "
+  / "cau'i "/"dai'i "/"pei'a "
+CEI <- "cei "
+CEhE <- "ce'e "
+CO <- "co "/"co'ai'e "/"co'au'e "/"co'o'e "
+CU <- "cu "
+
+DOI <- &{return options.ckt} "di'o "
+  / "o'ai "/"a'oi "/"fau'u "/"di'ai "/"co'oi "/"ju'i "/"coi "/"fi'i "/"ta'a "/"mu'o "
+  / "fe'o "/"co'o "/"pe'u "/"ke'o "/"nu'e "/"re'i "/"be'e "/"je'e "/"ki'e "/"vi'o "
+  / "fi'i'e "/"jo'au "/"da'oi "/"tai'i "/"da'ei "/"ki'ai "/"sa'ei "/"doi "/"mi'e "
+  / "ve'ai "/"bu'oi "/"de'a'ai "/"di'a'ai "/"doi'oi "/"fe'oi "/"ku'au'i "/"sau'ei "
+  / "sei'ai "/"te'ei "/"ve'ei "/"ku'o'e'a "/"sau'e'u "/"xu'e "/"zau'e "
+
+DOhU <- "do'u "
+
+FA <- &{return options.ckt} "cau "
+  / "fai "/"fi'a " / "f" [aeiou] " " / "fai'i "/"zoi'u "/"fa'au'u "
+
+FAhO <- "FAhO:<" .* { return ["FAhO", "fa'o"] } / "fa'o "
+
+FEhU <- "fe'u "
+
+FIhO <- &{return options.ckt} ("pau "/"nau "/"sau ")
+  / "pau'a "/"nau'a "/"poi'a "/"noi'a "/"soi'a "/"fi'o "
+
+FOI <- "foi "
+FUhA <- "fu'a "
+FUhE <- "fu'e "/"fu'ei "
+FUhO <- "fu'o "
+GA <- "ge'i "/"ga "/"ge "/"go "/"gu "/"ge'u'a "/"gi'a'a "
+GA_W <- "ga "
+GAhO <- "ke'i "/"ga'o "/"ma'a'u'oi "/"xai'u'oi "/"xau'u'oi "/"xei'u'oi "/"xoi'u'oi "
+GEhU <- "ge'u "
+GI <- "gi "
+GIhA <- "gi'" [aeiou] " " / "gi'e'u'a "/"gi'i'a'a "
+
+GOI <- &{return !options.ckt} "po "
+  / "no'u "/"ne "/"goi "/"po'u "/"pe "/"po'e "/"voi'e "
+
+GOhA <- goha_quote
+  / &{return !options.ckt} "nei "
+  / "xe'u "/"mo "/"go'u "/"go'o "/"go'i "/"go'a "/"no'a "/"go'e "/"ku'ai'i "
+  / "du "/"bu'a "/"bu'e "/"bu'i "/"co'e "/"cei'i "/"gai'o "/"gi'o'i "/"go'ai "
+  / "ma'o'au "
+goha_quote <- "GOhA:" w:quote { return w }
+
+GUhA <- "gu'" [aeiou] " " / "gu'e'u'a "/"gu'i'a'a "
+GU_W <- "gu "
+I <- "i "/"oi'i "/"fa'oi "
+IAU <- "ĭau "/"i'au "
+
+JA <- "j" [aeiou] " " / [aeou] " "
+  / "zi'e "/"fa'u "/"fa'u'ai "/"y'i "/"je'i "/"je'u'a "/"ji'a'a "
+
+JAI <- "jai'a "/"jo'ai "/"jai "/"ja'ei "/"jai'e "
+
+JOI <- &{return options.ckt} "ce'u "
+  / &{return !options.ckt} "ce "
+  / "kai'a "/"mi'i "/"bi'o "/"bi'i "/"pi'u "/"joi "/"ce'o "/"jo'u "/"ku'a "/"jo'e "
+  / "ju'e "/"jo'i "/"ge'a "/"fu'u "/"pi'i "/"fe'i "/"vu'u "/"su'i "/"gei "/"pa'i "
+  / "fa'i "/"te'a "/"cu'a "/"va'a "/"ne'o "/"de'o "/"fe'a "/"sa'o "/"re'a "/"ri'o "
+  / "sa'i "/"pi'a "/"si'i "/"bo'a'oi "/"ce'au "/"ce'oi "/"jo'ei "/"jo'ei'i "
+  / "joi'au'a "/"jo'oi "/"xoi'u "/"bai'i "/"be'ei'oi "/"bei'u'i "/"boi'ai "
+  / "ca'ei'a "/"ca'o'e "/"ca'oi "/"ci'ai'u "/"ci'au'i "/"ci'o'au "/"cu'au'ei "
+  / "da'a'au "/"dei'au'o "/"di'ei'o'au "/"du'a'e "/"du'a'o "/"du'ei "/"fa'ai "
+  / "fa'ai'ai "/"fa'au "/"fe'ei "/"fei'i "/"ga'ai "/"gau'a "/"gu'au'i "/"je'e'e "
+  / "ji'e'ai "/"ji'i'u "/"joi'i "/"ku'au'a "/"ma'au "/"mai'u "/"ma'o'e "/"me'ei'o "
+  / "mu'ai'au "/"mu'au "/"nei'au "/"no'au'au "/"pau'a'u "/"pau'ei "/"pei'e'a "
+  / "pi'au'e "/"pi'ei "/"pi'ei'au "/"pi'ei'oi "/"po'i'oi "/"ra'i'e "/"rai'i "
+  / "sau'i "/"se'i'a'o "/"si'oi'e "/"su'i'e "/"su'i'o "/"tai'i'e "/"te'au'u "
+  / "te'i'ai "/"tei'au "/"te'o'a "/"to'ei'au "/"vau'i "/"vei'u "/"vi'oi'au "
+  / "vo'au'au "/"xa'ai "/"xo'ei "/"xo'e'o'ei "/"za'ei "/"zi'a'o "/"ci'a'o'e "
+  / "xu'a'ai "/"bai'ei "/"cu'ai "/"de'au'u "/"fe'au'u "/"gu'ai "/"jau'au "/"ka'au "
+  / "ne'oi "/"pau'oi "/"ru'ei "/"zei'i'au "/"bai'i "/"lau'au "/"vo'au'u "/"zu'oi "
+
+KE <- "ke "/"pi'ai "/"fei'u "/"ke'oi "/"va'au "
+KEhE <- "ke'e "
+KEI <- "kei "
+
+KOhA <- koha_quote
+  / &{return options.ckt} ("se'e "/"lau "/"ce "/"ki ")
+  / &{return !options.ckt} ("ce'u "/"ke'a ")
+  / "da'u "/"da'e "/"di'u "/"di'e "/"de'u "/"de'e "/"dei "/"do'i "/"mi'o "/"mi'ai "
+  / "ma'a "/"mi'a "/"do'o "/"zi'o "/"ma "/"zu'i "/"zo'e "/"ko "/"mi "/"do "/"xai "
+  / "dei'e "/"dei'o "/"dei'u "/"do'u'o "/"ko'o'au "/"ko'o'e "/"nei'o "/"voi'a "
+  / "zi'au "/"zu'i'a "/"noi'o "/"xei'e "
+  / [bkvf] "o'" [aeiou] " " / [rt] [iau] " " / "d" [aei] " "
+koha_quote <- "KOhA:" w:quote { return w }
+
+KU <- "ku "
+
+KUhAU <- &{options.ckt} "kai "
+  / "ku'au "
+
+KUhE <- "ku'e "
+KUhO <- "ku'o "
+
+LAU <- &{return options.ckt} "tu'a "
+  / &{return !options.ckt} ("lau "/"zai "/"tau ")
+  / "ce'a "
+
+LAhE <- &{return options.ckt} "tau "
+  / &{return !options.ckt} "tu'a "
+  / "zo'ei "/"lu'au "/"du'au "/"lu'a "/"lu'o "/"la'e "/"vu'i "/"lu'i "/"lu'e "
+  / "cei'u "/"la'e'au "/"lai'e "/"moi'a "/"tau'e "
+
+LE <- &{return options.ckt} ("su "/"rai "/"ru'o "/"nei ")
+  / &{return !options.ckt} "lai "
+  / "ri'oi "/"mo'oi "/"me'ei "/"lei "/"loi "/"le'i "/"lo'i "/"le'e "/"lo'e "
+  / "lo "/"le "/"la'i "/"la "/"su'oi "/"ro'oi "/"ru'oi "/"no'oi "/"dau'u "
+  / "ji'ai "/"kai'i "/"lei'e "/"lei'i "/"lo'au "/"loi'a "/"loi'e "/"lei'i "
+  / "lo'o'o "/"moi'oi "/"nei'i "/"ti'oi "/"xai'i "/"zo'ai "
+
+LI <- "li'ai "/"me'o "/"li "/"na'au "
+LIhU <- "li'u "
+LOhO <- "lo'o "
+
+LOhOI <- &{return options.ckt} "po "
+  / "lo'oi "/"xu'u "/"fo'ai "/"ko'ai "/"koi'i "/"mau'a "/"xau'a "
+
+LU <- &{return options.ckt} "lai "
+  / "lu "/"la'au "/"tu'ai "
+
+LUhU <- "lu'u "
+MAhO <- "ma'o "
+MAI <- "mo'o "/"mai "/"ba'ai "/"ju'ai "/"sai'ei "
+ME <- "me'au "/"xo'i "/"me "/"du'ai "/"mei'u "
+MEhU <- "me'u "
+MOhE <- "ni'e "/"mo'e "
+MEIhE <- "mei'e "
+MEIhO <- "mei'o "
+MOI <- "moi'o "/"mei "/"moi "/"si'e "/"cu'o "/"va'e "/"cei'a "/"coi'e "/"cu'oi'e "
+  / "doi'e "/"jei'o "/"ka'oi "/"lei'o "/"moi'e "/"moi'u "/"soi'e "
+NA <- "cau'a "/"ja'a "/"na "/"mai'a "/"mai'e "/"na'ai "/"xa'au "/"xu'o'e "
+NAI <- "nai "/"ja'ai "
+NAhE <- "sai'e "/"rei'e "/"cai'e "/"cau'e "/"noi'e "/"je'ai "/"na'ei "/"fe'e "
+  / "mo'i "/"to'e "/"je'a "/"na'e "/"no'e "/"cau'o'e "/"ni'u'u "/"pai'e "
+NAhU <- "na'u "
+NIhO <- "ni'o "/"no'i "
+
+NOI <- &{return !options.ckt} "voi "
+  / "noi "/"poi "/"je'oi "/"voi'i "
+
+NU <- &{return options.ckt} "voi "
+  / "poi'i "/"kai'u "/"ni "/"du'u "/"si'o "/"nu "/"li'i "/"ka "/"jei "/"su'u "
+  / "zu'o "/"mu'e "/"pu'u "/"za'i "/"bu'ai "/"ga'ei "/"ka'ei "/"kai'ei "
+  / "ka'oi'i "/"ni'ai "/"te'oi "/"xe'ei "
+
+NUhA <- "nu'a "
+NUhI <- "nu'i "
+NUhU <- "nu'u "
+
+PA <- &{return !options.ckt} "pai "
+  / "xo'e "/"dau "/"fei "/"gai "/"jau "/"xei "/"rei "/"vai "/"pi'e "/"pi "
+  / "fi'u "/"za'u "/"me'i "/"ni'u "/"ki'o "/"ce'i "/"ma'u "/"ra'e "/"da'a "
+  / "so'a "/"ji'i "/"su'o "/"su'e "/"ro "/"rau "/"so'u "/"so'u "/"so'i "
+  / "so'e "/"so'o "/"mo'a "/"du'e "/"te'o "/"ka'o "/"ci'i "/"tu'o "/"xo "
+  / "pi'au "/"tau'u "/"no'o "/"no "/"pa "/"re "/"ci "/"vo "/"mu "/"xa "/"ze "
+  / "bi "/"so "/"ju'u "/"bi'ei "/"by'ai "/"ci'i'e "/"ci'i'o "/"ci'i'oi "
+  / "dau'e "/"dy'ei "/"fy'ai "/"mu'i'u "/"sai'i "/"si'i'ai "/"soi'ai "
+  / "soi'au "/"su'o'o "/"sy'au "/"vu'ai "/"xe'a "/"xy'au "/"zy'ei "
+
+PEhE <- "pe'e "
+PEhO <- "pe'o "/"kei'ai "
+
+BAI <- &{return !options.ckt} ("si'u "/"di'o "/"koi "/"ki "/"zau "/"kai "
+                             / "sau "/"cau "/"pi'o "/"zu'e "/"rai "/"ba'i ")
+  / &{return options.ckt} ("ke'a "/"pi'o "/"zu'e "/"ba'i ")
+  / "zei'a "/"ze'ai "/"dei'a "/"ka'ai "/"ze'u "/"ze'a "/"ze'i "/"ze'e "
+  / "du'o "/"ki'i "/"du'i "/"cu'u "/"xu'a "/"tu'i "/"ti'u "/"te'i "/"ji'u "
+  / "ri'a "/"ni'i "/"mu'i "/"ki'u "/"va'u "/"ca'i "/"ta'i "/"pu'e "/"ja'i "
+  / "bai "/"fi'e "/"de'i "/"ci'o "/"mau "/"mu'u "/"ri'i "/"ra'i "/"ka'a "
+  / "pa'u "/"pa'a "/"le'a "/"ku'u "/"tai "/"bau "/"ma'i "/"ci'e "/"fau "
+  / "po'i "/"fa'e "/"be'i "/"ti'i "/"ja'e "/"ga'a "/"va'o "/"ji'o "/"me'a "
+  / "do'e "/"ji'e "/"gau "/"me'e "/"xau "/"ve'u "/"ve'a "/"ve'i "/"ve'e "
+  / "be'ei "/"ci'u "/"da'ai'a "/"de'i'a "/"de'i'e "/"de'i'i "/"de'i'o "
+  / "de'i'u "/"fi'ei "/"gai'i "/"gu'au "/"ja'u "/"ka'i "/"kai'ai "/"ki'oi "
+  / "ko'au "/"ku'ai "/"la'u "/"li'e "/"li'i'e "/"ma'e "/"mu'ai "/"mu'e'ei "
+  / "nai'i "/"pau'u "/"po'a "/"pu'a "/"pu'ai "/"ra'a "/"te'a'a "/"ti'u'a "
+  / "ti'u'e "/"ti'u'i "/"zei'au "
+
+PU <- &{return !options.ckt} "nau "
+  / &{return options.ckt} "zai "
+  / "ba "/"ca "/"pu "
+  / "co'i "/"pu'o "/"co'u "/"mo'u "/"ca'o "/"co'a "/"de'a "/"ba'o "/"di'a "
+  / "za'o "/"xa'o "/"vi'i "/"vi'a "/"vi'u "/"vi'e "/"ru'i "/"ta'e "/"di'i "
+  / "na'o "/"ca'a "/"pu'i "/"nu'o "/"ka'e "/"cu'e "/"du'a "/"be'a "/"ne'u "
+  / "vu'a "/"ga'u "/"ti'a "/"ni'a "/"ca'u "/"zu'a "/"ri'u "/"ru'u "/"re'o "
+  / "te'e "/"bu'u "/"ne'a "/"pa'o "/"ne'i "/"to'o "/"zo'i "/"ze'o "/"zo'a "
+  / "fa'a "/"xa'ei "
+
+ROI <- "re'u "/"roi "/"mu'ei "/"ba'oi "/"de'ei "/"va'ei "
+
+SE <- [stvx] ("e "/"o'ai ") / "su'ei "/"su'ai "/"ko'ei "/"lu'oi "/"re'au'e "
+  / "se'ai'e "/"se'au'e "/"se'o'e "/"se'u'o "/"so'o'o'oi "/"tu'ei "
+  / "ze'ai'e "/"ze'au'e "
+
+SEI <- "sei "/"ti'o "/"le'au "/"cei'e "/"sei'e "
+SEhU <- "se'u "
+SOI <- "soi "/"so'oi "/"xoi "/"fi'oi "/"no'au "
+TEhU <- "te'u "
+TEI <- "tei "
+TO <- "to'i "/"to "
+TOI <- "toi "
+TUhE <- "tu'e "
+TUhU <- "tu'u "
+
+# FIXME ROhA
+UI <- &{return options.ckt} ("si'u "/"koi "/"pai ")
+  / &{return !options.ckt} "pau "
+  / ui_d " " / !IAU !I (ui_v "'" / ui_g ui_v "'" / ui_g) (ui_v "'")* ui_v " "
+  / "ki'a'au'u'au'i "/"ci'au'u'au'i "/"pei'e "/"li'oi "
+  / "fu'au "/"a'ei "/"ko'oi "/"si'au "/"ba'a "/"moi'i "/"kai'e "/"ja'o "
+  / "ca'e "/"su'a "/"ti'e "/"ka'u "/"se'o "/"za'a "/"pe'i "/"ru'a "/"ju'a "
+  / "ta'o "/"ra'u "/"li'a "/"ba'u "/"mu'a "/"do'a "/"to'u "/"va'i "/"pa'e "
+  / "zu'u "/"sa'e "/"la'a "/"ke'u "/"sa'u "/"da'i "/"xa'i "/"je'u "/"sa'a "
+  / "kau "/"ta'u "/"na'i "/"jo'a "/"bi'u "/"li'o "/"mi'u "/"ku'i "/"ji'a "
+  / "si'a "/"po'o "/"pe'a "/"ro'i "/"ro'e "/"ro'o "/"ro'u "/"ro'a "/"re'e "
+  / "le'o "/"ju'o "/"fu'i "/"dai "/"ga'i "/"be'u "/"ri'e "/"se'i "/"se'a "
+  / "vu'e "/"ki'a "/"xu "/"ge'e "/"bu'o "/"da'o "/"ra'o "/"bi'a "/"zi'a "
+  / "x" ("e'"+ "e'e" / "a'"+ "a" / "i'"+ "i'i" / "o'"+ "o") " "
+  / "z" "o'"+ "o "
+  / "ca'e'ei "/"ci'ai "/"coi'o'e "/"cu'ei "/"cu'i'a "/"doi'au "/"fai'a "
+  / "cu'ei'" ui_v " " / "fu'ei'" ui_v " "
+  / "mu'au'oi "/"pau'ai "/"pau'i "/"rau'o "/"si'ai "/"su'a'a "/"tai'a "
+  / "tei'i "/"tei'o "/"va'u'ai "/"zei'i "/"zi'ei "
+ui_v <- ui_d / [aeiou]
+ui_g <- [ĭŭ]
+ui_d <- "ai" / "ei" / "oi" / "au"
+
+VAU <- "vau "
+VEI <- "vei "
+VEhO <- "ve'o "
+VUhO <- "vu'o "
+XI <- "xi "/"te'ai "/"fau'e "/"xi'e "/"xi'i "
+
+ZOhU <- &{return options.ckt} "zau "
+  / "zo'u "/"ce'ai "/"ge'ai "/"ke'au "
+
+EOF <- !.
+space <- [\s]*
