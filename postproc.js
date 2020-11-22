@@ -420,7 +420,7 @@ if (typeof module !== 'undefined') {
     if (typeof process !== 'undefined' && require !== 'undefined' && require.main === module) {
       var fs = require('fs');
       var input = process.argv.length > 2 ? process.argv[2] : fs.readFileSync(0, 'utf-8');
-      console.log(camxes_postprocessing(input, 'T'));
+      console.log(camxes_postprocessing(input, 'TM'));
     }
 }
 

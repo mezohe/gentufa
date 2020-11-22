@@ -40,10 +40,10 @@ function morfoPost(words) {
 
 var camxes = {
   "fanza": {
-    parse: function (text) {
-      var morfoRaw = morfo.parse(text);
+    parse: function (text, options) {
+      var morfoRaw = morfo.parse(text, options);
       var morfoStr = morfoPost(morfoRaw);
-      var sturaRaw = stura.parse(morfoStr);
+      var sturaRaw = stura.parse(morfoStr, options);
       return sturaRaw;
     }
   },
@@ -76,6 +76,7 @@ var options = {
     s: false,
     f: true,
     h: false,
+    ckt: false,
     startRule: "text",
   },
   flag_pattern: "[+-]\\w+",
@@ -175,13 +176,19 @@ function run_camxes(input, mode) {
   result = camxes_pre.preprocessing(input);
   //result = input;
   try {
-    result = camxes[mode.parser].parse(result, mode.startRule);
+    result = camxes[mode.parser].parse(result, mode);
   } catch (e) {
     result = e;
     syntax_error = true;
   }
   if (!syntax_error) {
-    let oldMode = mode.format == 'raw' ? 0 : mode.s ? mode.f ? 3 : 6 : mode.f ? 2 : 5;
+    let oldMode = "M";
+    if (mode.format == 'raw') {
+      oldMode = "RJ";
+    } else {
+      if (mode.s) oldMode += "C";
+      if (mode.f) oldMode += "T";
+    }
     result = JSON.stringify(result, undefined, 2);
     result = camxes_post.postprocessing(result, oldMode);
   }

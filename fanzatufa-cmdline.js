@@ -22,7 +22,7 @@ var camxes = {
   parse: function(text) {
     var morfoRaw = morfo.parse(text);
     var morfoStr = morfoPost(morfoRaw);
-    var sturaRaw = stura.parse(morfoStr);
+    var sturaRaw = stura.parse(morfoStr, {ckt: true});
     return sturaRaw;
   }
 }

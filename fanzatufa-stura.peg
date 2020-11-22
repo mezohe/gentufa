@@ -14,7 +14,7 @@ statement_2 <- statement_3 (I_clause free* lone_jek? tag? BO_clause free* prenex
 
 statement_3 <- tag? TUhE_clause text TUhU_elidible free* / fragment / sentence
 
-fragment <- !term !tag quantifier / relative_clauses / links+ / !selbri linkargs / !selbri !term !tag nahe_guhe
+fragment <- !term !tag quantifier / relative_clauses / links+ / !selbri linkargs / !selbri !term !tag (nahe_guhe / se_guhe / gadri)
 
 lone_jek <- !gek gihek free*
 
@@ -52,14 +52,13 @@ tail_terms <- terms? VAU_elidible free*
 
 terms 'sumturpoi' <- terms_1+
 
-# FIXME FIX JECU
-terms_1 <- terms_2 (jek !tag_bo_ke_bridi_tail terms_2)* # LR2
+terms_1 <- terms_2 (PEhE_elidible jek !tag_bo_ke_bridi_tail terms_2)* # LR2
 
 tag_bo_ke_bridi_tail <- tag (BO_clause / KE_clause) CU_elidible free* (selbri / gek_sentence)
 
 terms_2 <- term (CEhE_clause free* term)* # FIX JECU
 
-terms_3 <- term (jek tag? BO_clause !bridi_tail_2 terms_3)?
+terms_3 <- term (PEhE_elidible jek tag? BO_clause !bridi_tail_2 terms_3)?
 
 term 'sumsuha' <- sumti / tag_term / termset / naku_term / soi_term
 
@@ -95,10 +94,22 @@ sumti_5 <- KOhA_clause
   / !tag !selbri lerfu_string BOI_elidible free*
   / LU_clause text LIhU_elidible free*
   / !tag lahe_nahe relative_clauses? term LUhU_elidible free* 
-  / LE_clause free* sumti_tail KU_elidible free*
+  / gadri sumti_tail KU_elidible free*
   / li_clause 
   / LOhOI_clause subsentence KUhAU_elidible free* 
-  
+
+gadri <- gadri_1 (jek (tag &KE_clause)? (gadri_ke / gadri_1))* # !LR2
+gadri_ke <- KE_clause free* gadri KEhE_elidible free*
+gadri_1 <- LE_clause free* (jek tag? BO_clause gadri_1)?
+
+li_gadri <- li_gadri_1 (jek (tag &KE_clause)? (li_gadri_ke / li_gadri_1))* # !LR2
+li_gadri_ke <- KE_clause free* li_gadri KEhE_elidible free*
+li_gadri_1 <- LI_clause free* (jek tag? BO_clause li_gadri_1)?
+
+lohoi_gadri <- lohoi_gadri_1 (jek (tag &KE_clause)? (lohoi_gadri_ke / lohoi_gadri_1))* # !LR2
+lohoi_gadri_ke <- KE_clause free* lohoi_gadri KEhE_elidible free*
+lohoi_gadri_1 <- LOhOI_clause (jek tag? BO_clause lohoi_gadri_1)?
+
 lahe_nahe <- (LAhE_clause / nahe_guhe) BO_clause? free*
 nahe_guhe <- guhek (nahe_guhe / nahe_ke)+ gik (nahe_ke / nahe_free) / nahe_free
 nahe_ke <- KE_clause free* nahe_guhe+ KEhE_elidible free*
@@ -108,7 +119,7 @@ se_guhe <- guhek (se_guhe / se_ke)+ gik (se_ke / se_free) / se_free
 se_ke <- KE_clause free* se_guhe+ KEhE_elidible free*
 se_free <- SE_clause free*
 
-li_clause <- LI_clause free* mex LOhO_elidible free*
+li_clause <- li_gadri mex LOhO_elidible free*
 
 sumti_tail 'sumyrebla' <- relative_clauses? sumti_tail_1
 
@@ -231,7 +242,7 @@ tag_1 <-
   guhek tag gik (tag_ke / tag_1)
   / tag_2+
 
-tag_ke <- KE_clause free* tag KEhE_elidible? free*
+tag_ke <- KE_clause free* tag KEhE_elidible free*
 
 tag_2 <- (nahe_guhe / se_guhe) (tag_ke / tag_3) / tag_3
 
@@ -256,7 +267,7 @@ post_clause <- indicators?
 indicator_post_clause <- FUhO_clause*
 # fuho_post_clause removed
 
-pre_clause <- dot fuhe_free* BAhE_clause*
+pre_clause <- fuhe_free* BAhE_clause* dot
 fuhe_free <- FUhE_clause free*
 pre_clause_no_fuhe <- BAhE_clause*
 
@@ -273,7 +284,7 @@ GI_elidible <- GI_clause?
 KEI_elidible <- KEI_clause?
 KEhE_elidible <- KEhE_clause?
 KU_elidible <- KU_clause?
-KUhAU_elidible <- KUhAU_clause?
+KUhAU_elidible <- k:KUhAU_clause? { return k ? _node_empty("KUhAU_elidible", k) : [options.ckt ? "KAI" : "KUhAU"] }
 KUhE_elidible <- KUhE_clause?
 KUhO_elidible <- KUhO_clause?
 # LEhU is never elidible
@@ -283,6 +294,7 @@ LUhU_elidible <- LUhU_clause?
 MEhU_elidible <- MEhU_clause?
 MEIhO_elidible <- MEIhO_clause?
 NUhU_elidible <- NUhU_clause?
+PEhE_elidible <- PEhE_clause?
 SEhU_elidible <- SEhU_clause?
 TEhU_elidible <- TEhU_clause?
 TOI_elidible <- TOI_clause?
@@ -390,6 +402,7 @@ ga_clause 'cmavrgavla' <- pre_clause GA_W post_clause
 gu_clause 'cmavrguvla' <- pre_clause GU_W post_clause
 
 dot <- a:"."? { return null }
+by_dot <- "."?
 quote <- "<" w:([^>] / ">>")+ "> " { return w.join("") + " " }
 
 BAhE <- "ba'ei "/"ba'e "/"za'e "/"ci'a "/"pe'ei "/"zai'e "/"zei'e "
@@ -400,13 +413,13 @@ BO <- "bi'e "/"bo "
 BOI <- "boi "
 
 BY <- by_quote
-  / [aeiouy] "'y" dot " "
-  / [bcdfgĭjklmnprstŭvxz] "y" dot " "
+  / [aeiouy] "'y" by_dot " "
+  / [bcdfgĭjklmnprstŭvxz] "y" by_dot " "
+  / ("ĭy"/"ai"/"au"/"ŭi"/"dau"/"fei"/"gai"/"jau"/"rei"/"xei"/"vai"
+    / "no"/"pa"/"re"/"ci"/"vo"/"mu"/"xa"/"ze"/"bi"/"so") "'y" by_dot " "
   / &{return !options.ckt} ("ru'o "/"se'e ")
-  / "jo'o "/"ru'o "/"ge'o "/"je'o "/"lo'a "/"na'a "/"to'a "/"ga'e "
-  / "bu'o'e "/"ĭy'y "/"ai'y "/"au'y "/"jo'au'o "/"ro'au'o "/"ŭi'y "
-  / "pa'y "/"re'y "/"ci'y "/"vo'y "/"mu'y "/"xa'y "/"ze'y "/"bi'y "/"so'y "
-  / "dau'y "/"fei'y "/"gai'y "/"jau'y "/"rei'y "/"xei'y "/"vai'y "/"no'y "
+  / "jo'o "/"ge'o "/"je'o "/"lo'a "/"na'a "/"to'a "/"ga'e "
+  / "bu'o'e "/"jo'au'o "/"ro'au'o "
 by_quote <- "BY:" w:quote { return w }
   
 CAI <- "na'oi "/"pei "/"cai "/"cu'i "/"sai "/"ru'e "/"mau'i "/"dau'i "/"me'ai "
@@ -501,7 +514,7 @@ koha_quote <- "KOhA:" w:quote { return w }
 
 KU <- "ku "
 
-KUhAU <- &{options.ckt} "kai "
+KUhAU <- &{return options.ckt} "kai "
   / "ku'au "
 
 KUhE <- "ku'e "

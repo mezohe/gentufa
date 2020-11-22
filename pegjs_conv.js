@@ -324,7 +324,7 @@ function peg_add_js_parser_actions(peg) {
                       '$1 = expr:($2) {return ",";}');
     /* cmavo rules */
     peg = peg.replace(/(?<=[\r\n])([A-Zh_]+) *= *(([^: \r\n]+ )*[^: \r\n]+)( *)(?=\r|\n|$)/gm,
-                    '$1 = expr:($2) {return _node_int("$1", join_trim(expr));}$4');
+                    '$1 = expr:($2) {return _node_int("$1", join_cmavo(expr));}$4');
     /* Default parser action */
     peg = peg.replace(/([0-9a-zA-Z_-]+)( *'[^']+')? *= *(([^: \r\n]+ )*[^: \r\n]+)( *)(?=\r|\n|$)/gm,
                     '$1$2 = expr:($3) {return _node("$1", expr);}$5');
@@ -450,10 +450,12 @@ function js_initializer() {
     return s;
   }
 
-  function join_trim(n) {
-    if (typeof n == "string")
-      return n.replace(/ $/, "");
-    return join_expr(n, true).replace(/ $/, "");
+  function join_cmavo(n) {
+    if (typeof n != "string")
+      n = join_expr(n, true);
+    n = n.replace(/ $/, "");
+    n = n.replace(/^(?=[aeiou])/, ".");
+    return n.split(" ");
   }
 
   function is_string(v) {
