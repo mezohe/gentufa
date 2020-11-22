@@ -96,27 +96,28 @@ sumti_5 <- KOhA_clause
   / !tag lahe_nahe relative_clauses? term LUhU_elidible free* 
   / gadri sumti_tail KU_elidible free*
   / li_clause 
-  / LOhOI_clause subsentence KUhAU_elidible free* 
+  / lohoi_gadri subsentence KUhAU_elidible free* 
 
-gadri <- gadri_1 (jek (tag &KE_clause)? (gadri_ke / gadri_1))* # !LR2
-gadri_ke <- KE_clause free* gadri KEhE_elidible free*
-gadri_1 <- LE_clause free* (jek tag? BO_clause gadri_1)?
+fragile_guhe <content inner> <- guhek inner<content> gik guhe_right<content inner> / content
+guhe_right <content inner> <- fragile_guhe<content inner> / guhe_ke<content inner> / content
+guhe_ke <content inner> <- KE_clause free* inner<content> KEhE_elidible free*
+guhe_one <content> = fragile_guhe<content guhe_one> / guhe_ke<content guhe_one> / content
+guhe_many <content> = (fragile_guhe<content guhe_many> / guhe_ke<content guhe_many> / content)+
 
-li_gadri <- li_gadri_1 (jek (tag &KE_clause)? (li_gadri_ke / li_gadri_1))* # !LR2
-li_gadri_ke <- KE_clause free* li_gadri KEhE_elidible free*
-li_gadri_1 <- LI_clause free* (jek tag? BO_clause li_gadri_1)?
+kramaho <content> <- kramaho_1<content> (jek (tag &KE_clause)? (kramaho_ke<content> / kramaho_1<content>))* # !LR2
+kramaho_ke <content> <- KE_clause free* kramaho<content> KEhE_elidible free*
+kramaho_1 <content> <- content free* (jek tag? BO_clause kramaho_1<content>)?
+  / guhek kramaho<content> gik (content / kramaho_ke<content>)
 
-lohoi_gadri <- lohoi_gadri_1 (jek (tag &KE_clause)? (lohoi_gadri_ke / lohoi_gadri_1))* # !LR2
-lohoi_gadri_ke <- KE_clause free* lohoi_gadri KEhE_elidible free*
-lohoi_gadri_1 <- LOhOI_clause (jek tag? BO_clause lohoi_gadri_1)?
+gadri <- kramaho<LE_clause>
+li_gadri <- kramaho<LI_clause>
+lohoi_gadri <- kramaho<LOhOI_clause>
 
 lahe_nahe <- (LAhE_clause / nahe_guhe) BO_clause? free*
-nahe_guhe <- guhek (nahe_guhe / nahe_ke)+ gik (nahe_ke / nahe_free) / nahe_free
-nahe_ke <- KE_clause free* nahe_guhe+ KEhE_elidible free*
+nahe_guhe <- fragile_guhe<nahe_free guhe_many>
 nahe_free <- NAhE_clause free*
 
-se_guhe <- guhek (se_guhe / se_ke)+ gik (se_ke / se_free) / se_free
-se_ke <- KE_clause free* se_guhe+ KEhE_elidible free*
+se_guhe <- fragile_guhe<se_free guhe_many>
 se_free <- SE_clause free*
 
 li_clause <- li_gadri mex LOhO_elidible free*
@@ -244,7 +245,7 @@ tag_1 <-
 
 tag_ke <- KE_clause free* tag KEhE_elidible free*
 
-tag_2 <- (nahe_guhe / se_guhe) (tag_ke / tag_3) / tag_3
+tag_2 <- (nahe_guhe / se_guhe) (tag_ke / tag_2) / tag_3
 
 tag_3 <- (BAI_clause / PU_clause / mex_2 ROI_clause / fiho_clause / FA_clause) free*
 
@@ -263,7 +264,9 @@ free_to <- TO_clause text TOI_elidible
 
 indicators <- FUhO_clause* (UI_clause / CAI_clause / NAI_clause / free_sei / free_to)+ / FUhO_clause+
 
-post_clause <- indicators?
+post_clause <- free*
+digit_post_clause <- (!lerfu_word !PA_clause free)*
+vocative_post_clause <- (!DOI_clause free)*
 indicator_post_clause <- FUhO_clause*
 # fuho_post_clause removed
 
@@ -319,7 +322,7 @@ CEI_clause 'cmavrcei' <- pre_clause CEI post_clause
 CEhE_clause 'cmavrcehe' <- pre_clause CEhE post_clause
 CO_clause 'cmavrco' <- pre_clause CO post_clause
 CU_clause 'cmavrcu' <- pre_clause CU post_clause
-DOI_clause 'cmavrdoi' <- pre_clause DOI post_clause
+DOI_clause 'cmavrdoi' <- pre_clause DOI vocative_post_clause
 DOhU_clause 'cmavrdohu' <- pre_clause DOhU indicator_post_clause
 FA_clause 'cmavrfa' <- pre_clause FA post_clause
 FAhO_clause 'cmavrfaho' <- pre_clause FAhO
@@ -602,7 +605,7 @@ BAI <- &{return !options.ckt} ("si'u "/"di'o "/"koi "/"ki "/"zau "/"kai "
   / "de'i'u "/"fi'ei "/"gai'i "/"gu'au "/"ja'u "/"ka'i "/"kai'ai "/"ki'oi "
   / "ko'au "/"ku'ai "/"la'u "/"li'e "/"li'i'e "/"ma'e "/"mu'ai "/"mu'e'ei "
   / "nai'i "/"pau'u "/"po'a "/"pu'a "/"pu'ai "/"ra'a "/"te'a'a "/"ti'u'a "
-  / "ti'u'e "/"ti'u'i "/"zei'au "
+  / "ti'u'e "/"ti'u'i "/"zei'au "/"ki'i'i "
 
 PU <- &{return !options.ckt} "nau "
   / &{return options.ckt} "zai "
@@ -633,7 +636,8 @@ TUhU <- "tu'u "
 # FIXME ROhA
 UI <- &{return options.ckt} ("si'u "/"koi "/"pai ")
   / &{return !options.ckt} "pau "
-  / ui_d " " / !IAU !I (ui_v "'" / ui_g ui_v "'" / ui_g) (ui_v "'")* ui_v " "
+  / ui_d " "
+  / !IAU !I !DOI (ui_v "'" / ui_g ui_v "'" / ui_g) (ui_v "'")* ui_v " "
   / "ki'a'au'u'au'i "/"ci'au'u'au'i "/"pei'e "/"li'oi "
   / "fu'au "/"a'ei "/"ko'oi "/"si'au "/"ba'a "/"moi'i "/"kai'e "/"ja'o "
   / "ca'e "/"su'a "/"ti'e "/"ka'u "/"se'o "/"za'a "/"pe'i "/"ru'a "/"ju'a "

@@ -326,8 +326,8 @@ function peg_add_js_parser_actions(peg) {
     peg = peg.replace(/(?<=[\r\n])([A-Zh_]+) *= *(([^: \r\n]+ )*[^: \r\n]+)( *)(?=\r|\n|$)/gm,
                     '$1 = expr:($2) {return _node_int("$1", join_cmavo(expr));}$4');
     /* Default parser action */
-    peg = peg.replace(/([0-9a-zA-Z_-]+)( *'[^']+')? *= *(([^: \r\n]+ )*[^: \r\n]+)( *)(?=\r|\n|$)/gm,
-                    '$1$2 = expr:($3) {return _node("$1", expr);}$5');
+    peg = peg.replace(/([0-9a-zA-Z_-]+)( *<[^>]+>)?( *'[^']+')? *= *(([^: \r\n]+ )*[^: \r\n]+)( *)(?=\r|\n|$)/gm,
+                    '$1$2$3 = expr:($4) {return _node("$1", expr);}$6');
     return peg;
 }
 
