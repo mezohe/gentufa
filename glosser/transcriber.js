@@ -1,28 +1,5 @@
 // General functions
 
-function addDotsToWord(word, previous) {
-    
-    var preDot = "";
-    var postDot = "";
-    
-    // if word begins with a vowel: dot before
-    if (isVowel(word.charAt(0))) {
-        preDot = ".";
-    }
-    
-    // if word is a cmene: dot after
-    if (!isVowel(word.charAt(word.length - 1))) {
-        postDot = ".";
-        
-        // and except for preceding selma'o DOI or LA, also a dot before
-        if (!previous || (previous !== "doi" && previous !== "la")) { // TODO: check if there are more of these
-            preDot = ".";
-        }
-    }
-    
-    return preDot + word + postDot;
-}
-
 function isVowel(c) {
     return c === "a" || c === "e" || c === "i" || c === "o" || c === "u" || c === "y";
 }
@@ -42,25 +19,13 @@ function arrayToString(array) {
 // Latin mode
 
 function transcribeToLatin(text) {
-    var result = [];
-    
-    for (var i in text) {
-        result.push(addDotsToWord(text[i], text[i - 1]));
-    }
-    
-    return result;
+    return [].concat(text);
 }
 
 // Cyrillic mode
 
 function transcribeToCyrillic(text) {
-    var result = [];
-    
-    for (var i in text) {
-        result.push(wordToCyrillic(addDotsToWord(text[i], text[i - 1])));
-    }
-    
-    return result;
+    return text.map(wordToCyrillic);
 }
 
 function wordToCyrillic(word) {
@@ -108,13 +73,7 @@ cyrillicTable["y"] = "&#1098;";
 // Tengwar mode
 
 function transcribeToTengwar(text) {
-    var result = [];
-    
-    for (var i in text) {
-        result.push(wordToTengwar(addDotsToWord(text[i], text[i - 1])));
-    }
-    
-    return result;
+    return text.map(wordToTengwar);
 }
 
 function wordToTengwar(word) {
@@ -222,13 +181,7 @@ tehtaTable["y"] = "&#57413;";
 // Hiragana mode
 
 function transcribeToHiragana(text) {
-    var result = [];
-    
-    for (var i in text) {
-        result.push(wordToHiragana(addDotsToWord(text[i], text[i - 1])));
-    }
-    
-    return result;
+    return text.map(wordToHiragana);
 }
 
 function wordToHiragana(word) {

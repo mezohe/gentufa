@@ -1,6 +1,10 @@
-var morfo = require('./fanzatufa-morfo.js');
-var stura = require('./fanzatufa-stura.js');
-var sturaPost = require('./postproc.js');
+try {
+  var morfo = require('./fanzatufa-morfo.js');
+  var stura = require('./fanzatufa-stura.js');
+  var sturaPost = require('./postproc.js');
+} catch (e) {
+  stura = camxes;
+}
 
 function morfoSingleWord(word) {
   var selmaho = word.selmaho;
@@ -19,11 +23,27 @@ function morfoPost(words) {
 }
 
 var camxes = {
-  parse: function(text) {
-    var morfoRaw = morfo.parse(text);
+  parse: function(text, options) {
+    try {
+      var morfoRaw = morfo.parse(text, options);
+    } catch (e) {
+      if (typeof e == "object")
+        e.parser = "morfo";
+      throw e;
+    }
     var morfoStr = morfoPost(morfoRaw);
-    var sturaRaw = stura.parse(morfoStr, {ckt: true});
+    try {
+      var sturaRaw = stura.parse(morfoStr, options);
+    } catch (e) {
+      if (typeof e == "object")
+        e.parser = "stura";
+      throw e;
+    }
     return sturaRaw;
+  },
+  getMorfoText: function(text) {
+    var morfoRaw = morfo.parse(text);
+    return morfoPost(morfoRaw);
   }
 }
 
@@ -32,7 +52,7 @@ if (typeof module !== 'undefined') {
     if (typeof process !== 'undefined' && require !== 'undefined' && require.main === module) {
       var input = process.argv[2];
       if (Object.prototype.toString.call(input) === '[object String]')
-        console.log(JSON.stringify(camxes.parse(input + ' ')));
+        console.log(JSON.stringify(camxes.parse(input, {ckt: true})));
     }
 }
 

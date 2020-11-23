@@ -11,7 +11,8 @@ function parse() {
     $("#result-row").slideDown();
     try {
         var start = new Date().getTime();
-        var parse = camxes.parse(textToParse);
+        var ckt = $("#ckt-button").hasClass('active');
+        var parse = camxes.parse(textToParse, {ckt: ckt});
         var end = new Date().getTime();
         $("#time-label").html("(parsing took " + (end - start) + " ms)");
         var simplified = simplifyTree(parse);
@@ -298,6 +299,8 @@ function boxClassForType(parse) {
     if (parse.type === "sumti x") {
         if (parse.sumtiPlace > 5) {
             return "box box-sumti6";
+        } else if (parse.sumtiPlace == "fai") {
+            return "box box-sumti-fai";
         } else {
             return "box box-sumti" + parse.sumtiPlace;
         }
@@ -326,12 +329,14 @@ function boxClassForType(parse) {
  * Shows a syntax error in the interface.
  */
 function showSyntaxError(e, textToParse, $element) {
+    if (e.parser === "stura")
+      textToParse = camxes.getMorfoText(textToParse);
     
     var output = "<div class=\"alert\">" +
     "<p><b>Syntax error</b> on line <b>" + 
-    e.line +
+    e.location.start.line +
     "</b>, at column <b>" +
-    e.column +
+    e.location.start.column +
     "</b>: " +
     e.message +
     "</p>" +
@@ -350,19 +355,26 @@ function showSyntaxError(e, textToParse, $element) {
 function generateErrorPosition(e, textToParse) {
     
     //"mi vau <span class=\"error-marker\">&#9652;</span> do cusku ..." +
+    var offset = e.location.start.offset
     
-    var before = textToParse.substring(e.offset - 20, e.offset);
+    var before = textToParse.substring(offset - 20, offset);
     
-    var after = textToParse.substring(e.offset + 0, e.offset + 20);
+    var after = textToParse.substring(offset + 0, offset + 20);
     
-    if (e.offset > 20) {
+    if (offset > 20) {
         before = "..." + before;
     }
-    if (e.offset < textToParse.length - 20) {
+    if (offset < textToParse.length - 20) {
         after = after + "...";
     }
     
-    return before + "<span class=\"error-marker\">&#9652;</span>" + after;
+    return escapeHtml(before) + "<span class=\"error-marker\">&#9652;</span>" + escapeHtml(after);
+}
+
+function escapeHtml(text) {
+    var el = document.createElement("p");
+    el.innerText = text;
+    return el.innerHTML;
 }
 
 function generateFixes(e) {
@@ -544,13 +556,13 @@ function getVlasiskuLink(word) {
 
 function outputWord(word, mode) {
     if (mode === 1) { // Latin mode
-        return addDotsToWord(word);
+        return word;
     } else if (mode === 2) { // Cyrillic mode
-        return wordToCyrillic(addDotsToWord(word));
+        return wordToCyrillic(word);
     } else if (mode === 3) { // Tengwar mode
-        return wordToTengwar(addDotsToWord(word));
+        return wordToTengwar(word);
     } else if (mode === 4) { // Hiragana mode
-        return wordToHiragana(addDotsToWord(word));
+        return wordToHiragana(word);
     }
 }
 
