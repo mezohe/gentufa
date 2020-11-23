@@ -1,7 +1,7 @@
 fanzygerna
 ==========
 
-fanzygerna is a grammar for Lojban incorporating many experimental changes.
+fanzygerna is a grammar for Lojban incorporating many experimental changes. [Try it!](https://mezohe.github.io/spagetufa/glosser/glosser.htm)
 
 ### Characteristics
 
