@@ -1,34 +1,55 @@
-spagetufa
-=========
+fanzygerna
+==========
 
-spagetufa is a parser for Lojban incorporating many experimental changes. There is no documentation yet; the only way to find out what has changed is to read the commit log or to use it.
+fanzygerna is a grammar for Lojban incorporating many experimental changes.
 
+### Characteristics
 
-=== Requirements ===
+Many features are copied from [the exp and beta variants of ilmentufa](https://github.com/lojban/ilmentufa/), [zantufa](https://github.com/guskant/gerna_cipra), or [zasni gerna](https://mw.lojban.org/lmw/zasni_gerna). Like in [tersmu](https://gitlab.com/zugz/tersmu), the morphology is extracted into a separate PEG.
 
-For generating a PEGJS grammar engine from its PEG grammar file, as well as for running the IRC bot interfaces, you need to have Node.js installed on your machine.
+fanzygerna is a cmevla-brivla-merging, connective-unifying (including VUhU), tag-unifying, [cekitau](https://mw.lojban.org/ce_ki_tau_jau)-optional grammar.
 
-For running the IRC bots, you may need to get the Node.js module 'irc'.
+#### Unique to fanzygerna
 
-PEGJS itself (slightly modified to work around our own bugs) is already included in this repo.
+* Grammar of descriptions: the cmavo {su'oi}, {ro'oi}, {no'oi}, {ru'oi} are moved to selmaho LE. The description grammar is changed such that {LE KOhA GOhA KU} is no longer allowed, and {LE KOhA KU} is allowed instead. This is the original motivation for fanzygerna, and also the reason for its name.
+* Expansion of connectives: selmaho NAhE, SE, LE, LI, LOhOI, and afterthought connectives themselves, can be connected (the first two in forethought only).
+* The morphology has a unified brivla rule, and includes only those rafsi rules needed to implement slinkuhi test. Slinkuhi words themselves are allowed after a pause.
+* Cmavo shaped like members of selmaho UI are automatically recognized as such, unless they explicitly belong to another selmaho.
+* Implementation detail: rule templates are used to shorten repetitive rules, as used in [eaburns's Toaq parser/transformer](https://github.com/eaburns/toaq).
 
-=== Building a PEGJS engine ===
+#### Notably absent
 
-After having entered the ilmentufa directory, run the following command:
+* Magic words other than ZO, ZEI, BU (this is temporary)
+* KE-BO-termsets, because replacing CEhE with BO is a messy undertaking
+* I-JA inside subsentences, out of personal preference; JA-I and TUhE are supported, however
+* Variable-arity geks (an opt-in is planned)
+* Unary afterthought JA, because it may be in conflict with JACU
+* GA or other gek styles as tanru connectives (guheks have to stay anyway for forethought connection of connectives and tags)
+* NOI on selbri
+* digit-string and lerfu-string split
 
-$ node [builder-filename]
+### Requirements
 
-For example, "node camxes-builder" for building the standard grammar engine or "node camxes-exp-builder" for experimental grammar.
+For generating a PEG.js grammar engine from its PEG grammar file, as well as for running the IRC bot interfaces, you need to have Node.js installed on your machine.  [PEG.js itself](https://github.com/pegjs/pegjs) (slightly modified to work around our own bugs) is already included in this repo.
 
-Now, the grammar engine should have been created/updated. Run "node camxes-exp.js 'ti mo'" or load "camxes-exp.html" to try it out. 
+### Building a parser
 
+After having entered the spagetufa directory, run the following commands:
 
-=== Running the IRC bots ===
+```
+node pegjs_conv.js fanzatufa-stura.peg
+node build-camxes.js fanzatufa-morfo.js.peg
+node build-camxes.js fanzatufa-stura.pegjs
+```
 
-Nothing easier; after having entered the ilmentufa directory, run the command "node ircbot/cipra-bot" (this is the main Lojban parser - other bots also exist).
-The list of the channels joined by the bot can be found and edited within the bot script.
+Now, the grammar engines should have been created. Run "node fanzatufa-cmdline.js 'ti mo'" or load "glosser/glosser.htm" to try it out. You can also run the IRC bot at "irc/fanza-bot.js" after installing the irc package from npm.
 
-=== Other parsers ===
+### Other parsers
 
-There are two separate attempts at parsing gua\spi here, neither complete; see guaspi.js.peg and guaspi-bnf.js.peg. There is also a copy of Randall Holmes's Loglan parser (loglan.js.peg), unmodified apart from the output format.
+In the morfologi branch of this repository, there are four unmaintained parsers:
+
+* spagetufa, a sort of ancestor to fanzygerna, but configurable to a fault and including some more radically experimental features,
+* morfopoho, a direct ancestor to the morphology grammar of fanzygerna,
+* two separate attempts at parsing gua\spi, neither complete
+* a version of Randall Holmes's Loglan parser modified to show terminator elision
 
