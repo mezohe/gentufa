@@ -1,3 +1,5 @@
+(to [lo jbobau panra be dei](./KOMITCIDU.md) toi)
+
 fanzygerna
 ==========
 
@@ -22,7 +24,6 @@ fanzygerna is a cmevla-brivla-merging, connective-unifying (including VUhU), tag
 * Magic words other than ZO, ZEI, BU (this is temporary)
 * KE-BO-termsets, because replacing CEhE with BO is a messy undertaking
 * I-JA inside subsentences, out of personal preference; JA-I and TUhE are supported, however
-* Variable-arity geks (an opt-in is planned)
 * Unary afterthought JA, because it may be in conflict with JACU
 * GA or other gek styles as tanru connectives (guheks have to stay anyway for forethought connection of connectives and tags)
 * NOI on selbri
@@ -30,7 +31,7 @@ fanzygerna is a cmevla-brivla-merging, connective-unifying (including VUhU), tag
 
 ### Requirements
 
-For generating a PEG.js grammar engine from its PEG grammar file, as well as for running the IRC bot interfaces, you need to have Node.js installed on your machine.  [PEG.js itself](https://github.com/pegjs/pegjs) (slightly modified to work around our own bugs) is already included in this repo.
+For generating a PEG.js grammar engine from its PEG grammar file, you need to have Node.js installed on your machine.  [PEG.js itself](https://github.com/pegjs/pegjs) (slightly modified to work around our own bugs) is already included in this repo.
 
 ### Building a parser
 
@@ -42,11 +43,11 @@ node build-camxes.js fanzatufa-morfo.js.peg
 node build-camxes.js fanzatufa-stura.pegjs
 ```
 
-Now, the grammar engines should have been created. Run "node fanzatufa-cmdline.js 'ti mo'" or load "glosser/glosser.htm" to try it out. You can also run the IRC bot at "irc/fanza-bot.js" after installing the irc package from npm.
+Now, the grammar engines should have been created. Run ``node fanzatufa-cmdline.js 'ti mo'`` or load ``glosser/glosser.htm`` to try it out. You can also run the IRC bot at ``irc/fanza-bot.js`` after installing the irc package from npm.
 
 ### Other parsers
 
-In the morfologi branch of this repository, there are four unmaintained parsers:
+In the morfologi branch of this repository, there are five unmaintained parsers:
 
 * spagetufa, a sort of ancestor to fanzygerna, but configurable to a fault and including some more radically experimental features,
 * morfopoho, a direct ancestor to the morphology grammar of fanzygerna,
