@@ -1,118 +1,118 @@
 text <- text_1 FAhO_clause? space EOF?
 
-text_1 <- free* (NIhO_clause+ free*)? paragraphs
+text_1 <- free? (NIhO_clause+ free?)? paragraphs
 
-paragraphs <- paragraph? (NIhO_clause+ free* paragraphs)?
+paragraphs <- paragraph? (NIhO_clause+ free? paragraphs)?
 
-paragraph <- lone_jek? (tag BO_clause)? free* (I_clause free* lone_jek? (tag? BO_clause free*)?)? statement (I_clause !lone_jek free* statement)*
+paragraph <- lone_jek? (tag BO_clause)? free? (I_clause free? lone_jek? (tag? BO_clause free?)?)? statement (I_clause !lone_jek free? statement)*
 
-statement <- (prenex statement / statement_1) (IAU_clause free* terms?)?
+statement <- (prenex statement / statement_1) (IAU_clause free? terms?)?
 
-statement_1 <- statement_2 (I_clause free* lone_jek prenex* statement_2?)*
+statement_1 <- statement_2 (I_clause free? lone_jek prenex* statement_2?)*
 
-statement_2 <- statement_3 (I_clause free* lone_jek? tag? BO_clause free* prenex* statement_2)?
+statement_2 <- statement_3 (I_clause free? lone_jek? tag? BO_clause free? prenex* statement_2)?
 
-statement_3 <- tag? TUhE_clause text TUhU_elidible free* / fragment / sentence
+statement_3 <- tag? TUhE_clause text TUhU_elidible free? / fragment / sentence
 
 fragment <- !term !tag quantifier / relative_clauses / links+ / !selbri linkargs / !selbri !term !tag (nahe_guhe / se_guhe / gadri)
 
-lone_jek <- !gek gihek free*
+lone_jek <- !gek gihek free?
 
-prenex 'prenexe' <- free* terms? ZOhU_clause
+prenex 'prenexe' <- free? terms? ZOhU_clause
 
-sentence <- free* terms? bridi_tail
+sentence <- free? terms? bridi_tail
 
 subsentence <- subsentence_tuhe / prenex subsentence / sentence
 
-subsentence_tuhe <- free* tag? TUhE_clause text TUhU_elidible free*
+subsentence_tuhe <- free? tag? TUhE_clause text TUhU_elidible free?
 
-bridi_tail <- bridi_tail_1 / VAU_elidible free*
+bridi_tail <- bridi_tail_1 / VAU_elidible free?
 
 bridi_tail_1 <- bridi_tail_2 (
-    gihek tag? !BO_clause free* ke_bridi_tail tail_terms
-    / gihek !(tag? BO_clause) free* bridi_tail_2 tail_terms
+    gihek tag? !BO_clause free? ke_bridi_tail tail_terms
+    / gihek !(tag? BO_clause) free? bridi_tail_2 tail_terms
   )* # !LR2
 
-bridi_tail_2 <- CU_elidible free* bridi_tail_3 (gihek tag? BO_clause free* bridi_tail_2 tail_terms)?
+bridi_tail_2 <- CU_elidible free? bridi_tail_3 (gihek tag? BO_clause free? bridi_tail_2 tail_terms)?
 
 bridi_tail_3 <- gek_sentence
   / selbri tail_terms
   / ke_bridi_tail
 
-ke_bridi_tail <- KE_clause free* bridi_tail_1 KEhE_elidible free*
+ke_bridi_tail <- KE_clause free? bridi_tail_1 KEhE_elidible free?
 
-gek_sentence <- gek subsentence (gik subsentence)+ GIhI_elidible free* tail_terms
-  / tag* KE_clause free* gek_sentence KEhE_elidible free*
+gek_sentence <- gek subsentence (gik subsentence)+ GIhI_elidible free? tail_terms
+  / tag* KE_clause free? gek_sentence KEhE_elidible free?
   / tag+ &(NA_clause / GA_clause) gek_sentence
-  / NA_clause free* gek_sentence
+  / NA_clause free? gek_sentence
 
-tail_terms <- terms? VAU_elidible free*
+tail_terms <- terms? VAU_elidible free?
 
 terms 'sumturpoi' <- terms_1+
 
 terms_1 <- terms_2 (PEhE_elidible jek !tag_bo_ke_bridi_tail terms_2)* # LR2
 
-tag_bo_ke_bridi_tail <- tag (BO_clause / KE_clause) CU_elidible free* (selbri / gek_sentence)
+tag_bo_ke_bridi_tail <- tag (BO_clause / KE_clause) CU_elidible free? (selbri / gek_sentence)
 
-terms_2 <- term (CEhE_clause free* term)* # FIX JECU
+terms_2 <- term (CEhE_clause free? term)* # FIX JECU
 
-terms_3 <- term (PEhE_elidible jek tag? BO_clause free* !bridi_tail_2 terms_3)?
+terms_3 <- term (PEhE_elidible jek tag? BO_clause free? !bridi_tail_2 terms_3)?
 
 term 'sumsuha' <- sumti / tag_term / termset / naku_term / soi_term
 
-tag_term <- !gek tag free* !BO_clause !selbri !gek_sentence (sumti / KU_elidible)
+tag_term <- !gek tag free? !BO_clause !selbri !gek_sentence (sumti / KU_elidible)
 
-naku_term <- !gek !jek NA_clause free* KU_elidible free*
+naku_term <- !gek !jek NA_clause free? KU_elidible free?
 
-soi_term <- SOI_clause subsentence SEhU_elidible free*
+soi_term <- SOI_clause subsentence SEhU_elidible free?
 
-termset <- gek terms (gik terms)+ GIhI_elidible free*
-  / NUhI_clause free* terms NUhU_elidible free*
+termset <- gek terms (gik terms)+ GIhI_elidible free?
+  / NUhI_clause free? terms NUhU_elidible free?
 
-sumti 'sumti' <- sumti_1 (VUhO_clause free* vuho_tail?)?
+sumti 'sumti' <- sumti_1 (VUhO_clause free? vuho_tail?)?
 
 vuho_tail <- relative_clauses (jek sumti)?
 
 sumti_1 <- sumti_2 (jek (tag &KE_clause)? sumti_2)* # !LR2
 
-sumti_2 <- sumti_3 (jek? tag? BO_clause free* sumti_2)?
+sumti_2 <- sumti_3 (jek? tag? BO_clause free? sumti_2)?
 
-sumti_3 <- KE_clause free* sumti KEhE_elidible free*
-  / sumti_4 / gek sumti (gik sumti)+ GIhI_elidible free*
+sumti_3 <- KE_clause free? sumti KEhE_elidible free?
+  / sumti_4 / gek sumti (gik sumti)+ GIhI_elidible free?
 
 sumti_4 <- quantifier? sumti_5 relative_clauses?
-  / quantifier relative_clauses? selbri KU_elidible free* relative_clauses?
+  / quantifier relative_clauses? selbri KU_elidible free? relative_clauses?
 
 sumti_5 <- KOhA_clause
-  / !tag !selbri lerfu_string BOI_elidible free*
-  / LU_clause text LIhU_elidible free*
-  / !tag lahe_nahe relative_clauses? term LUhU_elidible free* 
-  / gadri sumti_tail KU_elidible free*
+  / !tag !selbri lerfu_string BOI_elidible free?
+  / LU_clause text LIhU_elidible free?
+  / !tag lahe_nahe relative_clauses? term LUhU_elidible free? 
+  / gadri sumti_tail KU_elidible free?
   / li_clause 
-  / lohoi_gadri subsentence KUhAU_elidible free* 
+  / lohoi_gadri subsentence KUhAU_elidible free? 
 
-fragile_guhe <content inner> <- guhek inner<content> (gik inner<content>)+ GIhI_elidible free* / content
+fragile_guhe <content inner> <- guhek inner<content> (gik inner<content>)+ GIhI_elidible free? / content
 guhe_one <content> = fragile_guhe<content guhe_one> / content
 guhe_many <content> = (fragile_guhe<content guhe_many> / content)+
 
 kramaho <content> <- kramaho_1<content> (jek (tag &KE_clause)? kramaho_1<content>)* # !LR2
-kramaho_1 <content> <- kramaho_2<content> (jek tag? BO_clause free* kramaho_1<content>)?
-kramaho_2 <content> <- content free*
-  / guhek kramaho<content> (gik kramaho<content>)+ GIhI_elidible free*
-  / KE_clause free* kramaho<content> KEhE_elidible free*
+kramaho_1 <content> <- kramaho_2<content> (jek tag? BO_clause free? kramaho_1<content>)?
+kramaho_2 <content> <- content free?
+  / guhek kramaho<content> (gik kramaho<content>)+ GIhI_elidible free?
+  / KE_clause free? kramaho<content> KEhE_elidible free?
 
 gadri <- kramaho<LE_clause>
 li_gadri <- kramaho<LI_clause>
 lohoi_gadri <- kramaho<LOhOI_clause>
 
-lahe_nahe <- (LAhE_clause / nahe_guhe) BO_clause? free*
+lahe_nahe <- (LAhE_clause / nahe_guhe) BO_clause? free?
 nahe_guhe <- fragile_guhe<nahe_free guhe_many>
-nahe_free <- NAhE_clause free*
+nahe_free <- NAhE_clause free?
 
 se_guhe <- fragile_guhe<se_free guhe_many>
-se_free <- SE_clause free*
+se_free <- SE_clause free?
 
-li_clause <- li_gadri mex LOhO_elidible free*
+li_clause <- li_gadri mex LOhO_elidible free?
 
 sumti_tail 'sumyrebla' <- relative_clauses? sumti_tail_1
 
@@ -121,45 +121,45 @@ sumti_tail_1 <- selbri relative_clauses?
   / quantifier? sumti
 
 relative_clauses <- relative_clauses_1 (jek (tag &KE_clause)? relative_clauses_1)* # !LR2
-relative_clauses_1 <- relative_clauses_2 (jek tag? BO_clause free* relative_clauses_1)?
+relative_clauses_1 <- relative_clauses_2 (jek tag? BO_clause free? relative_clauses_1)?
 relative_clauses_2 <- relative_clause
-  / gek relative_clauses (gik relative_clauses)+ GIhI_elidible free*
-  / KE_clause free* relative_clauses KEhE_elidible free*
+  / gek relative_clauses (gik relative_clauses)+ GIhI_elidible free?
+  / KE_clause free? relative_clauses KEhE_elidible free?
 
-relative_clause 'rahabri' <- GOI_clause free* term GEhU_elidible free*
-  / NOI_clause subsentence KUhO_elidible free*
+relative_clause 'rahabri' <- GOI_clause free? term GEhU_elidible free?
+  / NOI_clause subsentence KUhO_elidible free?
 
-selbri 'selbri' <- (tag / NA_clause free*)* selbri_1
+selbri 'selbri' <- (tag / NA_clause free?)* selbri_1
 
 selbri_1 <- selbri_2 (KEhE_clause linkargs)? (CEI_clause selbri)*
 
-selbri_2 <- selbri_3 (CO_clause free* selbri)?
+selbri_2 <- selbri_3 (CO_clause free? selbri)?
 
 selbri_3 <- selbri_4+ # !LR
 
 selbri_4 <- selbri_5 (jek (tag &KE_clause)? selbri_5)* # !LR2
 
-selbri_5 <- selbri_6 (jek tag? BO_clause free* selbri_5)?
+selbri_5 <- selbri_6 (jek tag? BO_clause free? selbri_5)?
 
-selbri_6 <- tanru_unit (BO_clause free* selbri_6)?
+selbri_6 <- tanru_unit (BO_clause free? selbri_6)?
 
 tanru_unit 'tausle' <- tanru_unit_1 linkargs?
 
 tanru_unit_1 <- BRIVLA_clause
-  / KE_clause free* selbri_3 KEhE_elidible free*
-  / ME_clause free* (term / mex / relative_clauses) MEhU_elidible free* MOI_clause? free*
-  / mex MOI_clause free*
-  / NUhA_clause free* jek
+  / KE_clause free? selbri_3 KEhE_elidible free?
+  / ME_clause free? (term / mex / relative_clauses) MEhU_elidible free? MOI_clause? free?
+  / mex MOI_clause free?
+  / NUhA_clause free? jek
   / se_guhe tanru_unit_1
-  / JAI_clause free* (tag / !tanru_unit_1 lahe_nahe)? tanru_unit_1
+  / JAI_clause free? (tag / !tanru_unit_1 lahe_nahe)? tanru_unit_1
   / nahe_guhe tanru_unit_1
-  / NU_clause (free* jek NU_clause)* subsentence KEI_elidible free*
-  / MEIhE_clause free* sumti+ MEIhO_elidible free*
-  / guhek selbri (gik selbri)+ GIhI_elidible free*
+  / NU_clause (free? jek NU_clause)* subsentence KEI_elidible free?
+  / MEIhE_clause free? sumti+ MEIhO_elidible free?
+  / guhek selbri (gik selbri)+ GIhI_elidible free?
 
-linkargs 'inkorpora' <- BE_clause free* term? links* BEhO_elidible free*
+linkargs 'inkorpora' <- BE_clause free? term? links* BEhO_elidible free?
 
-links <-  BEI_clause free* term?
+links <-  BEI_clause free? term?
 
 quantifier 'kuhantora' <- !selbri !sumti_5 mex
 
@@ -167,40 +167,40 @@ mex 'mekso' <- mex_1 (jek mex_1)* # !LR2
 
 mex_1 <- gek_mex (mex_1_bihe_hack mex_1)?
 
-mex_1_bihe_hack <- BO_clause jek / jek tag? BO_clause free*
+mex_1_bihe_hack <- BO_clause jek / jek tag? BO_clause free?
 
-gek_mex <- gek mex (gik mex)+ GIhI_elidible free*
+gek_mex <- gek mex (gik mex)+ GIhI_elidible free?
   / mex_2
 
-mex_2 'sampu mekso' <- mex_3 / (PEhO_clause free*)? jek mex_1+ KUhE_elidible free* 
+mex_2 'sampu mekso' <- mex_3 / (PEhO_clause free?)? jek mex_1+ KUhE_elidible free? 
 
 mex_3 'cmavrfuha mapti mekso' <- 
-  VEI_clause free* mex VEhO_elidible free* 
+  VEI_clause free? mex VEhO_elidible free? 
   / mohe_operand 
-  / lahe_nahe mex LUhU_elidible free* 
-  / PEhO_clause free* jek mex_1+ KUhE_elidible free* 
+  / lahe_nahe mex LUhU_elidible free? 
+  / PEhO_clause free? jek mex_1+ KUhE_elidible free? 
   / FUhA_clause rp_expression
-  / number BOI_elidible free* 
-  / lerfu_string BOI_elidible free*
+  / number BOI_elidible free? 
+  / lerfu_string BOI_elidible free?
   
-mohe_operand <- MOhE_clause free* (sumti / &(selbri / relative_clauses) sumti_tail) TEhU_elidible free* 
+mohe_operand <- MOhE_clause free? (sumti / &(selbri / relative_clauses) sumti_tail) TEhU_elidible free? 
 
 rp_expression <- mex_3 (rp_expression jek_1)*
 
 jek 'jek' <- jek_1 (jek (tag &KE_clause)? jek_1)* # !LR2
 
-jek_1 <- jek_2 (jek tag? BO_clause free* jek_1)?
+jek_1 <- jek_2 (jek tag? BO_clause free? jek_1)?
 
 jek_2 <- se_guhe jek_2 / nahe_guhe jek_2
-  / jek_3 free*
-  / guhek jek (gik jek)+ GIhI_elidible free*
+  / jek_3 free?
+  / guhek jek (gik jek)+ GIhI_elidible free?
 
 jek_3 <- GAhO_clause* NA_clause? se_guhe? jek_4 GAhO_clause*
 
 jek_4 <-
-  KE_clause free* jek KEhE_elidible free* 
-  / MAhO_clause free* mex TEhU_elidible free*
-  / NAhU_clause free* (selbri / sumti) TEhU_elidible free*
+  KE_clause free? jek KEhE_elidible free? 
+  / MAhO_clause free? mex TEhU_elidible free?
+  / NAhU_clause free? (selbri / sumti) TEhU_elidible free?
   / JOI_clause / JA_clause
 
 number <- PA_clause (PA_clause / lerfu_word)*
@@ -214,16 +214,16 @@ gihek_strict <- NA_clause? se_guhe? (GIhA_clause / GI_clause (JOI_clause / JA_cl
 
 gek 'gek' <- gak jek
   / (jek / tag) gik
-  / se_guhe? !guhek GA_clause free*
+  / se_guhe? !guhek GA_clause free?
 
 gak <- ga_clause !gek
 
 guhek 'guhek' <- guk jek
-  / SE_clause? GUhA_clause free*
+  / SE_clause? GUhA_clause free?
 
 guk <- gu_clause !gek
 
-gik <- GI_clause (tag BO_clause)? free*
+gik <- GI_clause (tag BO_clause)? free?
 
 
 tag <- tag_1 (jek tag_1)* # !LR2
@@ -232,38 +232,52 @@ tag_1 <- tag_2+
 
 tag_2 <- (nahe_guhe / se_guhe) tag_2 / tag_3
 
-tag_3 <- KE_clause free* tag KEhE_elidible free*
-  / guhek tag (gik tag)+ GIhI_elidible free*
+tag_3 <- KE_clause free? tag KEhE_elidible free?
+  / guhek tag (gik tag)+ GIhI_elidible free?
   / tag_4
 
-tag_4 <- (BAI_clause / PU_clause / mex_2 ROI_clause / fiho_clause / FA_clause) free*
+tag_4 <- (BAI_clause / PU_clause / mex_2 ROI_clause / fiho_clause / FA_clause) free?
 
-fiho_clause <- FIhO_clause free* fiho_sei_tail FEhU_elidible
+fiho_clause <- FIhO_clause free? fiho_sei_tail FEhU_elidible
 
-fiho_sei_tail <- (terms CU_elidible free*)? (selbri / gek_sentence)
+fiho_sei_tail <- (terms CU_elidible free?)? (selbri / gek_sentence)
 
 
-free 'zifyjufpau' <- indicators / free_vocative / mex_2 MAI_clause / XI_clause free* mex_2
+free 'zifyjufpau' <- free_1+
 
-free_sei <- SEI_clause free* fiho_sei_tail SEhU_elidible
+free_1 <- free_2 free_toihe?
+
+free_2 <- KOIhE_clause free_2+ (free_toihe / TOIhO_elidible) / free_3
+
+free_3 <- indicator / free_vocative / mex_2 MAI_clause / XI_clause free? mex_2
+
+free_sei <- SEI_clause free? fiho_sei_tail SEhU_elidible
 
 free_vocative <- DOI_clause+ (relative_clauses? selbri relative_clauses? / sumti)? DOhU_elidible
 
 free_to <- TO_clause text TOI_elidible
 
-indicators <- FUhO_clause* (UI_clause / CAI_clause / NAI_clause / free_sei / free_to)+ / FUhO_clause+
+free_ui <- (UI_clause NAI_clause* free_cai? free_roha?)
 
-post_clause <- free*
-digit_post_clause <- (!lerfu_word !PA_clause free)*
-vocative_post_clause <- (!DOI_clause free)*
+free_cai <- (CAI_clause NAI_clause*)+
+
+free_roha <- (ROhA_clause NAI_clause* free_cai?)+
+
+free_toihe = TOIhE_clause free? TOIhO_elidible
+
+indicator <- NAI_clause / free_roha / free_cai / free_ui / free_sei / free_to
+
+post_clause <- FUhO_clause* free?
+digit_post_clause <- FUhO_clause* (!lerfu_word !PA_clause free)*
+vocative_post_clause <- FUhO_clause* (!DOI_clause free)*
 indicator_post_clause <- FUhO_clause*
 # fuho_post_clause removed
 
-pre_clause <- fuhe_free* BAhE_clause* dot
-fuhe_free <- FUhE_clause free*
+pre_clause <- fuhe_free? BAhE_clause* dot
+fuhe_free <- FUhE_clause free?
 pre_clause_no_fuhe <- BAhE_clause*
 
-# ___ ELIDIBLE TERMINATORS ___  (EXPERIMENTAL)
+# ___ ELIDIBLE TERMINATORS ___
 
 BEhO_elidible <- BEhO_clause?
 BOI_elidible <- BOI_clause?
@@ -290,6 +304,7 @@ PEhE_elidible <- PEhE_clause?
 SEhU_elidible <- SEhU_clause?
 TEhU_elidible <- TEhU_clause?
 TOI_elidible <- TOI_clause?
+TOIhO_elidible <- TOIhO_clause?
 TUhU_elidible <- TUhU_clause?
 VAU_elidible <- VAU_clause?
 VEhO_elidible <- VEhO_clause?
@@ -338,6 +353,7 @@ KE_clause 'cmavrke' <- pre_clause KE post_clause
 KEhE_clause 'cmavrkehe' <- pre_clause KEhE indicator_post_clause
 KEI_clause 'cmavrkei' <- pre_clause KEI indicator_post_clause
 KOhA_clause 'cmavrkoha' <- pre_clause KOhA post_clause
+KOIhE_clause 'cmavrkoihe' <- pre_clause KOIhE indicator_post_clause
 KU_clause 'cmavrku' <- pre_clause KU indicator_post_clause
 KUhAU_clause 'cmavrkuhau' <- pre_clause KUhAU indicator_post_clause
 KUhE_clause 'cmavrkuhe' <- pre_clause KUhE indicator_post_clause
@@ -373,6 +389,7 @@ PA_clause 'cmavrpa' <- pre_clause PA post_clause
 PEhE_clause 'cmavrpehe' <- pre_clause PEhE post_clause
 PEhO_clause 'cmavrpeho' <- pre_clause PEhO post_clause
 PU_clause 'cmavrpu' <- pre_clause PU post_clause
+ROhA_clause 'cmavnroha' <- pre_clause ROhA indicator_post_clause
 ROI_clause 'cmavnroi' <- pre_clause ROI indicator_post_clause
 SE_clause 'cmavrse' <- pre_clause SE post_clause
 SEI_clause 'cmavrsei' <- pre_clause SEI indicator_post_clause
@@ -382,6 +399,8 @@ TEhU_clause 'cmavrtehu' <- pre_clause TEhU indicator_post_clause
 TEI_clause 'cmavrtei' <- pre_clause TEI post_clause
 TO_clause 'cmavrto' <- pre_clause TO indicator_post_clause
 TOI_clause 'cmavrtoi' <- pre_clause TOI indicator_post_clause
+TOIhE_clause 'cmavrtoihe' <- pre_clause TOIhE indicator_post_clause
+TOIhO_clause 'cmavrtoiho' <- pre_clause TOIhO indicator_post_clause
 TUhE_clause 'cmavrtuhe' <- pre_clause TUhE indicator_post_clause
 TUhU_clause 'cmavrtuhu' <- pre_clause TUhU post_clause
 UI_clause 'cmavrui' <- pre_clause UI indicator_post_clause
@@ -506,6 +525,7 @@ KOhA <- koha_quote
   / [bkvf] "o'" [aeiou] " " / [rt] [iau] " " / "d" [aei] " "
 koha_quote <- "KOhA:" w:quote { return w }
 
+KOIhE <- "koi'e "
 KU <- "ku "
 
 KUhAU <- &{return options.ckt} "kai "
@@ -621,29 +641,35 @@ TEhU <- "te'u "
 TEI <- "tei "
 TO <- "to'i "/"to "
 TOI <- "toi "
+TOIhE <- "toi'e "/"ji'au "
+TOIhO <- "toi'o "
 TUhE <- "tu'e "
 TUhU <- "tu'u "
 
-# FIXME ROhA
+ROhA <- "be'u "/"dai "/"fu'i "/"ga'i "/"ju'o "/"le'o "/"ri'e "/"se'a "
+  / "se'i "/"vu'e "/"bo'oi "/"jau'i "/"ji'ei "/"ra'i'au "/"zai'a "/"bu'o "
+  / "xu'o "/"kau "/"pei'o "/"re'e "
+  / [xz] "o'"+ "o " / "ro'" [aeiou] " "
+
 UI <- &{return options.ckt} ("si'u "/"koi "/"pai ")
   / &{return !options.ckt} "pau "
   / ui_d " "
   / !IAU !I !DOI (ui_v "'" / ui_g ui_v "'" / ui_g) (ui_v "'")* ui_v " "
-  / "ki'a'au'u'au'i "/"ci'au'u'au'i "/"pei'e "/"li'oi "
+  / "ki'a'au'u'au'i "/"ci'au'u'au'i "/"pei'e "/"li'oi "/"lai'i "/"zi'ai"
   / "fu'au "/"a'ei "/"ko'oi "/"si'au "/"ba'a "/"moi'i "/"kai'e "/"ja'o "
   / "ca'e "/"su'a "/"ti'e "/"ka'u "/"se'o "/"za'a "/"pe'i "/"ru'a "/"ju'a "
   / "ta'o "/"ra'u "/"li'a "/"ba'u "/"mu'a "/"do'a "/"to'u "/"va'i "/"pa'e "
   / "zu'u "/"sa'e "/"la'a "/"ke'u "/"sa'u "/"da'i "/"xa'i "/"je'u "/"sa'a "
-  / "kau "/"ta'u "/"na'i "/"jo'a "/"bi'u "/"li'o "/"mi'u "/"ku'i "/"ji'a "
-  / "si'a "/"po'o "/"pe'a "/"ro'i "/"ro'e "/"ro'o "/"ro'u "/"ro'a "/"re'e "
-  / "le'o "/"ju'o "/"fu'i "/"dai "/"ga'i "/"be'u "/"ri'e "/"se'i "/"se'a "
-  / "vu'e "/"ki'a "/"xu "/"ge'e "/"bu'o "/"da'o "/"ra'o "/"bi'a "/"zi'a "
-  / "x" ("e'"+ "e'e" / "a'"+ "a" / "i'"+ "i'i" / "o'"+ "o") " "
-  / "z" "o'"+ "o "
+  / "ta'u "/"na'i "/"jo'a "/"bi'u "/"li'o "/"mi'u "/"ku'i "/"ji'a "/"si'a "
+  / "po'o "/"pe'a "/"ki'a "/"xu "/"ge'e "/"da'o "/"ra'o "/"bi'a "/"zi'a "
+  / "x" ("e'"+ "e'e" / "a'"+ "a" / "i'"+ "i'i") " "
   / "ca'e'ei "/"ci'ai "/"coi'o'e "/"cu'ei "/"cu'i'a "/"doi'au "/"fai'a "
   / "cu'ei'" ui_v " " / "fu'ei'" ui_v " "
   / "mu'au'oi "/"pau'ai "/"pau'i "/"rau'o "/"si'ai "/"su'a'a "/"tai'a "
-  / "tei'i "/"tei'o "/"va'u'ai "/"zei'i "/"zi'ei "
+  / "tei'i "/"tei'o "/"va'u'ai "/"zei'i "/"zi'ei "/"ne'au "/"ci'ai "
+  / "je'au "/"ge'ei "/"jei'u "/"kai'au "/"mi'au "/"pe'ai "/"ra'ei "/"sei'i"
+  / "ta'ei "/"te'i'o "/"vei'i "/"vo'oi "/"xai'a "/"xe'o "/"xu'u'i "/"za'oi"
+  / "xy'y" by_dot " "
 ui_v <- ui_d / [aeiou]
 ui_g <- [ĭŭ]
 ui_d <- "ai" / "ei" / "oi" / "au"
