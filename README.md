@@ -3,7 +3,7 @@
 fanzygerna
 ==========
 
-fanzygerna is a grammar for Lojban incorporating many experimental changes. [Try it!](https://mezohe.github.io/spagetufa/glosser/glosser.htm)
+fanzygerna is a grammar for Lojban incorporating many experimental changes. [Try it!](https://mezohe.github.io/gentufa/glosser/glosser.htm)
 
 ### Characteristics
 
@@ -35,7 +35,7 @@ For generating a PEG.js grammar engine from its PEG grammar file, you need to ha
 
 ### Building a parser
 
-After having entered the spagetufa directory, run the following commands:
+After having entered the gentufa directory, run the following commands:
 
 ```
 node pegjs_conv.js fanzatufa-stura.peg

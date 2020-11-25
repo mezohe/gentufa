@@ -3,7 +3,7 @@
 la fanzygerna
 =============
 
-.i la fanzygerna cu gerna lo jbobau je cu jai jalge su'oi so'i na'e carslau nunstika [.i .e'e do cipyzu'e](https://mezohe.github.io/spagetufa/glosser/glosser.htm)
+.i la fanzygerna cu gerna lo jbobau je cu jai jalge su'oi so'i na'e carslau nunstika [.i .e'e do cipyzu'e](https://mezohe.github.io/gentufa/glosser/glosser.htm)
 
 ### ni'o lo se vajykai
 
@@ -40,7 +40,7 @@ tu'u .i su'o klesi be la fanzatufa cu gerna su'o klesi be [la tcekitau](https://
 
 ### ni'o xu'u zbasu lo'e gentufa
 
-.i ko ca gi zvati lo sfailystu po'u la spagetufa gi mi'esku zoi bu.
+.i ko ca gi zvati lo sfailystu po'u la gentufa gi mi'esku zoi bu.
 
 ```
 node pegjs_conv.js fanzatufa-stura.peg
