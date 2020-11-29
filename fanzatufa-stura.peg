@@ -684,4 +684,4 @@ ZOhU <- &{return options.ckt} "zau "
   / "zo'u "/"ce'ai "/"ge'ai "/"ke'au "
 
 EOF <- !.
-space <- [\s]*
+space <- [ \t\r\n]*

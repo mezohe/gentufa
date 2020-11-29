@@ -3,7 +3,7 @@
 fanzygerna
 ==========
 
-fanzygerna is a grammar for Lojban incorporating many experimental changes. [Try it!](https://mezohe.github.io/gentufa/glosser/glosser.htm)
+fanzygerna is a grammar for Lojban incorporating many experimental changes. [Try it!](https://mezohe.github.io/gentufa/camxes.html)
 
 ### Characteristics
 
@@ -21,7 +21,7 @@ fanzygerna is a cmevla-brivla-merging, connective-unifying (including VUhU), tag
 
 #### Notably absent
 
-* Magic words other than ZO, ZEI, BU (this is temporary)
+* SA and LOhAI-LEhAI
 * KE-BO-termsets, because replacing CEhE with BO is a messy undertaking
 * I-JA inside subsentences, out of personal preference; JA-I and TUhE are supported, however
 * Unary afterthought JA, because it may be in conflict with JACU

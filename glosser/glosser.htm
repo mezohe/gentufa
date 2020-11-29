@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html><script type="text/javascript">window["_gaUserPrefs"] = { ioo : function() { return true; } }</script><head><meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>Lojban parser</title>
   <link type="text/css" href="layout.css" rel="stylesheet">
   <link href="bootstrap.css" rel="stylesheet">
@@ -11,6 +11,7 @@
   <script src="rename-morfo.js"></script>
   <script src="../fanzatufa-stura.js"></script>
   <script src="../fanzatufa-cmdline.js"></script>
+  <script src="../postproc.js"></script>
   <script src="transcriber.js"></script>
   <script src="translationselbridata.js"></script>
   <script src="bootstrap.js"></script>
@@ -49,15 +50,16 @@
    <div class="row">
     <div id="result-row" class="span12" style="display: none;">
      <legend>Result <small><span id="time-label"></span></small></legend>
-     <ul class="nav nav-tabs">
-      <li><a id="parse-result-highlighted-tab" href="glosser.htm#parse-result-highlighted" data-toggle="tab">Highlighted</a></li>
+     <div id="parse-result-postproc"></div>
+     <ul class="nav nav-tabs" id="parse-result-tab-bar">
+      <!--li><a id="parse-result-highlighted-tab" href="glosser.htm#parse-result-highlighted" data-toggle="tab">Highlighted</a></li-->
       <li><a id="parse-result-raw-tab" href="glosser.htm#parse-result-raw" data-toggle="tab">Raw tree</a></li>
       <li><a id="parse-result-tree-tab" href="glosser.htm#parse-result-tree" data-toggle="tab">Parse tree</a></li>
       <li class="active"><a id="parse-result-simplified-tab" href="glosser.htm#parse-result-simplified" data-toggle="tab">Simplified tree</a></li>
       <li><a id="parse-result-boxes-tab" href="glosser.htm#parse-result-boxes" data-toggle="tab">Boxes</a></li>
       <li><a id="parse-result-glossing-tab" href="glosser.htm#parse-result-glossing" data-toggle="tab">Glosses</a></li>
      </ul>
-     <div class="tab-content">
+     <div class="tab-content" id="parse-result-tab-content">
       <div id="parse-result-highlighted" class="tab-pane fade"><i>Here, the sentence will be shown with highlighting...</i></div>
       <div id="parse-result-raw" class="tab-pane fade"><i>Here, the raw parse output will be shown...</i></div>
       <div id="parse-result-tree" class="tab-pane fade"><i>Here, the parse result will be shown as a tree...</i></div>

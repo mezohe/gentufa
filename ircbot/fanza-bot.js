@@ -18,50 +18,7 @@ client.addListener('message', function(from, to, text, message) {
   processor(client, from, to, text, message);
 });
 
-var morfo = require('../fanzatufa-morfo.js');
-var stura = require('../fanzatufa-stura.js');
-var sturaPost = require('../postproc.js');
-
-function morfoSingleWord(word) {
-  var selmaho = word.selmaho;
-  if (selmaho == 'cmavo')
-    return word.word;
-  if (selmaho == 'brivla' || selmaho == 'cmevla')
-    selmaho = 'GOhA';
-  return selmaho + ':<' + word.word.replace(/>/g, '>>') + '>'
-}
-
-function morfoPost(words) {
-  return words.filter(w => w.word != 'y')
-              .map(morfoSingleWord)
-              .join(' ')
-              + ' ';
-}
-
-var camxes = {
-  "fanza": {
-    parse: function (text, options) {
-      var morfoRaw = morfo.parse(text, options);
-      var morfoStr = morfoPost(morfoRaw);
-      var sturaRaw = stura.parse(morfoStr, options);
-      return sturaRaw;
-    }
-  },
-}
-
-var camxes_pre = { preprocessing: function (a) {
-  return a.replace('0', 'no')
-          .replace('1', 'pa')
-          .replace('2', 're')
-          .replace('3', 'ci')
-          .replace('4', 'vo')
-          .replace('5', 'mu')
-          .replace('6', 'xa')
-          .replace('7', 'ze')
-          .replace('8', 'bi')
-          .replace('9', 'so')
-          ;
-} };
+var camxes = require('../fanzatufa-cmdline.js');
 var camxes_post = require('../postproc.js');
 
 var options = {
@@ -173,8 +130,7 @@ function extract_mode(input) {
 function run_camxes(input, mode) {
   var result;
   var syntax_error = false;
-  result = camxes_pre.preprocessing(input);
-  //result = input;
+  result = input;
   try {
     result = camxes[mode.parser].parse(result, mode);
   } catch (e) {
@@ -184,7 +140,7 @@ function run_camxes(input, mode) {
   if (!syntax_error) {
     let oldMode = "M";
     if (mode.format == 'raw') {
-      oldMode = "RJ";
+      oldMode = "TRJM";
     } else {
       if (mode.s) oldMode += "C";
       if (mode.f) oldMode += "T";

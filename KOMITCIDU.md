@@ -3,7 +3,7 @@
 la fanzygerna
 =============
 
-.i la fanzygerna cu gerna lo jbobau je cu jai jalge su'oi so'i na'e carslau nunstika [.i .e'e do cipyzu'e](https://mezohe.github.io/gentufa/glosser/glosser.htm)
+.i la fanzygerna cu gerna lo jbobau je cu jai jalge su'oi so'i na'e carslau nunstika [.i .e'e do cipyzu'e](https://mezohe.github.io/gentufa/camxes.html)
 
 ### ni'o lo se vajykai
 
@@ -18,15 +18,15 @@ tu'u .i su'o klesi be la fanzatufa cu gerna su'o klesi be [la tcekitau](https://
 
 #### ni'o lo se .olkai be la fanzygerna
 
-* .i lo gerna pe lo'e sumsu'a zo'u tu'e zo su'oi je zo ro'oi je zo no'oi je zo ru'oi cmavo ma'oi le .i gernyuenzi fa je gi lo'u LE KOhA GOhA KU le'u co'u ku gi lo'u LE KOhA KU le'u co'a ku (to tu'a dei ralju lo mukti be tu'a la fanzygerna je cu rinka xu'u ma kau ri cmene toi) tu'u
+* .i lo gerna pe lo'e sumsu'a zo'u tu'e zo su'oi je zo ro'oi je zo no'oi je zo ru'oi cmavo ma'oi le .i gendra fa je gi lo'u LE KOhA GOhA KU le'u co'u ku gi lo'u LE KOhA KU le'u co'a ku (to tu'a dei ralju lo mukti be tu'a la fanzygerna je cu rinka xu'u ma kau ri cmene toi) tu'u
 * .i lo gerna pe lo'e jonma'o zo'u tu'e lo'e cmavrna'e je lo'e cmavrse ka'e sumti lo'e .gu'ek. i lo'e cmavrle je lo'e cmavrli je lo'e cmavrlo'oi je lo'e .jek. je gi lo'e .gu'ek. gi lo'e .jek. ka'e sumti tu'u
-* .i lo vlaturge'a zo'u tu'e pa javni ro brivla cu se gernyuenzi .i lo javni pe lo'e rafsi cu se pilno tu'a po'o lo javni pe lo'e valslinku'i ku noi me'o kunti bu ce'o ke'a gernyuenzi lo brivla javni tu'u
+* .i lo vlaturge'a zo'u tu'e pa javni fi ro brivla cu te gendra .i lo javni pe lo'e rafsi cu se pilno tu'a po'o lo javni pe lo'e valslinku'i ku noi me'o kunti bu ce'o ke'a gendra fi lo brivla javni tu'u
 * .i lo'e vlataismi be lo'e uinma'o ku je pagbu be na ku bei lo'e na'e uinma'o ke selma'o javni cu uinma'o poi'a jinvi be fa lo gerna
 * .i soi genge'a tcila zo'u lo krauenzi be lo gerna cu se pagbu lo'e genjva templeite ku noi pilno ke'a fa ke ji'a [lo ke gentufa je logjitufa ke'e be lo to'anbau be'o pe la jelca](https://github.com/eaburns/toaq)
 
 #### ni'o lo se ckaji be poi'a vajni bei na ku
 
-* .i tu'a lo'e mafyvla poi na menre fa zo zo ja zo zei ja zo bu ku'o noi'a zasni
+* .i tu'a ma'oi sa jo'u ma'oi lo'ai jo'u ma'oi le'ai
 * .i tu'a lo'e terymste pe zo ke jo'u zo bo ki'u xu'u nandu fa xu'u gau ce'u zo bo basti zo ce'e poi'a cnici
 * .i tu'a lo'u .i ja le'u poi pagbu lo'e nerju'a ku'o ki'u xu'u mi na'e sa'u nelci .i bo ku'i cumki va'o ku fa tu'a lo'u ja .i le'u ja zo tu'e
 * .i tu'a lo'e .jek. poi pa da je pa lidne be ke'a ke'a sumti lu'u ki'u xu'u na ju'o cu'i sarxe tu'a lo'u ja cu le'u
@@ -36,7 +36,7 @@ tu'u .i su'o klesi be la fanzatufa cu gerna su'o klesi be [la tcekitau](https://
 
 ### ni'o lo sarcu be xu'u pilno
 
-.i xu'u galfi lo .peg. krauenzi su'o gentufa cu se sarcu xu'u plika'e la'o ba.node.js.ba. i la'o ba.peg.js.ba. noi ke'a ji'a jai sarcu xa'o poi'i ke'a se ju su'o se finkra be ke'a cu pagbu lo me ti vreji
+.i xu'u galfi lo .peg. krauenzi su'o gentufa cu se sarcu xu'u plika'e la'o ba.node.js.ba. i la'o ba.peg.js.ba. noi ke'a ji'a jai sarcu xa'o poi'i ke'a se ju su'o se finkra be ke'a be'o poi mapti lo me ti genge'a cu pagbu lo me ti vreji
 
 ### ni'o xu'u zbasu lo'e gentufa
 

@@ -21,6 +21,8 @@ function parse() {
         if (parse) {
             tokens = [];
             findTokens(parse, tokens);
+
+            // $("#parse-result-postproc").text(camxes_postprocessing(JSON.stringify(parse), "TM"))
             
             var $parseResultHighlighted = $("#parse-result-highlighted");
             showHighlighting(simplified[0], tokens, $parseResultHighlighted);
@@ -40,26 +42,14 @@ function parse() {
             var $parseResultGlossing = $("#parse-result-glossing");
             showGlossing(tokens, $parseResultGlossing);
         }
-        $("#parse-result-highlighted-tab").html("Highlighted");
-        $("#parse-result-tree-tab").html("Parse tree");
-        $("#parse-result-raw-tab").html("Raw tree");
-        $("#parse-result-simplified-tab").html("Simplified tree");
-        $("#parse-result-boxes-tab").html("Boxes");
-        $("#parse-result-glossing-tab").html("Glosses");
+        $("#parse-result-tab-bar a").removeClass("muted");
     } catch (e) {
         if (e.name && e.name === "SyntaxError") {
-            $("#parse-result-highlighted-tab").html("<span class=\"muted\">Highlighted</span>");
-            showSyntaxError(e, textToParse, $("#parse-result-highlighted"));
-            $("#parse-result-raw-tab").html("<span class=\"muted\">Raw tree</span>");
-            showSyntaxError(e, textToParse, $("#parse-result-raw"));
-            $("#parse-result-simplified-tab").html("<span class=\"muted\">Simplified tree</span>");
-            showSyntaxError(e, textToParse, $("#parse-result-simplified"));
-            $("#parse-result-tree-tab").html("<span class=\"muted\">Parse tree</span>");
-            showSyntaxError(e, textToParse, $("#parse-result-tree"));
-            $("#parse-result-boxes-tab").html("<span class=\"muted\">Boxes</span>");
-            showSyntaxError(e, textToParse, $("#parse-result-boxes"));
-            $("#parse-result-glossing-tab").html("<span class=\"muted\">Glosses</span>");
-            showSyntaxError(e, textToParse, $("#parse-result-glossing"));
+            $("#parse-result-postproc").text("");
+            $("#parse-result-tab-bar a").addClass("muted");
+            $("#parse-result-tab-content>*").each(function (_, el) {
+                showSyntaxError(e, $(el));
+            });
         } else {
             throw e;
         }
@@ -328,9 +318,7 @@ function boxClassForType(parse) {
 /**
  * Shows a syntax error in the interface.
  */
-function showSyntaxError(e, textToParse, $element) {
-    if (e.parser === "stura")
-      textToParse = camxes.getMorfoText(textToParse);
+function showSyntaxError(e, $element) {
     
     var output = "<div class=\"alert\">" +
     "<p><b>Syntax error</b> on line <b>" + 
@@ -341,7 +329,7 @@ function showSyntaxError(e, textToParse, $element) {
     e.message +
     "</p>" +
     "<p class=\"error-sentence\">" +
-    generateErrorPosition(e, textToParse) + 
+    generateErrorPosition(e, e.text) + 
     "</p>" +
     generateFixes(e) +
     "</div>";
