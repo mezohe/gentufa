@@ -22,16 +22,30 @@
   function _is_zoi_delim(word) {
     return word.replace(/\./gm, "") === _g_zoi_delim;
   }
+
+  var _g_glide_dot;
+  function _set_glide_dot() {
+    _g_glide_dot = true;
+  }
+  function _pop_glide_dot() {
+    var result = _g_glide_dot ? "." : "";
+    _g_glide_dot = false;
+    return result;
+  }
 }
 
 // LOhAI SAhAI LEhAI
 
-text = space? (si_clause / &SI cmavo)* w:clause* { return w }
+text = space? (si_clause / &SI cmavo)* w:clause* (&FAhO cmavo .*)? { return w }
+FAhO = f a h o word_break
 
-clause = !SI w:word si_clause* t:(zei_tail / bu_tail)* si_clause* { return truthy(t) ? {selmaho: t[t.length-1].selmaho, word: w.word + " " + t.map(t => t.word).join(" ")} : w}
+clause = !(&clause_non_start cmavo) w:word (!zei_tail !bu_tail si_clause)* t:(zei_tail / bu_tail)* si_clause* { return truthy(t) ? {selmaho: t[t.length-1].selmaho, word: w.word + " " + t.map(t => t.word).join(" ")} : w}
+clause_non_start = SI / ZEI / BU / FAhO
 
-zei_tail = &(z e i word_break) z:cmavo w:word { return {selmaho: "GOhA", word: z.word + " " + w.word} }
-bu_tail = &(b u word_break) b:cmavo { return {selmaho: "BY", word: b.word} }
+zei_tail = &ZEI z:cmavo w:single_word { return {selmaho: "GOhA", word: z.word + " " + w.word} }
+bu_tail = &BU b:cmavo { return {selmaho: "BY", word: b.word} }
+ZEI = z e i word_break
+BU = b u word_break
 
 si_clause = y_cmavo !bu_tail / clause &SI cmavo
 SI 'cmavrsi' = s i word_break
@@ -64,7 +78,8 @@ zoi_open = w:single_word { return _zoi_assign_delim(w.word) }
 zoi_close = w:single_word &{ return _is_zoi_delim(w.word) } { return w.word.replace(/^\.?/, ".") }
 zoi_word = !zoi_close w:zoi_word_1 s:zoi_space* { return w + s.join("") }
 zoi_word_1 = w:(!zoi_space c:. { return c })+ { return w.join("") }
-zoi_space = [. \t\r\n]
+zoi_space = zoi_space_1 &zoi_close { return "" } / zoi_space_1
+zoi_space_1 = [. \t\r\n]
 zoi_candidate = &(w:single_word { _zoi_assign_delim(w, true) }) / &{ _g_zoi_delim_candidate = null }
 
 cmevo 'cmevla' = !h head:(h / consonant !glide !pause !h / glide / nucleus)* tail:consonant pause dot:(!(nucleus / cmevo) {return "."})? { return {selmaho: "cmevla", word: "." + join(head) + tail + (dot || "")} }
@@ -115,7 +130,7 @@ onset_consonantal = expr:(affricate / liquid / other (liquid &coda / &coda) / si
 nucleus_consonantal = &syllabic &coda { return "y" }
 
 syllable_break = &onset &syllable / &space / !.
-word_break = syllable_break (space / &(!slinkuhi word) / !.) { return null }
+word_break = syllable_break !cmevo (space / &(!slinkuhi single_word) / !.) { return null }
 space = (!letter .)+ { return null }
 pause = space / !.
 letter = [A-Za-z'àèìòùỳáéíóúýÀÈÌÒÙỲÁÉÍÓÚÝĭŭĬŬ]
@@ -133,40 +148,43 @@ syllabic = l / m / n / r
 voiced = b / d / g / j / v / z
 unvoiced = c / f / k / p / s / t / x
 
-b = [Bb] !b !unvoiced           { return "b" }
-c = [Cc] !c !voiced !sibilant   { return "c" }
-d = [Dd] !d !unvoiced           { return "d" }
-f = [Ff] !f !voiced             { return "f" }
-g = [Gg] !g !unvoiced           { return "g" }
-h = [Hh'] !h &nucleus           { return "'" }
-j = [Jj] !j !unvoiced !sibilant { return "j" }
-k = [Kk] !k !voiced             { return "k" }
-l = [Ll] !l                     { return "l" }
-m = [Mm] !m                     { return "m" }
-n = [Nn] !n !affricate          { return "n" }
-p = [Pp] !p !voiced             { return "p" }
-r = [Rr] !r                     { return "r" }
-s = [Ss] !s !voiced !sibilant   { return "s" }
-t = [Tt] !t !voiced             { return "t" }
-v = [Vv] !v !unvoiced           { return "v" }
-x = [Xx] !x !voiced             { return "x" }
-z = [Zz] !z !unvoiced !sibilant { return "z" }
+b = comma [Bb] !b !unvoiced           { return "b" }
+c = comma [Cc] !c !voiced !sibilant   { return "c" }
+d = comma [Dd] !d !unvoiced           { return "d" }
+f = comma [Ff] !f !voiced             { return "f" }
+g = comma [Gg] !g !unvoiced           { return "g" }
+h = comma [Hh'] !h &nucleus           { return "'" }
+j = comma [Jj] !j !unvoiced !sibilant { return "j" }
+k = comma [Kk] !k !voiced             { return "k" }
+l = comma [Ll] !l                     { return "l" }
+m = comma [Mm] !m                     { return "m" }
+n = comma [Nn] !n !affricate          { return "n" }
+p = comma [Pp] !p !voiced             { return "p" }
+r = comma [Rr] !r                     { return "r" }
+s = comma [Ss] !s !voiced !sibilant   { return "s" }
+t = comma [Tt] !t !voiced             { return "t" }
+v = comma [Vv] !v !unvoiced           { return "v" }
+x = comma [Xx] !x !voiced             { return "x" }
+z = comma [Zz] !z !unvoiced !sibilant { return "z" }
 
-glide = iy / uy
-iy = [iĭIĬ] &nucleus !glide { return "ĭ" }
-uy = [uŭUŬ] &nucleus !glide { return "ŭ" }
+glide = g:(iy / uy) { return _pop_glide_dot() + g }
+iy = comma [iĭIĬ] &nucleus !glide { return "ĭ" }
+uy = comma [uŭUŬ] &nucleus !glide { return "ŭ" }
 
 nucleus = vowel / y
 vowel = diphthong / pure_vowel
-diphthong = d:(a i / e i / o i) !nucleus !iy { return join(d) } / a u !nucleus !uy { return "au" }
+diphthong = d:(a i / e i / o i) diphthong_tail<iy> { return join(d) } / a u diphthong_tail<uy> { return "au" }
+diphthong_tail<g> = !nucleus !g &(word_break g { _set_glide_dot() })?
 pure_vowel = v:(a / e / i / o / u) !nucleus { return v }
 stressed_vowel = ![aeiou] v:vowel { return v } / v:vowel &stress { return v }
 unstressed_vowel = &[aeiou] v:vowel !stress { return v }
 stress = coda? medial_syllable* brivo_tail_syllable pause
 
-a = [AaàáÀÁ] { return "a" }
-e = [EeèéÈÉ] { return "e" }
-i = [IiìíÌÍ] { return "i" }
-o = [OoòóÒÓ] { return "o" }
-u = [UuùúÙÚ] { return "u" }
-y = [YyỳýỲÝ] !(!y nucleus) { return "y" }
+a = comma [AaàáÀÁ] { return "a" }
+e = comma [EeèéÈÉ] { return "e" }
+i = comma [IiìíÌÍ] { return "i" }
+o = comma [OoòóÒÓ] { return "o" }
+u = comma [UuùúÙÚ] { return "u" }
+y = comma [YyỳýỲÝ] !(!y nucleus) { return "y" }
+
+comma = ","*

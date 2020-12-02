@@ -454,7 +454,6 @@ function js_initializer() {
     if (typeof n != "string")
       n = join_expr(n, true);
     n = n.replace(/ $/, "");
-    n = n.replace(/^(?=[aeiou])/, ".");
     return n.split(" ");
   }
 

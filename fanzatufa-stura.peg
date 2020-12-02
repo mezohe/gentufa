@@ -1,4 +1,4 @@
-text <- text_1 FAhO_clause? space EOF?
+text <- text_1 space EOF?
 
 text_1 <- free? (NIhO_clause+ free?)? paragraphs
 
@@ -14,7 +14,7 @@ statement_2 <- statement_3 (I_clause free? lone_jek? tag? BO_clause free? prenex
 
 statement_3 <- tag? TUhE_clause text TUhU_elidible free? / fragment / sentence
 
-fragment <- !term !tag quantifier / relative_clauses / links+ / !selbri linkargs / !selbri !term !tag (nahe_guhe / se_guhe / gadri)
+fragment <- !term !tag quantifier / relative_clauses / links+ / !selbri linkargs / !selbri !term !tag (nahe_guhe / gadri / se_guhe)
 
 lone_jek <- !gek gihek free?
 
@@ -60,7 +60,7 @@ terms_3 <- term (PEhE_elidible jek tag? BO_clause free? !bridi_tail_2 terms_3)?
 
 term 'sumsuha' <- sumti / tag_term / termset / naku_term / soi_term
 
-tag_term <- !gek tag free? !BO_clause !selbri !gek_sentence (sumti / KU_elidible)
+tag_term <- !gek tag free? !BO_clause !selbri !gek_sentence (sumti / KU_elidible free*)
 
 naku_term <- !gek !jek NA_clause free? KU_elidible free?
 
@@ -101,9 +101,9 @@ kramaho_2 <content> <- content free?
   / guhek kramaho<content> (gik kramaho<content>)+ GIhI_elidible free?
   / KE_clause free? kramaho<content> KEhE_elidible free?
 
-gadri <- kramaho<LE_clause>
+gadri <- kramaho<LE_clause> / se_guhe gadri
 li_gadri <- kramaho<LI_clause>
-lohoi_gadri <- kramaho<LOhOI_clause>
+lohoi_gadri <- kramaho<LOhOI_clause> / se_guhe lohoi_gadri
 
 lahe_nahe <- (LAhE_clause / nahe_guhe) BO_clause? free?
 nahe_guhe <- fragile_guhe<nahe_free guhe_many>
@@ -226,14 +226,17 @@ guk <- gu_clause !gek
 gik <- GI_clause (tag BO_clause)? free?
 
 
-tag <- tag_1 (jek tag_1)* # !LR2
+tag <- tag_0<tag_3>
 
-tag_1 <- tag_2+
+tag_0 <inner> <- tag_1<inner> (jek tag_1<inner>)* # !LR2
 
-tag_2 <- (nahe_guhe / se_guhe) tag_2 / tag_3
+tag_1 <inner> <- tag_2<inner>+
 
-tag_3 <- KE_clause free? tag KEhE_elidible free?
-  / guhek tag (gik tag)+ GIhI_elidible free?
+tag_2 <inner> <- (nahe_guhe / se_guhe) tag_2<inner> / inner
+
+tag_ke <- KE_clause free? tag KEhE_elidible free? / tag_4
+
+tag_3 <- guhek tag_0<tag_ke> (gik tag_0<tag_ke>)+ GIhI_elidible free?
   / tag_4
 
 tag_4 <- (BAI_clause / PU_clause / mex_2 ROI_clause / fiho_clause / FA_clause) free?
@@ -273,9 +276,10 @@ vocative_post_clause <- FUhO_clause* (!DOI_clause free)*
 indicator_post_clause <- FUhO_clause*
 # fuho_post_clause removed
 
-pre_clause <- fuhe_free? BAhE_clause* dot
+pre_clause<word> <- fuhe_free? BAhE_clause* dot_word<word>
 fuhe_free <- FUhE_clause free?
-pre_clause_no_fuhe <- BAhE_clause*
+pre_clause_no_fuhe<word> <- BAhE_clause* dot_word<word>
+dot_word<word> <- d:"."? w:word { return d ? w.map((el, i) => i == 1 ? d + el : el) : w }
 
 # ___ ELIDIBLE TERMINATORS ___
 
@@ -312,108 +316,106 @@ VEhO_elidible <- VEhO_clause?
 
 # ___ SELMAHO ___
 
-BRIVLA_clause 'cmavrbrivla' <- pre_clause GOhA post_clause
-BAhE_clause 'cmavrbahe' <- dot BAhE
-BAI_clause 'cmavrbai' <- pre_clause BAI post_clause
-BE_clause 'cmavrbe' <- pre_clause BE post_clause
-BEI_clause 'cmavrbei' <- pre_clause BEI post_clause
-BEhO_clause 'cmavrbeho' <- pre_clause BEhO indicator_post_clause
-BO_clause 'cmavrbo' <- pre_clause BO post_clause
-BOI_clause 'cmavrboi' <- pre_clause BOI indicator_post_clause
-BY_clause 'cmavrby' <- pre_clause BY post_clause
-CAI_clause 'cmavrcai' <- pre_clause CAI indicator_post_clause
-CEI_clause 'cmavrcei' <- pre_clause CEI post_clause
-CEhE_clause 'cmavrcehe' <- pre_clause CEhE post_clause
-CO_clause 'cmavrco' <- pre_clause CO post_clause
-CU_clause 'cmavrcu' <- pre_clause CU post_clause
-DOI_clause 'cmavrdoi' <- pre_clause DOI vocative_post_clause
-DOhU_clause 'cmavrdohu' <- pre_clause DOhU indicator_post_clause
-FA_clause 'cmavrfa' <- pre_clause FA post_clause
-FAhO_clause 'cmavrfaho' <- pre_clause FAhO
-FEhU_clause 'cmavrfehu' <- pre_clause FEhU indicator_post_clause
-FIhO_clause 'cmavrfiho' <- pre_clause FIhO post_clause
-FOI_clause 'cmavrfoi' <- pre_clause FOI post_clause
-FUhA_clause 'cmavrfuha' <- pre_clause FUhA post_clause
-FUhE_clause 'cmavrfuhe' <- pre_clause_no_fuhe FUhE indicator_post_clause
-FUhO_clause 'cmavrfuho' <- pre_clause FUhO
-GA_clause 'cmavrga' <- pre_clause GA post_clause
-GAhO_clause 'cmavrgaho' <- pre_clause GAhO post_clause
-GEhU_clause 'cmavrgehu' <- pre_clause GEhU indicator_post_clause
-GI_clause 'cmavrgi' <- pre_clause GI indicator_post_clause
-GIhA_clause 'cmavrgiha' <- pre_clause GIhA post_clause
-GIhI_clause 'cmavrgihi' <- pre_clause GIhI indicator_post_clause
-GOI_clause 'cmavrgoi' <- pre_clause GOI post_clause
-GUhA_clause 'cmavrguha' <- pre_clause GUhA post_clause
-I_clause 'cmavrcmavri' <- pre_clause I indicator_post_clause
-IAU_clause 'cmavriau' <- pre_clause IAU indicator_post_clause
-JA_clause 'cmavrjoi' <- pre_clause JA post_clause
-JAI_clause 'cmavrjai' <- pre_clause JAI post_clause
-JOI_clause 'cmavrjoi' <- pre_clause JOI post_clause
-KE_clause 'cmavrke' <- pre_clause KE post_clause
-KEhE_clause 'cmavrkehe' <- pre_clause KEhE indicator_post_clause
-KEI_clause 'cmavrkei' <- pre_clause KEI indicator_post_clause
-KOhA_clause 'cmavrkoha' <- pre_clause KOhA post_clause
-KOIhE_clause 'cmavrkoihe' <- pre_clause KOIhE indicator_post_clause
-KU_clause 'cmavrku' <- pre_clause KU indicator_post_clause
-KUhAU_clause 'cmavrkuhau' <- pre_clause KUhAU indicator_post_clause
-KUhE_clause 'cmavrkuhe' <- pre_clause KUhE indicator_post_clause
-KUhO_clause 'cmavrkuho' <- pre_clause KUhO indicator_post_clause
-LAU_clause 'cmavrlau' <- pre_clause LAU post_clause
-LAhE_clause 'cmavrlahe' <- pre_clause LAhE post_clause
-LE_clause 'cmavrle' <- pre_clause LE indicator_post_clause
-LI_clause 'cmavrli' <- pre_clause LI post_clause
-LIhU_clause 'cmavrlihu' <- pre_clause LIhU indicator_post_clause
-LOhO_clause 'cmavrloho' <- pre_clause LOhO indicator_post_clause
-LOhOI_clause 'cmavrlohoi' <- pre_clause LOhOI indicator_post_clause
-LU_clause 'cmavrlu' <- pre_clause LU indicator_post_clause
-LUhU_clause 'cmavrluhu' <- pre_clause LUhU indicator_post_clause
-MAhO_clause 'cmavrmaho' <- pre_clause MAhO post_clause
-MAI_clause 'cmavrmai' <- pre_clause MAI indicator_post_clause
-ME_clause 'cmavrme' <- pre_clause ME post_clause
-MEhU_clause 'cmavrmehu' <- pre_clause MEhU indicator_post_clause
-MOhE_clause 'cmavrmohe' <- pre_clause MOhE post_clause
-MEIhE_clause 'cmavrmeihe' <- pre_clause MEIhE post_clause
-MEIhO_clause 'cmavrmeiho' <- pre_clause MEIhO indicator_post_clause
-MOI_clause 'cmavrmoi' <- pre_clause MOI indicator_post_clause
-NA_clause 'cmavrna' <- pre_clause NA post_clause
-NAI_clause 'cmavrnai' <- pre_clause NAI indicator_post_clause
-NAhE_clause 'cmavrnahe' <- pre_clause NAhE post_clause
-NAhU_clause 'cmavrnahu' <- pre_clause NAhU post_clause
-NIhO_clause 'cmavrniho' <- pre_clause NIhO post_clause
-NOI_clause 'cmavrnoi' <- pre_clause NOI indicator_post_clause
-NU_clause 'cmavrnu' <- pre_clause NU indicator_post_clause
-NUhA_clause 'cmavrnuha' <- pre_clause NUhA post_clause
-NUhI_clause 'cmavrnuhi' <- pre_clause NUhI indicator_post_clause
-NUhU_clause 'cmavrnuhu' <- pre_clause NUhU indicator_post_clause
-PA_clause 'cmavrpa' <- pre_clause PA post_clause
-PEhE_clause 'cmavrpehe' <- pre_clause PEhE post_clause
-PEhO_clause 'cmavrpeho' <- pre_clause PEhO post_clause
-PU_clause 'cmavrpu' <- pre_clause PU post_clause
-ROhA_clause 'cmavnroha' <- pre_clause ROhA indicator_post_clause
-ROI_clause 'cmavnroi' <- pre_clause ROI indicator_post_clause
-SE_clause 'cmavrse' <- pre_clause SE post_clause
-SEI_clause 'cmavrsei' <- pre_clause SEI indicator_post_clause
-SEhU_clause 'cmavrsehu' <- pre_clause SEhU indicator_post_clause
-SOI_clause 'cmavrsoi' <- pre_clause SOI indicator_post_clause
-TEhU_clause 'cmavrtehu' <- pre_clause TEhU indicator_post_clause
-TEI_clause 'cmavrtei' <- pre_clause TEI post_clause
-TO_clause 'cmavrto' <- pre_clause TO indicator_post_clause
-TOI_clause 'cmavrtoi' <- pre_clause TOI indicator_post_clause
-TOIhE_clause 'cmavrtoihe' <- pre_clause TOIhE indicator_post_clause
-TOIhO_clause 'cmavrtoiho' <- pre_clause TOIhO indicator_post_clause
-TUhE_clause 'cmavrtuhe' <- pre_clause TUhE indicator_post_clause
-TUhU_clause 'cmavrtuhu' <- pre_clause TUhU post_clause
-UI_clause 'cmavrui' <- pre_clause UI indicator_post_clause
-VAU_clause 'cmavrvau' <- pre_clause VAU indicator_post_clause
-VEI_clause 'cmavrvei' <- pre_clause VEI post_clause
-VEhO_clause 'cmavrveho' <- pre_clause VEhO indicator_post_clause
-VUhO_clause 'cmavrvuho' <- pre_clause VUhO indicator_post_clause
-XI_clause 'cmavrxi' <- pre_clause XI indicator_post_clause
-ZOhU_clause 'cmavrzohu' <- pre_clause ZOhU indicator_post_clause
-ga_clause 'cmavrgavla' <- pre_clause GA_W post_clause
-gu_clause 'cmavrguvla' <- pre_clause GU_W post_clause
+BRIVLA_clause 'cmavrbrivla' <- pre_clause<GOhA> post_clause
+BAhE_clause 'cmavrbahe' <- dot_word<BAhE>
+BAI_clause 'cmavrbai' <- pre_clause<BAI> post_clause
+BE_clause 'cmavrbe' <- pre_clause<BE> post_clause
+BEI_clause 'cmavrbei' <- pre_clause<BEI> post_clause
+BEhO_clause 'cmavrbeho' <- pre_clause<BEhO> indicator_post_clause
+BO_clause 'cmavrbo' <- pre_clause<BO> post_clause
+BOI_clause 'cmavrboi' <- pre_clause<BOI> indicator_post_clause
+BY_clause 'cmavrby' <- pre_clause<BY> post_clause
+CAI_clause 'cmavrcai' <- pre_clause<CAI> indicator_post_clause
+CEI_clause 'cmavrcei' <- pre_clause<CEI> post_clause
+CEhE_clause 'cmavrcehe' <- pre_clause<CEhE> post_clause
+CO_clause 'cmavrco' <- pre_clause<CO> post_clause
+CU_clause 'cmavrcu' <- pre_clause<CU> post_clause
+DOI_clause 'cmavrdoi' <- pre_clause<DOI> vocative_post_clause
+DOhU_clause 'cmavrdohu' <- pre_clause<DOhU> indicator_post_clause
+FA_clause 'cmavrfa' <- pre_clause<FA> post_clause
+FEhU_clause 'cmavrfehu' <- pre_clause<FEhU> indicator_post_clause
+FIhO_clause 'cmavrfiho' <- pre_clause<FIhO> post_clause
+FOI_clause 'cmavrfoi' <- pre_clause<FOI> post_clause
+FUhA_clause 'cmavrfuha' <- pre_clause<FUhA> post_clause
+FUhE_clause 'cmavrfuhe' <- pre_clause_no_fuhe<FUhE> indicator_post_clause
+FUhO_clause 'cmavrfuho' <- pre_clause<FUhO>
+GA_clause 'cmavrga' <- pre_clause<GA> post_clause
+GAhO_clause 'cmavrgaho' <- pre_clause<GAhO> post_clause
+GEhU_clause 'cmavrgehu' <- pre_clause<GEhU> indicator_post_clause
+GI_clause 'cmavrgi' <- pre_clause<GI> indicator_post_clause
+GIhA_clause 'cmavrgiha' <- pre_clause<GIhA> post_clause
+GIhI_clause 'cmavrgihi' <- pre_clause<GIhI> indicator_post_clause
+GOI_clause 'cmavrgoi' <- pre_clause<GOI> post_clause
+GUhA_clause 'cmavrguha' <- pre_clause<GUhA> post_clause
+I_clause 'cmavrcmavri' <- pre_clause<I> indicator_post_clause
+IAU_clause 'cmavriau' <- pre_clause<IAU> indicator_post_clause
+JA_clause 'cmavrjoi' <- pre_clause<JA> post_clause
+JAI_clause 'cmavrjai' <- pre_clause<JAI> post_clause
+JOI_clause 'cmavrjoi' <- pre_clause<JOI> post_clause
+KE_clause 'cmavrke' <- pre_clause<KE> post_clause
+KEhE_clause 'cmavrkehe' <- pre_clause<KEhE> indicator_post_clause
+KEI_clause 'cmavrkei' <- pre_clause<KEI> indicator_post_clause
+KOhA_clause 'cmavrkoha' <- pre_clause<KOhA> post_clause
+KOIhE_clause 'cmavrkoihe' <- pre_clause<KOIhE> indicator_post_clause
+KU_clause 'cmavrku' <- pre_clause<KU> indicator_post_clause
+KUhAU_clause 'cmavrkuhau' <- pre_clause<KUhAU> indicator_post_clause
+KUhE_clause 'cmavrkuhe' <- pre_clause<KUhE> indicator_post_clause
+KUhO_clause 'cmavrkuho' <- pre_clause<KUhO> indicator_post_clause
+LAU_clause 'cmavrlau' <- pre_clause<LAU> post_clause
+LAhE_clause 'cmavrlahe' <- pre_clause<LAhE> post_clause
+LE_clause 'cmavrle' <- pre_clause<LE> indicator_post_clause
+LI_clause 'cmavrli' <- pre_clause<LI> post_clause
+LIhU_clause 'cmavrlihu' <- pre_clause<LIhU> indicator_post_clause
+LOhO_clause 'cmavrloho' <- pre_clause<LOhO> indicator_post_clause
+LOhOI_clause 'cmavrlohoi' <- pre_clause<LOhOI> indicator_post_clause
+LU_clause 'cmavrlu' <- pre_clause<LU> indicator_post_clause
+LUhU_clause 'cmavrluhu' <- pre_clause<LUhU> indicator_post_clause
+MAhO_clause 'cmavrmaho' <- pre_clause<MAhO> post_clause
+MAI_clause 'cmavrmai' <- pre_clause<MAI> indicator_post_clause
+ME_clause 'cmavrme' <- pre_clause<ME> post_clause
+MEhU_clause 'cmavrmehu' <- pre_clause<MEhU> indicator_post_clause
+MOhE_clause 'cmavrmohe' <- pre_clause<MOhE> post_clause
+MEIhE_clause 'cmavrmeihe' <- pre_clause<MEIhE> post_clause
+MEIhO_clause 'cmavrmeiho' <- pre_clause<MEIhO> indicator_post_clause
+MOI_clause 'cmavrmoi' <- pre_clause<MOI> indicator_post_clause
+NA_clause 'cmavrna' <- pre_clause<NA> post_clause
+NAI_clause 'cmavrnai' <- pre_clause<NAI> indicator_post_clause
+NAhE_clause 'cmavrnahe' <- pre_clause<NAhE> post_clause
+NAhU_clause 'cmavrnahu' <- pre_clause<NAhU> post_clause
+NIhO_clause 'cmavrniho' <- pre_clause<NIhO> post_clause
+NOI_clause 'cmavrnoi' <- pre_clause<NOI> indicator_post_clause
+NU_clause 'cmavrnu' <- pre_clause<NU> indicator_post_clause
+NUhA_clause 'cmavrnuha' <- pre_clause<NUhA> post_clause
+NUhI_clause 'cmavrnuhi' <- pre_clause<NUhI> indicator_post_clause
+NUhU_clause 'cmavrnuhu' <- pre_clause<NUhU> indicator_post_clause
+PA_clause 'cmavrpa' <- pre_clause<PA> post_clause
+PEhE_clause 'cmavrpehe' <- pre_clause<PEhE> post_clause
+PEhO_clause 'cmavrpeho' <- pre_clause<PEhO> post_clause
+PU_clause 'cmavrpu' <- pre_clause<PU> post_clause
+ROhA_clause 'cmavnroha' <- pre_clause<ROhA> indicator_post_clause
+ROI_clause 'cmavnroi' <- pre_clause<ROI> indicator_post_clause
+SE_clause 'cmavrse' <- pre_clause<SE> post_clause
+SEI_clause 'cmavrsei' <- pre_clause<SEI> indicator_post_clause
+SEhU_clause 'cmavrsehu' <- pre_clause<SEhU> indicator_post_clause
+SOI_clause 'cmavrsoi' <- pre_clause<SOI> indicator_post_clause
+TEhU_clause 'cmavrtehu' <- pre_clause<TEhU> indicator_post_clause
+TEI_clause 'cmavrtei' <- pre_clause<TEI> post_clause
+TO_clause 'cmavrto' <- pre_clause<TO> indicator_post_clause
+TOI_clause 'cmavrtoi' <- pre_clause<TOI> indicator_post_clause
+TOIhE_clause 'cmavrtoihe' <- pre_clause<TOIhE> indicator_post_clause
+TOIhO_clause 'cmavrtoiho' <- pre_clause<TOIhO> indicator_post_clause
+TUhE_clause 'cmavrtuhe' <- pre_clause<TUhE> indicator_post_clause
+TUhU_clause 'cmavrtuhu' <- pre_clause<TUhU> post_clause
+UI_clause 'cmavrui' <- pre_clause<UI> indicator_post_clause
+VAU_clause 'cmavrvau' <- pre_clause<VAU> indicator_post_clause
+VEI_clause 'cmavrvei' <- pre_clause<VEI> post_clause
+VEhO_clause 'cmavrveho' <- pre_clause<VEhO> indicator_post_clause
+VUhO_clause 'cmavrvuho' <- pre_clause<VUhO> indicator_post_clause
+XI_clause 'cmavrxi' <- pre_clause<XI> indicator_post_clause
+ZOhU_clause 'cmavrzohu' <- pre_clause<ZOhU> indicator_post_clause
+ga_clause 'cmavrgavla' <- pre_clause<GA_W> post_clause
+gu_clause 'cmavrguvla' <- pre_clause<GU_W> post_clause
 
-dot <- a:"."? { return null }
 by_dot <- "."?
 quote <- "<" w:([^>] / ">>")+ "> " { return w.join("") + " " }
 
@@ -452,8 +454,6 @@ DOhU <- "do'u "
 
 FA <- &{return options.ckt} "cau "
   / "fai "/"fi'a " / "f" [aeiou] " " / "fai'i "/"zoi'u "/"fa'au'u "
-
-FAhO <- "FAhO:<" .* { return ["FAhO", "fa'o"] } / "fa'o "
 
 FEhU <- "fe'u "
 
