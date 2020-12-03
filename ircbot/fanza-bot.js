@@ -18,7 +18,7 @@ client.addListener('message', function(from, to, text, message) {
   processor(client, from, to, text, message);
 });
 
-var camxes = require('../fanzatufa-cmdline.js');
+var camxes = {fanza: require('../fanzatufa-cmdline.js')};
 var camxes_post = require('../postproc.js');
 
 var options = {
