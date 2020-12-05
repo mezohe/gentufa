@@ -62,7 +62,7 @@ term 'sumsuha' <- sumti / tag_term / termset / naku_term / soi_term
 
 tag_term <- !gek tag free? !BO_clause !selbri !gek_sentence (sumti / KU_elidible free*)
 
-naku_term <- !gek !jek NA_clause free? KU_elidible free?
+naku_term <- !gek !jek !selbri NA_clause free? KU_elidible free?
 
 soi_term <- SOI_clause subsentence SEhU_elidible free?
 
