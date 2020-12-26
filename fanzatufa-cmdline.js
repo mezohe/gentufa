@@ -12,6 +12,10 @@ var morfoMacros = {
   "’":"'","‘":"'",sh:"c",zh:"j",ch:"tc",kh:"x","ı":"i","ʃ":"c","ʒ":"j","ɛ":"e","Ɛ":"E","ɛ́":"E","ɛ̀":"E","ə":"y","ŋ":"n"
 };
 
+var morfoIpaMacros = {
+  "c":"ʃ","'":"h","j":"ʒ","ĭ":"j","ŭ":"w","y":"ə",".":"ʔ"
+};
+
 function morfoPre(text) {
   text = text.replace(/([0-9])\.([0-9])/g, "$1 pi $2");
   text = text.replace(/([0-9]):([0-9])/g, "$1 pi'e $2");
@@ -34,10 +38,29 @@ function morfoJoin(words) {
               + " ";
 }
 
+function morfoMergeDot(array, elem) {
+  if (array[array.length - 1] == ".")
+    array[array.length - 1] += elem;
+  else
+    array[array.length] = elem;
+  return array;
+}
+
+function morfoIpaPost(word) {
+  if (word.match(/[A-Z]/))
+    word = "ˈ" + word.toLowerCase();
+  word = word.split("").map(ch => morfoIpaMacros[ch] || ch).join("");
+  word = word.replace(/([aeo])i/g, "$1j");
+  word = word.replace(/au/g, "aw");
+  return word;
+}
+
 var morfoPost = [morfoJoin];
 
 var camxes = {
   parse: function(text, options) {
+    if (options.ipa)
+      return this.ipa(text, options);
     text = morfoPre(text);
     try {
       var morfoRaw = morfo.parse(text, options);
@@ -59,6 +82,24 @@ var camxes = {
       throw e;
     }
     return sturaRaw;
+  },
+  ipa: function(text, options) {
+    text = morfoPre(text);
+    try {
+      var morfoRaw = morfo.parse(text, options);
+    } catch (e) {
+      if (typeof e == "object") {
+        e.parser = "morfo";
+        e.text = text;
+      }
+      throw e;
+    }
+    return morfoRaw.map(w => w.syllables || [w.word])
+                   .reduce((a, b) => a.concat(b), [])
+                   .reduce(morfoMergeDot, [])
+                   .map(morfoIpaPost)
+                   .join(".")
+                   .replace(/.ˈ/g, "ˈ");
   }
 }
 
@@ -66,8 +107,9 @@ if (typeof module !== "undefined") {
     module.exports = camxes;
     if (typeof process !== "undefined" && require !== "undefined" && require.main === module) {
       var input = process.argv[2];
+      var fun = process.argv[3] || "parse";
       if (Object.prototype.toString.call(input) === "[object String]")
-        console.log(JSON.stringify(camxes.parse(input, {ckt: true})));
+        console.log(JSON.stringify(camxes[fun](input, {ckt: true})));
     }
 }
 

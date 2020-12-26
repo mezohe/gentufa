@@ -356,3 +356,9 @@ module.exports.remove_structure = remove_structure;
 module.exports.loadgloss = function (a, b) { glossfallback = a; xmlDoc = b; };
 module.exports.normalize = _normalize;
 
+if (typeof process !== 'undefined' && require !== 'undefined' && require.main === module) {
+  var fs = require('fs');
+  var input = process.argv.length > 2 ? process.argv[2] : fs.readFileSync(0, 'utf-8');
+  console.log(camxes_postprocessing(input, {format: 'text'}));
+}
+

@@ -35,6 +35,7 @@ var options = {
     h: false,
     ckt: false,
     startRule: "text",
+    ipa: false,
   },
   flag_pattern: "[+-]\\w+",
 }
