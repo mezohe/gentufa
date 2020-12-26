@@ -82,12 +82,14 @@ sumti_3 <- KE_clause free? sumti KEhE_elidible free?
 
 sumti_4 <- quantifier? sumti_5 relative_clauses?
   / quantifier relative_clauses? selbri KU_elidible free? relative_clauses?
+  / quantifier KU_clause free*
 
 sumti_5 <- KOhA_clause
   / !tag !selbri lerfu_string BOI_elidible free?
   / LU_clause text LIhU_elidible free?
   / !tag lahe_nahe relative_clauses? term LUhU_elidible free? 
   / gadri sumti_tail KU_elidible free?
+  / gadri KU_clause free?
   / li_clause 
   / lohoi_gadri subsentence KUhAU_elidible free? 
 
