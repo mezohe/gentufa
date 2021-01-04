@@ -139,6 +139,7 @@ function run_camxes(input, mode) {
     syntax_error = true;
   }
   if (!syntax_error) {
+    if (mode.ipa) return result;
     let oldMode = "M";
     if (mode.format == 'raw') {
       oldMode = "TRJM";
