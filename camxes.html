@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+<head>
+<title>la fanzatufa</title>
+<meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1.0,width=device-width,viewport-fit=cover">
+<style>
+  * { box-sizing: border-box }
+  html { width: 100%; height: 100%; }
+  form, select { margin: 4px 0 }
+  body { font-family: sans-serif; font-size: 0.9em; position: absolute; top: 0; left: 0; right: 0; bottom: 0 }
+  form { width: 100%; height: 100%; display: flex; flex-direction: column; }
+  textarea { font-size: inherit; }
+</style>
+</head>
+<body>
+<form>
+  <div>Type any Lojban text in the following textarea. The result will be parsed as you type:</div>
+  <textarea id="input_textarea" style="width:100%" rows="8" autofocus></textarea>
+  <div>
+    <label>Output mode:
+      <select id="optlist" onchange="run_camxes()">
+        <option value="TRIM">Raw output</option>
+        <option value="TRJM">Condensed</option>
+        <option value="TM" selected>Prettified</option>
+        <option value="TMC">Prettified + selmaho</option>
+        <option value="M">Prettified – famymaho</option>
+        <option value="MC">Prettified – famymaho + selmaho</option>
+      </select>
+    </label>
+    <label style="padding-left: 1rem">Dialect:
+      <select id="dialect" onchange="run_camxes();">
+        <option value='{"ckt":false}'>fanzygerna: standard</option>
+        <option value='{"ckt":true}'>fanzygerna: ce-ki-tau</option>
+      </select>
+    </label>
+    <small style="padding-left: 1rem">
+      Grammar files: 
+      <a href="fanzatufa-morfo.js.peg" target="_blank">[Morphology]</a>
+      <a href="fanzatufa-stura.peg" target="_blank">[Syntax]</a>
+    </small>
+  </div>
+  <div style="overflow-y: scroll; border: solid 1px; padding: 0 0.5em; background-color: #DDDDFF;">
+    <pre style="white-space: pre-wrap;"><code id="parse_result"> </code></pre>
+  </div>
+</form>
+
+<script src="fanzatufa-morfo.js"></script>
+<script src="glosser/rename-morfo.js"></script>
+<script src="fanzatufa-stura.js"></script>
+<script src="fanzatufa-cmdline.js"></script>
+<script src="postproc.js"></script>
+
+<script>
+var inputTextarea = document.querySelector('#input_textarea');
+inputTextarea.addEventListener("keyup", run_camxes);
+var optList = document.querySelector('#optlist');
+var dialectList = document.querySelector('#dialect');
+
+function run_camxes() {
+    try {
+      var input = inputTextarea.value;
+      var result = camxes.parse(input, JSON.parse(dialectList.value));
+    } catch (err) {
+      if (err.location !== undefined) {
+        var location_info = '\nLocation: [' + err.location.start.offset + ', ' + err.location.end.offset + ']';
+        location_info += '\n…' + err.text.substring(err.location.start.offset, err.location.start.offset + 12) + '…';
+      } else var location_info = "";
+      document.querySelector('#parse_result').innerText = err.toString() + location_info;
+      return;
+    }
+    /* Postprocessing: if mode == "R", the below function won't modify camxes' output */
+    result = camxes_postprocessing(result, optList.value);
+             // @ camxes_postproc.js
+    /* Retrieve the result */
+    document.querySelector('#parse_result').innerText = result;
+}
+</script>
+
+</body>
+</html>
+
